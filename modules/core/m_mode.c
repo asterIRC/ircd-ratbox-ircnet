@@ -674,7 +674,7 @@ chm_simple(struct Client *source_p, struct Channel *chptr,
 	   int alevel, int parc, int *parn,
 	   const char **parv, int *errors, int dir, char c, long mode_type)
 {
-	if(alevel != CHFL_CHANOP)
+	if(!alevel)
 	{
 		if(!(*errors & SM_ERR_NOOPS))
 			sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
@@ -683,8 +683,31 @@ chm_simple(struct Client *source_p, struct Channel *chptr,
 		return;
 	}
 
-	/* +ntspmaikl == 9 + MAXMODEPARAMS (4 * +o) */
-	if(MyClient(source_p) && (++mode_limit > (9 + MAXMODEPARAMS)))
+	/* +r/MODE_REOP is aliased over MODE_REGONLY, the meaning being assumed
+	   by channel name */
+	if (chptr->chname[0] != '!') {
+#ifdef ENABLE_SERVICES
+		if (mode_type & (MODE_REGONLY)) {
+			chm_regonly(source_p, chptr, atlevel, parc, parn, parv, errors, dir, c, mode_type);
+			return;
+		}
+#endif
+	} else {
+		/* +a can be set only by creators, unset only by servers */
+		if ((mode_type & (MODE_ANONYMOUS)) &&
+		    ((!(alevel & CHFL_UNIQOP)) ||
+		     (dir == MODE_DEL && MyClient(source_p)))) {
+			if(!(*errors & SM_ERR_NOOPS))
+				sendto_one(source_p, form_str(ERR_UNIQOPRIVSNEEDED),
+					   me.name, chptr->chname);
+			*errors |= SM_ERR_NOOPS;
+			return;
+		}
+	}
+
+
+	/* +ntspmaiklra == 11 + MAXMODEPARAMS (4 * +o) */
+	if(MyClient(source_p) && (++mode_limit > (11 + MAXMODEPARAMS)))
 		return;
 
 	/* setting + */
@@ -790,7 +813,7 @@ chm_ban(struct Client *source_p, struct Channel *chptr,
 		*errors |= errorval;
 
 		/* non-ops cant see +eI lists.. */
-		if(alevel != CHFL_CHANOP && mode_type != CHFL_BAN)
+		if(!alevel && mode_type != CHFL_BAN)
 		{
 			if(!(*errors & SM_ERR_NOOPS))
 				sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
@@ -810,7 +833,7 @@ chm_ban(struct Client *source_p, struct Channel *chptr,
 		return;
 	}
 
-	if(alevel != CHFL_CHANOP)
+	if(!alevel)
 	{
 		if(!(*errors & SM_ERR_NOOPS))
 			sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
@@ -888,7 +911,7 @@ chm_op(struct Client *source_p, struct Channel *chptr,
 	const char *opnick;
 	struct Client *targ_p;
 
-	if(alevel != CHFL_CHANOP)
+	if(!alevel)
 	{
 		if(!(*errors & SM_ERR_NOOPS))
 			sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
@@ -981,7 +1004,7 @@ chm_voice(struct Client *source_p, struct Channel *chptr,
 	const char *opnick;
 	struct Client *targ_p;
 
-	if(alevel != CHFL_CHANOP)
+	if(!alevel)
 	{
 		if(!(*errors & SM_ERR_NOOPS))
 			sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
@@ -1059,7 +1082,7 @@ chm_limit(struct Client *source_p, struct Channel *chptr,
 	static char limitstr[30];
 	int limit;
 
-	if(alevel != CHFL_CHANOP)
+	if(!alevel)
 	{
 		if(!(*errors & SM_ERR_NOOPS))
 			sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
@@ -1115,7 +1138,7 @@ chm_key(struct Client *source_p, struct Channel *chptr,
 {
 	char *key;
 
-	if(alevel != CHFL_CHANOP)
+	if(!alevel)
 	{
 		if(!(*errors & SM_ERR_NOOPS))
 			sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
@@ -1190,7 +1213,7 @@ chm_regonly(struct Client *source_p, struct Channel *chptr,
 	    int alevel, int parc, int *parn,
 	    const char **parv, int *errors, int dir, char c, long mode_type)
 {
-	if(alevel != CHFL_CHANOP)
+	if(!alevel)
 	{
 		if(!(*errors & SM_ERR_NOOPS))
 			sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
@@ -1227,7 +1250,7 @@ chm_sslonly(struct Client *source_p, struct Channel *chptr,
 	    int alevel, int parc, int *parn,
 	    const char **parv, int *errors, int dir, char c, long mode_type)
 {
-	if(alevel != CHFL_CHANOP)
+	if(!alevel)
 	{
 		if(!(*errors & SM_ERR_NOOPS))
 			sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
@@ -1308,7 +1331,7 @@ static struct ChannelMode ModeTable[255] =
   {chm_nosuch,	0 },
   {chm_nosuch,	0 },
   {chm_nosuch,	0 },
-  {chm_nosuch,	0 },			/* a */
+  {chm_simple,	MODE_ANONYMOUS },	/* a */
   {chm_ban,	CHFL_BAN },		/* b */
   {chm_nosuch,	0 },			/* c */
   {chm_nosuch,	0 },			/* d */
@@ -1325,11 +1348,7 @@ static struct ChannelMode ModeTable[255] =
   {chm_op,	0 },			/* o */
   {chm_simple,	MODE_PRIVATE },		/* p */
   {chm_nosuch,	0 },			/* q */
-#ifdef ENABLE_SERVICES
-  {chm_regonly, 0 },			/* r */
-#else
-  {chm_nosuch,	0 },			/* r */
-#endif
+  {chm_simple,	MODE_REOP },		/* r */
   {chm_simple,	MODE_SECRET },		/* s */
   {chm_simple,	MODE_TOPICLIMIT },	/* t */
   {chm_nosuch,	0 },			/* u */
@@ -1344,10 +1363,9 @@ static struct ChannelMode ModeTable[255] =
 static int
 get_channel_access(struct Client *source_p, struct membership *msptr)
 {
-	if(!MyClient(source_p) || is_chanop(msptr))
-		return CHFL_CHANOP;
-
-	return CHFL_PEON;
+	if(!MyClient(source_p))
+		return CHFL_CHANOP|CHFL_UNIQOP;
+	return msptr->flags & (CHFL_CHANOP|CHFL_UNIQOP);
 }
 
 /* set_channel_mode()

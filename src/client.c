@@ -1707,7 +1707,7 @@ clean_uid(const char *uid)
 			return 0;
 	}
 
-	return 1;
+	return len;
 }
 
 

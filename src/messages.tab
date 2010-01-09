@@ -507,7 +507,7 @@ static  const char *  replies[] = {
 /* 482 ERR_CHANOPRIVSNEEDED, */ ":%s 482 %s %s :You're not channel operator",
 /* 483 ERR_CANTKILLSERVER, */   ":You can't kill a server!",
 /* 484 ERR_ISCHANSERVICE */     ":%s 484 %s %s %s :Cannot kick or deop a network service",
-/* 485 ERR_BANNEDNICK, */	NULL,
+/* 485 ERR_UNIQPRIVSNEEDED */	":%s 485 %s :You're not the original channel operator",
 /* 486 */       NULL,
 /* 487 */       NULL,
 /* 488 */       NULL,

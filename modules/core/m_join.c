@@ -197,11 +197,11 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 				/* channel name found, but check for duplicates! */
 				chptr = lp->data;
 				sn = chptr->chname + CHIDLEN + 1; /* take the name from here */
-				RB_DLINK_FOREACH(lp, lp) {
+				RB_DLINK_FOREACH(lp, lp->next) {
 					chptr = lp->data;
 					if ((chptr->chname[0] == '!') && !irccmp(sn, chptr->chname + 1 + CHIDLEN)) {
 						sendto_one(source_p, form_str(ERR_TOOMANYTARGETS),
-						   me.name, source_p->name, "Duplicate", chptr->chname, " Include channel prefix.");
+						   me.name, source_p->name, chptr->chname);
 						nclashes++;
 					}
 				}
@@ -516,11 +516,11 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 		case 't':
 			mode.mode |= MODE_TOPICLIMIT;
 			break;
-#ifdef ENABLE_SERVICES
 		case 'r':
-			mode.mode |= MODE_REGONLY;
+			mode.mode |= MODE_REOP|MODE_REGONLY;
 			break;
-#endif
+		case 'a':
+			mode.mode |= MODE_ANONYMOUS;
 		case 'S':
 			mode.mode |= MODE_SSLONLY;
 			break;
@@ -954,10 +954,10 @@ static struct mode_letter
 	MODE_INVITEONLY, 'i'},
 	{
 	MODE_PRIVATE, 'p'},
-#ifdef ENABLE_SERVICES
 	{
-	MODE_REGONLY, 'r'},
-#endif
+	MODE_REOP, 'r'},
+	{
+	MODE_ANONYMOUS, 'a'},
 	{
 	MODE_SSLONLY, 'S'},
 	{

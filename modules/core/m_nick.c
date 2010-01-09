@@ -368,7 +368,7 @@ ms_uid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		return 0;
 	}
 
-	if(!clean_uid(parv[8]) || (strlen(parv[8]) != IDLEN))
+	if(clean_uid(parv[8]) != IDLEN)
 	{
 		ServerStats.is_kill++;
 		sendto_realops_flags(UMODE_DEBUG, L_ALL,

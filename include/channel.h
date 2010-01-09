@@ -148,10 +148,12 @@ struct ChCapCombo
 #define MODE_INVITEONLY 0x0010
 #define MODE_NOPRIVMSGS 0x0020
 #define MODE_REGONLY	0x0040
+#define MODE_REOP	0x0040
 #define MODE_SSLONLY	0x0080
-#define CHFL_BAN        0x0100	/* ban channel flag */
-#define CHFL_EXCEPTION  0x0200	/* exception to ban channel flag */
-#define CHFL_INVEX      0x0400
+#define MODE_ANONYMOUS	0x0100
+#define CHFL_BAN        0x0200	/* ban channel flag */
+#define CHFL_EXCEPTION  0x0400	/* exception to ban channel flag */
+#define CHFL_INVEX      0x0800
 
 /* mode flags for direction indication */
 #define MODE_QUERY     0

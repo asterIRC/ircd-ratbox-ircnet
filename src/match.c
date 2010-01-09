@@ -813,7 +813,7 @@ const unsigned int CharAttrs[] = {
 /* 30 */ CNTRL_C | CHAN_C | NONEOS_C,
 /* 31 */ CNTRL_C | CHAN_C | FCHAN_C | NONEOS_C,
 /* SP */ PRINT_C | SPACE_C,
-/* ! */ PRINT_C | KWILD_C | CHAN_C | NONEOS_C,
+/* ! */ PRINT_C | KWILD_C | CHANPFX_C | CHAN_C | NONEOS_C,
 /* " */ PRINT_C | CHAN_C | NONEOS_C,
 /* # */ PRINT_C | MWILD_C | CHANPFX_C | CHAN_C | NONEOS_C,
 /* $ */ PRINT_C | CHAN_C | NONEOS_C | USER_C,
