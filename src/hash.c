@@ -469,7 +469,7 @@ rb_dlink_node *find_channels(const char *name)
 		chptr = ptr->data;
 
 		if (chptr->chname[0] == '!' &&
-			(!irccmp(name, chptr->chname + 1 + CHIDLEN)))
+			(!irccmp(name, chptr->chname + 1)))
 				return ptr;
 	}
 	return NULL;

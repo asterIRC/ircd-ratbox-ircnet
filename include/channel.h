@@ -168,7 +168,7 @@ struct ChCapCombo
 #define IsMember(who, chan) ((who && who->user && \
 		find_channel_membership(chan, who)) ? 1 : 0)
 
-#define IsChannelName(name) ((name) && (*(name) == '#' || *(name) == '&'))
+#define IsChannelName(name) ((name) && (*(name) == '#' || *(name) == '&' || *(name) == '!'))
 
 extern rb_dlink_list global_channel_list;
 void init_channels(void);

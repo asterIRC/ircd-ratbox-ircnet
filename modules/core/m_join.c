@@ -171,6 +171,44 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 			continue;
 		}
 
+		/* IRCNet !channels, creation logic moved from hash.c */
+		if (*name == '!') {
+			rb_dlink_node *lp;
+			char *sn = name + 1; /* shortname */
+
+			if ((name[1] == '!') || (name[1] == '#'))
+				sn = name + 2;
+			lp = find_channels(sn);
+			if (!lp) {
+				static char chname[CHANNELLEN+1];
+				/* no match found and we're not creating */
+				if ((sn - name) != 2) {
+					sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL,
+					   form_str(ERR_NOSUCHCHANNEL), name);
+					continue;
+				}
+				/* otherwise build the channel name */
+				generate_uid(chname + 1, CHIDLEN, time(NULL));
+				chname[0] = '!';
+				(void)rb_strlcat(chname, sn, sizeof(chname));
+			} else {
+				int nclashes = 0;
+				/* channel name found, but check for duplicates! */
+				chptr = lp->data;
+				sn = chptr->chname + CHIDLEN + 1; /* take the name from here */
+				RB_DLINK_FOREACH(lp, lp) {
+					chptr = lp->data;
+					if ((chptr->chname[0] == '!') && !irccmp(sn, chptr->chname + 1 + CHIDLEN)) {
+						sendto_one(source_p, form_str(ERR_TOOMANYTARGETS),
+						   me.name, source_p->name, "Duplicate", chptr->chname, " Include channel prefix.");
+						nclashes++;
+					}
+				}
+				if (nclashes) continue;
+				sn -= CHIDLEN + 1;
+			}
+		}
+
 		/* look for the channel */
 		if((chptr = find_channel(name)) != NULL)
 		{
