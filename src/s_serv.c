@@ -77,6 +77,8 @@ struct Capability captab[] = {
 #endif
 	{"SAVE", CAP_SAVE},
 	{"SAVETS_100", CAP_SAVETS_100},
+	{"IRCNET", CAP_IRCNET},
+	{"211", CAP_211 },
 	{0, 0}
 };
 

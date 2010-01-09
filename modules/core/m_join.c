@@ -817,6 +817,10 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 			remove_ban_list(chptr, source_p, &chptr->invexlist,
 					'I', CAP_IE, ONLY_CHANOPS);
 
+		if(rb_dlink_list_length(&chptr->reoplist) > 0)
+			remove_ban_list(chptr, source_p, &chptr->reoplist,
+					'R', CAP_IRCNET, ONLY_CHANOPS);
+
 		chptr->ban_serial++;
 	}
 
@@ -906,6 +910,31 @@ can_join(struct Client *source_p, struct Channel *chptr, char *key)
 
 	s_assert(source_p->localClient != NULL);
 
+	if(ConfigChannel.use_sslonly && chptr->mode.mode & MODE_SSLONLY && !IsSSL(source_p))
+		return ERR_SSLONLYCHAN;
+
+	/* if the channel is opless and the client matches a reop mask,
+         * override everything, but ONLY in case there is noone else
+         * matching already on the channel. --sd */
+	if (chptr->reop && match_ban(&chptr->reoplist, source_p, 0)) {
+		int opseen = 0;
+		RB_DLINK_FOREACH(lp, chptr->members.head) {
+			struct membership *m = lp->data;
+			if (is_chanop(m)) {
+				chptr->reop = 0;
+				opseen++;
+				break;
+			}
+			if (match_ban(&chptr->reoplist, m->client_p, 0)) {
+				opseen++;
+				break;
+			}
+		}
+		/* nobody else seen, get in */
+		if (!opseen)
+			return 0;
+	}
+
 	if((is_banned(chptr, source_p, NULL)) == CHFL_BAN)
 		return (ERR_BANNEDFROMCHAN);
 
@@ -936,9 +965,6 @@ can_join(struct Client *source_p, struct Channel *chptr, char *key)
 	if(chptr->mode.mode & MODE_REGONLY && EmptyString(source_p->user->suser))
 		return ERR_NEEDREGGEDNICK;
 #endif
-
-	if(ConfigChannel.use_sslonly && chptr->mode.mode & MODE_SSLONLY && !IsSSL(source_p))
-		return ERR_SSLONLYCHAN;
 
 	return 0;
 }

@@ -159,6 +159,9 @@ const char *form_str(int);
 #define RPL_INVITING         341
 #define RPL_SUMMONING        342
 
+#define RPL_REOPLIST	     344
+#define RPL_ENDOFREOPLIST    345
+
 #define RPL_INVITELIST       346
 #define RPL_ENDOFINVITELIST  347
 #define RPL_EXCEPTLIST       348

@@ -726,6 +726,10 @@ burst_TS6(struct Client *client_p)
 		if(IsCapable(client_p, CAP_IE) && rb_dlink_list_length(&chptr->invexlist) > 0)
 			burst_modes_TS6(client_p, chptr, &chptr->invexlist, 'I');
 
+		if(IsCapable(client_p, CAP_IRCNET) && rb_dlink_list_length(&chptr->reoplist) > 0)
+			burst_modes_TS6(client_p, chptr, &chptr->reoplist, 'R');
+
+
 		if(IsCapable(client_p, CAP_TB) && chptr->topic != NULL)
 			sendto_one(client_p, ":%s TB %s %ld %s%s:%s",
 				   me.id, chptr->chname, (long)chptr->topic->topic_time,

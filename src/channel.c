@@ -1064,8 +1064,8 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
 static void	reop_channel(struct Channel *chptr)
 {
 	struct membership *msptr;
-	struct Client *notidler = NULL;
-	struct Client *matched = NULL;
+	struct membership *notidler = NULL;
+	struct membership *matched = NULL;
 	char enforcing = 'r';
 	rb_dlink_node *ptr;
 
@@ -1080,16 +1080,16 @@ static void	reop_channel(struct Channel *chptr)
 		if (!MyClient(msptr->client_p))
 			continue;
 		if (!notidler ||
-			notidler->localClient->lasttime < msptr->client_p->localClient->lasttime)
+			notidler->client_p->localClient->lasttime < msptr->client_p->localClient->lasttime)
 		{
-			notidler = msptr->client_p;
+			notidler = msptr;
 		}
 
 		if ((!matched ||
-			(matched->localClient->lasttime < msptr->client_p->localClient->lasttime)) &&
+			(matched->client_p->localClient->lasttime < msptr->client_p->localClient->lasttime)) &&
 			match_ban(&chptr->reoplist, msptr->client_p, 0))
 		{
-			matched = msptr->client_p;
+			matched = msptr;
 		}
 	}
 	if (matched) {
@@ -1098,12 +1098,13 @@ static void	reop_channel(struct Channel *chptr)
 		matched = notidler;
 	}
 	if (matched) {
-		sendto_channel_local(ALL_MEMBERS, chptr, ":%s MODE %s +o %s",
-			me.name, chptr->chname, matched->name);
-		sendto_server(&me, chptr, CAP_TS6, NOCAPS, ":%s TMODE %ld %s +o %s",
-			me.id, (long)chptr->channelts, chptr->chname, matched->name);
 		sendto_channel_flags(&me, ALL_MEMBERS, &me, chptr, "NOTICE %s :Enforcing channel mode +%c (%ld)",
 			chptr->chname, enforcing, rb_current_time() - chptr->reop);
+		matched->flags |= CHFL_CHANOP;
+		sendto_channel_local(ALL_MEMBERS, chptr, ":%s MODE %s +o %s",
+			me.name, chptr->chname, matched->client_p->name);
+		sendto_server(&me, chptr, CAP_TS6, NOCAPS, ":%s TMODE %ld %s +o %s",
+			me.id, (long)chptr->channelts, chptr->chname, matched->client_p->name);
 		chptr->reop = chptr->opquit = 0;
 		return;
 	}

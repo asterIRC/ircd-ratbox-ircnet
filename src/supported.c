@@ -216,13 +216,9 @@ isupport_chanmodes(const void *ptr)
 {
 	static char result[80];
 
-	rb_snprintf(result, sizeof result, "%s%sb,k,l,imnpstS%s",
+	rb_snprintf(result, sizeof result, "%s%s%sb,k,l,imnpstaqrS",
 		    ConfigChannel.use_except ? "e" : "", ConfigChannel.use_invex ? "I" : "",
-#ifdef ENABLE_SERVICES
-		    rb_dlink_list_length(&service_list) ? "r" : ""
-#else
-		    ""
-#endif
+		    ConfigChannel.reop ? "R" : ""
 		);
 	return result;
 }
@@ -232,7 +228,7 @@ isupport_chanlimit(const void *ptr)
 {
 	static char result[30];
 
-	rb_snprintf(result, sizeof result, "&#:%i", ConfigChannel.max_chans_per_user);
+	rb_snprintf(result, sizeof result, "&#!:%i", ConfigChannel.max_chans_per_user);
 	return result;
 }
 
@@ -241,9 +237,10 @@ isupport_maxlist(const void *ptr)
 {
 	static char result[30];
 
-	rb_snprintf(result, sizeof result, "b%s%s:%i",
+	rb_snprintf(result, sizeof result, "b%s%s%s:%i",
 		    ConfigChannel.use_except ? "e" : "",
-		    ConfigChannel.use_invex ? "I" : "", ConfigChannel.max_bans);
+		    ConfigChannel.use_invex ? "I" : "",
+		    ConfigChannel.reop ? "R" : "", ConfigChannel.max_bans);
 	return result;
 }
 
@@ -265,7 +262,7 @@ init_isupport(void)
 	static int nicklen = NICKLEN - 1;
 	static int channellen = LOC_CHANNELLEN;
 
-	add_isupport("CHANTYPES", isupport_string, "&#");
+	add_isupport("CHANTYPES", isupport_string, "&#!");
 	add_isupport("EXCEPTS", isupport_boolean, &ConfigChannel.use_except);
 	add_isupport("INVEX", isupport_boolean, &ConfigChannel.use_invex);
 	add_isupport("CHANMODES", isupport_chanmodes, NULL);

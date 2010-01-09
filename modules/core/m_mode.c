@@ -286,6 +286,11 @@ ms_bmask(struct Client *client_p, struct Client *source_p, int parc, const char 
 		mems = ONLY_CHANOPS;
 		break;
 
+	case 'R':
+		banlist = &chptr->reoplist;
+		mode_type = CHFL_REOP;
+		needcap = CAP_IRCNET;
+		mems = ONLY_CHANOPS;
 		/* maybe we should just blindly propagate this? */
 	default:
 		return 0;
@@ -685,7 +690,7 @@ chm_simple(struct Client *source_p, struct Channel *chptr,
 
 	/* +r/MODE_REOP is aliased over MODE_REGONLY, the meaning being assumed
 	   by channel name */
-	if (chptr->chname[0] != '!') {
+	if (chptr->chname[0] != '!' || !ConfigChannel.reop) {
 #ifdef ENABLE_SERVICES
 		if (mode_type & (MODE_REGONLY)) {
 			chm_regonly(source_p, chptr, atlevel, parc, parn, parv, errors, dir, c, mode_type);
@@ -804,6 +809,25 @@ chm_ban(struct Client *source_p, struct Channel *chptr,
 		else
 			mems = ONLY_SERVERS;
 		break;
+
+	case CHFL_REOP:
+		/* if +R is disabled, allow all but +I locally */
+		if(!ConfigChannel.use_invex && MyClient(source_p) &&
+		   (dir == MODE_ADD) && (parc > *parn))
+			return;
+
+		list = &chptr->reoplist;
+		errorval = SM_ERR_RPL_I;
+		rpl_list = RPL_REOPLIST;
+		rpl_endlist = RPL_ENDOFREOPLIST;
+		caps = CAP_IRCNET;
+
+		if(ConfigChannel.reop || (dir == MODE_DEL))
+			mems = ONLY_CHANOPS;
+		else
+			mems = ONLY_SERVERS;
+		break;
+
 
 	default:
 		sendto_realops_flags(UMODE_ALL, L_ALL, "chm_ban() called with unknown type!");
@@ -1322,7 +1346,7 @@ static struct ChannelMode ModeTable[255] =
   {chm_op,	CHFL_UNIQOP },		/* O */
   {chm_nosuch,	0 },			/* P */
   {chm_nosuch,	0 },			/* Q */
-  {chm_nosuch,	0 },			/* R */
+  {chm_ban,	CHFL_REOP },		/* R */
   {chm_sslonly,  MODE_SSLONLY },         /* S */
   {chm_nosuch,	0 },			/* T */
   {chm_nosuch,	0 },			/* U */
