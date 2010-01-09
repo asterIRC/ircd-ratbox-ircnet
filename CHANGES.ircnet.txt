@@ -1,0 +1,49 @@
+A lot of you were asking for it, so here we go...
+
+IRCNet support for ratbox 3.1-svn
+=================================
+
+User-visible features implemented for IRCNet compatibility:
+-----------------------------------------------------------
+	* !channels (same semantics of creating as on IRCNet,
+	   additionaly conflicting names are reported)
+	* +r for !channels (identical to IRCNet)
+	* +a (anonymous) flag for !channels
+	  DIFFERENCES: channel members will NOT see joins/modes/parts at all,
+	  except their own. (censorship to anonymous!anonymous. is applied
+	  only for PRIVMSG, NOTICE and TOPIC)
+	* +R for &, # and !channels, channel { reop = 300 }; in config
+	  DIFFERENCES: when channel is opless and there is no user matching
+	  among the current members, a joining user matching +R will be always
+	  let in no matter the current +bilk flags.
+	* chandelay (channel { delay = 1800; } in config) will enable
+	  channel locking when @user is lost in a netsplit and the channel gets
+	  empty.
+	* channel { no_ops_on_netsplit = yes } - IRCNet-like splitmode
+
+TS6 -> 2.11 emulation
+---------------------
+	* SJOIN is translated to NJOIN, including appropiate MODEs if necessary
+	* UID is translated to UNICK
+	* PASS password TS 6 SID -> PASS password 0301000000 IRC|aCDEFHJKMQRTu P SIDSTRING
+	  (if the remote side is actually a ratbox, it will have to use SID from parv[5])
+	* TMODE is translated to MODE
+	* BMASK is translated to MODE +bbb as appropiate
+2.11 -> TS6 emulation
+---------------------
+	* NJOIN is translated to SJOIN with TS 0
+	* UNICK is translated to UID with TS 0
+
+This should make IRCNet compatibility pretty stable as we pass everything needed.
+A joining user or mode coming from a 2.11 server will clear current TS to zero.
+This should enforce no-TS behaviour on mixed net, after all servers are switched to
+ratbox, a simple script could be linked to re-TS all channels.
+
+As a safety-net measure for development, in any case we would be spewing
+SQUIT or KILL in COMPAT_211 mode, we'd rather SQUIT ourselves from that
+uplink. This should prevent the mayhem in case something goes very wrong
+(and making ratbox servers linked to IRCNet developer-only as they'll
+squit on the first sign of trouble making them useless for users now).
+
+Questions? /msg sd@ircnet or discuss at !ratbox@ircnet
+
