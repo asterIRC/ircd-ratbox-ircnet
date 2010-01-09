@@ -66,6 +66,7 @@ struct Channel
 	rb_dlink_list banlist;
 	rb_dlink_list exceptlist;
 	rb_dlink_list invexlist;
+	rb_dlink_list reoplist;
 
 	time_t first_received_message_time;	/* channel flood control */
 	int received_number_of_privmsgs;
@@ -73,6 +74,9 @@ struct Channel
 
 	uint32_t ban_serial;
 	time_t channelts;
+
+	time_t reop;	/* since when we're considering the channel to be reopped */
+	time_t opquit;	/* when some @user quitted, for chandelay */
 	char *chname;
 };
 
@@ -154,6 +158,7 @@ struct ChCapCombo
 #define CHFL_BAN        0x0200	/* ban channel flag */
 #define CHFL_EXCEPTION  0x0400	/* exception to ban channel flag */
 #define CHFL_INVEX      0x0800
+#define CHFL_REOP	0x1000  /* consider these hostmask for reopping */
 
 /* mode flags for direction indication */
 #define MODE_QUERY     0
@@ -172,6 +177,9 @@ struct ChCapCombo
 		find_channel_membership(chan, who)) ? 1 : 0)
 
 #define IsChannelName(name) ((name) && (*(name) == '#' || *(name) == '&' || *(name) == '!'))
+#define HasHistory(chptr) (chptr->opquit + ConfigChannel.delay >= rb_current_time())
+#define IsLocked(chptr) (HasHistory(chptr) && (rb_dlink_list_length(&chptr->members) == 0))
+
 
 extern rb_dlink_list global_channel_list;
 void init_channels(void);
@@ -220,4 +228,5 @@ void send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
 
 
 struct	Ban *match_ban(rb_dlink_list *bl, struct Client *who, int cache);
+void	expire_chandelay(void *unused);
 #endif /* INCLUDED_channel_h */

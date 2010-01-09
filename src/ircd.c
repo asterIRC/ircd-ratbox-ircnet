@@ -771,6 +771,11 @@ ratbox_main(int argc, char *argv[])
 	rb_event_addonce("try_connections_startup", try_connections, NULL, 2);
 	rb_event_add("check_rehash", check_rehash, NULL, 3);
 	rb_event_addish("reseed_srand", seed_random, NULL, 300);	/* reseed every 10 minutes */
+#ifndef NDEBUG
+	rb_event_add("expire_chandelay", expire_chandelay, NULL, 1);
+#else /* production build */
+	rb_event_addish("expire_chandelay", expire_chandelay, NULL, 300);
+#endif
 
 	if(splitmode)
 		rb_event_add("check_splitmode", check_splitmode, NULL, 5);

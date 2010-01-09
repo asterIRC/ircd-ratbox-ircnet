@@ -996,6 +996,7 @@ chm_op(struct Client *source_p, struct Channel *chptr,
 		mode_changes[mode_count].arg = targ_p->name;
 		mode_changes[mode_count++].client = targ_p;
 
+		chptr->reop = rb_current_time();
 		mstptr->flags &= ~(CHFL_CHANOP|CHFL_UNIQOP);
 	}
 }

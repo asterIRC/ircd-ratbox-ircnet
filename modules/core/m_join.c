@@ -268,6 +268,13 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 			}
 		}
 
+		if (IsLocked(chptr))
+		{
+			sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
+					   me.name, source_p->name, name);
+			continue;
+		}
+
 		if(!IsOper(source_p) && !IsExemptSpambot(source_p))
 			check_spambot_warning(source_p, name);
 

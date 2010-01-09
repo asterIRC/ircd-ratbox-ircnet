@@ -233,6 +233,12 @@ remove_user_from_channel(struct membership *msptr)
 	client_p = msptr->client_p;
 	chptr = msptr->chptr;
 
+	if (!MyConnect(client_p) && is_chanop(msptr)) {
+		chptr->reop = rb_current_time();
+		if (client_p->flags & FLAGS_KILLED)
+			chptr->opquit = chptr->reop;
+	}
+
 	rb_dlinkDelete(&msptr->usernode, &client_p->user->channel);
 	rb_dlinkDelete(&msptr->channode, &chptr->members);
 
@@ -376,6 +382,10 @@ destroy_channel(struct Channel *chptr)
 
 	/* Free the topic */
 	free_topic(chptr);
+
+	/* CHANDELAY: will be destroyed by the timer eventually */
+	if (HasHistory(chptr))
+		return;
 
 	rb_dlinkDelete(&chptr->node, &global_channel_list);
 	del_from_hash(HASH_CHANNEL, chptr->chname, chptr);
@@ -1049,3 +1059,75 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
 			sendto_server(client_p, chptr, cap, nocap, "%s %s", modebuf, parabuf);
 	}
 }
+
+/* try to find the least idle client and give it +o */
+static void	reop_channel(struct Channel *chptr)
+{
+	struct membership *msptr;
+	struct Client *notidler = NULL;
+	struct Client *matched = NULL;
+	char enforcing = 'r';
+	rb_dlink_node *ptr;
+
+	RB_DLINK_FOREACH(ptr, chptr->members.head)
+	{
+		msptr = ptr->data;
+		if (is_chanop(msptr)) {
+			chptr->opquit = chptr->reop = 0;
+			/* no reop needed */
+			return;
+		}
+		if (!MyClient(msptr->client_p))
+			continue;
+		if (!notidler ||
+			notidler->localClient->lasttime < msptr->client_p->localClient->lasttime)
+		{
+			notidler = msptr->client_p;
+		}
+
+		if ((!matched ||
+			(matched->localClient->lasttime < msptr->client_p->localClient->lasttime)) &&
+			match_ban(&chptr->reoplist, msptr->client_p, 0))
+		{
+			matched = msptr->client_p;
+		}
+	}
+	if (matched) {
+		enforcing = 'R';
+	} else if (chptr->mode.mode & MODE_REOP) {
+		matched = notidler;
+	}
+	if (matched) {
+		sendto_channel_local(ALL_MEMBERS, chptr, ":%s MODE %s +o %s",
+			me.name, chptr->chname, matched->name);
+		sendto_server(&me, chptr, CAP_TS6, NOCAPS, ":%s TMODE %ld %s +o %s",
+			me.id, (long)chptr->channelts, chptr->chname, matched->name);
+		sendto_channel_flags(&me, ALL_MEMBERS, &me, chptr, "NOTICE %s :Enforcing channel mode +%c (%ld)",
+			chptr->chname, enforcing, rb_current_time() - chptr->reop);
+		chptr->reop = chptr->opquit = 0;
+		return;
+	}
+	return;
+}
+
+void	expire_chandelay(void *unused)
+{
+	rb_dlink_node *ptr;
+	RB_DLINK_FOREACH(ptr, global_channel_list.head)
+	{
+		struct Channel *chptr = ptr->data;
+
+		if (rb_dlink_list_length(&chptr->members) <= 0)
+			destroy_channel(chptr);
+		else if (ConfigChannel.reop) {
+			/* if ops were lost in netsplit, wait for delay to expire. */
+			if (chptr->reop &&
+				(chptr->reop + ConfigChannel.reop < rb_current_time()) &&
+				!HasHistory(chptr))
+			{
+				reop_channel(chptr);
+			}
+		}
+	}
+}
+

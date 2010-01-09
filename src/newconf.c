@@ -2242,7 +2242,7 @@ load_conf_settings(void)
 
 	}
 	if(!split_users || !split_servers
-	   || (!ConfigChannel.no_create_on_split && !ConfigChannel.no_join_on_split))
+	   || (!ConfigChannel.no_create_on_split && !ConfigChannel.no_join_on_split && !ConfigChannel.no_ops_on_split))
 	{
 		rb_event_delete(cache_links_ev);
 		splitmode = 0;
