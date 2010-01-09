@@ -375,5 +375,7 @@ char *generate_uid(char *buf, int len, unsigned l);
 void flood_endgrace(struct Client *);
 void allocate_away(struct Client *);
 void free_away(struct Client *);
+int clean_uid(const char *uid);
+
 
 #endif /* INCLUDED_client_h */

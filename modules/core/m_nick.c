@@ -515,28 +515,6 @@ clean_host(const char *host)
 	return 1;
 }
 
-static int
-clean_uid(const char *uid)
-{
-	int len = 1;
-
-	if(!IsDigit(*uid++))
-		return 0;
-
-	for(; *uid; uid++)
-	{
-		len++;
-
-		if(!IsIdChar(*uid))
-			return 0;
-	}
-
-	if(len != IDLEN - 1)
-		return 0;
-
-	return 1;
-}
-
 static void
 set_initial_nick(struct Client *client_p, struct Client *source_p, char *nick)
 {

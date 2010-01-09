@@ -1690,6 +1690,30 @@ free_away(struct Client *client_p)
 	}
 }
 
+/* moved from m_nick, ensures the uid is valid */
+int
+clean_uid(const char *uid)
+{
+	int len = 1;
+
+	if(!IsDigit(*uid++))
+		return 0;
+
+	for(; *uid; uid++)
+	{
+		len++;
+
+		if(!IsIdChar(*uid))
+			return 0;
+	}
+
+	if(len != IDLEN - 1)
+		return 0;
+
+	return 1;
+}
+
+
 /* the previous one doing fingercounting was too funny */
 char *generate_uid(char *buf, int len, unsigned l)
 {
