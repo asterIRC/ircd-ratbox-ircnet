@@ -85,6 +85,7 @@
 #define IRCD_RES_HOSTLEN 255	/* Must match with resolver/res.h          */
 
 #define SIDLEN		3
+#define CHIDLEN		5
 #define USERLEN         10
 #define REALLEN         50
 #define KILLLEN         90

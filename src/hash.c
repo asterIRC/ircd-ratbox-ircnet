@@ -40,7 +40,8 @@
 
 #define hash_nick(x) (fnv_hash_upper((const unsigned char *)(x), U_MAX_BITS, 0))
 #define hash_id(x) (fnv_hash((const unsigned char *)(x), U_MAX_BITS, 0))
-#define hash_channel(x) (fnv_hash_upper_len((const unsigned char *)(x), CH_MAX_BITS, 30))
+#define hash_channel(x) (fnv_hash_channel((const unsigned char *)(x), CH_MAX_BITS, 30))
+#define hash_channel_raw(x) (fnv_hash_upper_len((const unsigned char *)(x), CH_MAX_BITS, 30))
 #define hash_hostname(x) (fnv_hash_upper_len((const unsigned char *)(x), HOST_MAX_BITS, 30))
 #define hash_resv(x) (fnv_hash_upper_len((const unsigned char *)(x), R_MAX_BITS, 30))
 #define hash_cli_fd(x)	(x % CLI_FD_MAX)
@@ -157,6 +158,16 @@ fnv_hash_upper_len(const unsigned char *s, unsigned int bits, unsigned int len)
 	return h;
 }
 
+/* hash only the part after CHIDLEN for '!' channels */
+uint32_t
+fnv_hash_channel(const unsigned char *s, unsigned bits, unsigned int len)
+{
+	int l = strlen((const char*)s);
+	if (s[0] == '!' && l > CHIDLEN+1)
+		return fnv_hash_upper_len(s + CHIDLEN + 1, bits, len);
+	return fnv_hash_upper_len(s, bits, len);
+}
+
 static unsigned int
 hash_help(const char *name)
 {
@@ -183,7 +194,7 @@ static struct _hash_function
 	{
 	fnv_hash, idTable, U_MAX_BITS, 0},
 	{
-	fnv_hash_upper_len, channelTable, CH_MAX_BITS, 30},
+	fnv_hash_channel, channelTable, CH_MAX_BITS, 30},
 	{
 	fnv_hash_upper_len, hostTable, HOST_MAX_BITS, 30},
 	{
@@ -421,6 +432,46 @@ find_channel(const char *name)
 			return chptr;
 	}
 
+	return NULL;
+}
+
+/* find_channels()
+ * input - the channel name with or without CHIDLEN prefix,
+ *         !, !! and !# are expected to be stripped.
+ *
+ * try to find !channels, return the list of bucket chain
+ * so the caller can find out other colliding names.
+ */
+rb_dlink_node *find_channels(const char *name)
+{
+	struct Channel *chptr;
+	rb_dlink_node *ptr;
+	unsigned int hashv;
+
+	/* assume the channel is without SID */
+	hashv = hash_channel_raw(name);
+
+	RB_DLINK_FOREACH(ptr, channelTable[hashv].head)
+	{
+		chptr = ptr->data;
+
+		if (chptr->chname[0] == '!' &&
+			(!irccmp(name, chptr->chname + 1 + CHIDLEN)))
+				return ptr;
+	}
+
+	/* ok, nothing found or to be created. perhaps there is a prefix in the name? */
+	if (strlen(name) <= CHIDLEN)
+		return NULL;
+	hashv = hash_channel_raw(name + CHIDLEN);
+	RB_DLINK_FOREACH(ptr, channelTable[hashv].head)
+	{
+		chptr = ptr->data;
+
+		if (chptr->chname[0] == '!' &&
+			(!irccmp(name, chptr->chname + 1 + CHIDLEN)))
+				return ptr;
+	}
 	return NULL;
 }
 

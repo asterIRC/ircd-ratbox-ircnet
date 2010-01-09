@@ -76,6 +76,7 @@ uint32_t fnv_hash_upper(const unsigned char *s, unsigned int bits, unsigned int 
 uint32_t fnv_hash(const unsigned char *s, unsigned int bits, unsigned int unused);
 uint32_t fnv_hash_len(const unsigned char *s, unsigned int bits, unsigned int len);
 uint32_t fnv_hash_upper_len(const unsigned char *s, unsigned int bits, unsigned int len);
+uint32_t fnv_hash_channel(const unsigned char *s, unsigned int bits, unsigned int len);
 
 void init_hash(void);
 
@@ -90,6 +91,7 @@ struct Client *find_id(const char *name);
 
 struct Channel *get_or_create_channel(struct Client *client_p, const char *chname, int *isnew);
 struct Channel *find_channel(const char *name);
+rb_dlink_node *find_channels(const char *name);
 
 rb_dlink_node *find_hostname(const char *);
 
