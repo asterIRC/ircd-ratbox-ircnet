@@ -692,6 +692,11 @@ chm_simple(struct Client *source_p, struct Channel *chptr,
 			return;
 		}
 #endif
+		if(*errors & SM_ERR_UNKNOWN)
+			return;
+		*errors |= SM_ERR_UNKNOWN;
+		sendto_one(source_p, form_str(ERR_UNKNOWNMODE), me.name, source_p->name, c);
+		return;
 	} else {
 		/* +a can be set only by creators, unset only by servers */
 		if ((mode_type & (MODE_ANONYMOUS)) &&

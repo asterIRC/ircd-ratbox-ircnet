@@ -236,6 +236,10 @@ struct config_channel_entry
 	int invite_ops_only;
 	int topiclen;
 	int resv_forcepart;
+
+	int no_ops_on_split;
+	int delay;
+	int reop;
 };
 
 struct config_server_hide

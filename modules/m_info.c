@@ -175,6 +175,24 @@ static struct InfoStruct info_table[] = {
 		{ (void *)RATBOX_SOMAXCONN },
 		"Maximum Queue Length of Pending Connections"
 	},
+	{
+		"no_ops_on_split",
+		OUTPUT_BOOLEAN_YN,
+		{ &ConfigChannel.no_ops_on_split }, 
+		"Disallow getting ops when creating channels in splitmode",
+	},
+	{
+		"delay",
+		OUTPUT_DECIMAL,
+		{ &ConfigChannel.delay }, 
+		"Lock channels for this duration when empty and @user vanished due to a netsplit",
+	},
+	{
+		"reop",
+		OUTPUT_DECIMAL,
+		{ &ConfigChannel.reop }, 
+		"Re-op a random user in !channel (+r), or a matching user (+R) after this period of channel being opless.",
+	},
 	{	
 		"IPV6", 
 		OUTPUT_BOOLEAN_RAW,

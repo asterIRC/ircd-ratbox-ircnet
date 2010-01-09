@@ -182,7 +182,7 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 			if (!lp) {
 				static char chname[CHANNELLEN+1];
 				/* no match found and we're not creating */
-				if ((sn - name) != 2) {
+				if (((sn - name) != 2) || (!name[2])) {
 					sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL,
 					   form_str(ERR_NOSUCHCHANNEL), name);
 					continue;
