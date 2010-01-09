@@ -943,6 +943,8 @@ chm_op(struct Client *source_p, struct Channel *chptr,
 		mode_changes[mode_count].arg = targ_p->name;
 		mode_changes[mode_count++].client = targ_p;
 
+		if (mode_type & CHFL_UNIQOP)
+			mstptr->flags |= CHFL_UNIQOP;
 		mstptr->flags |= CHFL_CHANOP;
 		mstptr->flags &= ~CHFL_DEOPPED;
 	}
@@ -966,7 +968,7 @@ chm_op(struct Client *source_p, struct Channel *chptr,
 		mode_changes[mode_count].arg = targ_p->name;
 		mode_changes[mode_count++].client = targ_p;
 
-		mstptr->flags &= ~CHFL_CHANOP;
+		mstptr->flags &= ~(CHFL_CHANOP|CHFL_UNIQOP);
 	}
 }
 
@@ -1288,7 +1290,7 @@ static struct ChannelMode ModeTable[255] =
   {chm_nosuch,	0 },			/* L */
   {chm_nosuch,	0 },			/* M */
   {chm_nosuch,	0 },			/* N */
-  {chm_nosuch,	0 },			/* O */
+  {chm_op,	CHFL_UNIQOP },		/* O */
   {chm_nosuch,	0 },			/* P */
   {chm_nosuch,	0 },			/* Q */
   {chm_nosuch,	0 },			/* R */

@@ -191,6 +191,7 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 				generate_uid(chname + 1, CHIDLEN, time(NULL));
 				chname[0] = '!';
 				(void)rb_strlcat(chname, sn, sizeof(chname));
+				name = chname;
 			} else {
 				int nclashes = 0;
 				/* channel name found, but check for duplicates! */
@@ -205,7 +206,7 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 					}
 				}
 				if (nclashes) continue;
-				sn -= CHIDLEN + 1;
+				name = sn - CHIDLEN - 1;
 			}
 		}
 
@@ -232,6 +233,10 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 			flags = CHFL_CHANOP;
 		}
+
+		/* creators are able to set +a */
+		if (*name == '!' && (flags & CHFL_CHANOP))
+			flags |= CHFL_UNIQOP;
 
 		if((rb_dlink_list_length(&source_p->user->channel) >=
 		    (unsigned long)ConfigChannel.max_chans_per_user) &&

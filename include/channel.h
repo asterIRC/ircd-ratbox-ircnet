@@ -129,6 +129,7 @@ struct ChCapCombo
 #define CHFL_DEOPPED    	0x0004	/* deopped on sjoin, bounce modes */
 #define CHFL_BANNED		0x0008	/* cached as banned */
 #define ONLY_SERVERS		0x0010
+#define CHFL_UNIQOP		0x0020	/* the user has just create a !channel */
 #define ALL_MEMBERS		CHFL_PEON
 #define ONLY_CHANOPS		CHFL_CHANOP
 #define ONLY_CHANOPSVOICED	(CHFL_CHANOP|CHFL_VOICE)
