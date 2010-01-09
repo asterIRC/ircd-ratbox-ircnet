@@ -344,7 +344,7 @@ do_who_on_channel(struct Client *source_p, struct Channel *chptr, int server_ope
 		if(server_oper && !IsOper(target_p))
 			continue;
 
-		if(member || !IsInvisible(target_p))
+		if((member || !IsInvisible(target_p)) && (!IsAnonymous(chptr) || target_p == source_p))
 			do_who(source_p, target_p, chptr->chname,
 			       find_channel_status(msptr, combine));
 	}

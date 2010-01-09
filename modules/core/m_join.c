@@ -293,7 +293,7 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		/* we send the user their join here, because we could have to
 		 * send a mode out next.
 		 */
-		sendto_channel_local(ALL_MEMBERS, chptr, ":%s!%s@%s JOIN :%s",
+		sendto_channel_anon(source_p, chptr, ":%s!%s@%s JOIN :%s",
 				     source_p->name,
 				     source_p->username, source_p->host, chptr->chname);
 
@@ -431,7 +431,8 @@ ms_join(struct Client *client_p, struct Client *source_p, int parc, const char *
 	if(!IsMember(source_p, chptr))
 	{
 		add_user_to_channel(chptr, source_p, CHFL_PEON);
-		sendto_channel_local(ALL_MEMBERS, chptr, ":%s!%s@%s JOIN :%s",
+
+		sendto_channel_anon(source_p, chptr, ":%s!%s@%s JOIN :%s",
 				     source_p->name, source_p->username,
 				     source_p->host, chptr->chname);
 	}
@@ -528,6 +529,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 			break;
 		case 'a':
 			mode.mode |= MODE_ANONYMOUS;
+			break;
 		case 'S':
 			mode.mode |= MODE_SSLONLY;
 			break;
@@ -702,7 +704,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 		if(!IsMember(target_p, chptr))
 		{
 			add_user_to_channel(chptr, target_p, fl);
-			sendto_channel_local(ALL_MEMBERS, chptr, ":%s!%s@%s JOIN :%s",
+			sendto_channel_anon(target_p, chptr, ":%s!%s@%s JOIN :%s",
 					     target_p->name,
 					     target_p->username, target_p->host, parv[2]);
 			joins++;
@@ -861,7 +863,7 @@ do_join_0(struct Client *client_p, struct Client *source_p)
 	{
 		msptr = ptr->data;
 		chptr = msptr->chptr;
-		sendto_channel_local(ALL_MEMBERS, chptr, ":%s!%s@%s PART %s",
+		sendto_channel_anon(source_p, chptr, ":%s!%s@%s PART %s",
 				     source_p->name,
 				     source_p->username, source_p->host, chptr->chname);
 		remove_user_from_channel(msptr);
@@ -1126,7 +1128,7 @@ remove_our_modes(struct Channel *chptr)
 		if(is_chanop(msptr))
 		{
 			msptr->flags &= ~CHFL_CHANOP;
-			lpara[count++] = msptr->client_p->name;
+			lpara[count++] = Anon(msptr->client_p->name);
 			*mbuf++ = 'o';
 
 			/* +ov, might not fit so check. */
@@ -1151,14 +1153,14 @@ remove_our_modes(struct Channel *chptr)
 				}
 
 				msptr->flags &= ~CHFL_VOICE;
-				lpara[count++] = msptr->client_p->name;
+				lpara[count++] = Anon(msptr->client_p->name);
 				*mbuf++ = 'v';
 			}
 		}
 		else if(is_voiced(msptr))
 		{
 			msptr->flags &= ~CHFL_VOICE;
-			lpara[count++] = msptr->client_p->name;
+			lpara[count++] = Anon(msptr->client_p->name);
 			*mbuf++ = 'v';
 		}
 		else

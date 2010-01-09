@@ -477,8 +477,8 @@ resv_chan_forcepart(const char *name, const char *reason, int temp_time)
 			              ":%s PART %s", target_p->id, chptr->chname);
 
 			sendto_channel_local(ALL_MEMBERS, chptr, ":%s!%s@%s PART %s :%s",
-			                     target_p->name, target_p->username,
-			                     target_p->host, chptr->chname, target_p->name);
+			                     Anonymize(chptr, target_p->name, target_p->username,
+			                     target_p->host), chptr->chname, target_p->name);
 
 			remove_user_from_channel(msptr);
 

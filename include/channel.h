@@ -165,6 +165,10 @@ struct ChCapCombo
 #define MODE_ADD       1
 #define MODE_DEL       -1
 
+#define IsAnonymous(x)          ((x) && ((x)->mode.mode & MODE_ANONYMOUS))
+#define Anon(x)	(IsAnonymous(chptr)?"anonymous":(x))
+#define Anonymize(chptr,n,u,h) (IsAnonymous(chptr)?"anonymous":(n)), (IsAnonymous(chptr)?"anonymous":(u)), (IsAnonymous(chptr)?"anonymous.":(h))
+
 #define SecretChannel(x)        ((x) && ((x)->mode.mode & MODE_SECRET))
 #define HiddenChannel(x)        ((x) && ((x)->mode.mode & MODE_PRIVATE))
 #define PubChannel(x)           ((!x) || ((x)->mode.mode &\

@@ -529,7 +529,7 @@ sendto_channel_flags(struct Client *one, int type, struct Client *source_p,
 	else
 		rb_linebuf_putmsg(&rb_linebuf_local, NULL, NULL,
 				  ":%s!%s@%s %s",
-				  source_p->name, source_p->username, source_p->host, buf);
+				  Anonymize(chptr, source_p->name, source_p->username, source_p->host), buf);
 
 	rb_linebuf_putmsg(&rb_linebuf_id, NULL, NULL, ":%s %s", source_p->id, buf);
 
@@ -609,6 +609,48 @@ sendto_channel_local(int type, struct Channel *chptr, const char *pattern, ...)
 	rb_linebuf_donebuf(&linebuf);
 }
 
+/* sendto_channel_anon()
+ *
+ * inputs	- flags to send to, channel to send to, va_args
+ * outputs	- message to local channel members
+ * side effects -
+ */
+void
+sendto_channel_anon(struct Client *anon, struct Channel *chptr, const char *pattern, ...)
+{
+	va_list args;
+	buf_head_t linebuf;
+	struct membership *msptr;
+	struct Client *target_p;
+	rb_dlink_node *ptr;
+	rb_dlink_node *next_ptr;
+
+	rb_linebuf_newbuf(&linebuf);
+
+	va_start(args, pattern);
+	rb_linebuf_putmsg(&linebuf, pattern, &args, NULL);
+	va_end(args);
+
+	if ((IsAnonymous(chptr))) {
+		send_linebuf(anon, &linebuf);
+		rb_linebuf_donebuf(&linebuf);
+		return;
+	}
+
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->locmembers.head)
+	{
+		msptr = ptr->data;
+		target_p = msptr->client_p;
+
+		if(IsIOError(target_p))
+			continue;
+
+		send_linebuf(target_p, &linebuf);
+	}
+
+	rb_linebuf_donebuf(&linebuf);
+}
+
 /*
  * sendto_common_channels_local()
  *
@@ -644,6 +686,10 @@ sendto_common_channels_local(struct Client *user, const char *pattern, ...)
 	{
 		mscptr = ptr->data;
 		chptr = mscptr->chptr;
+
+		/* do not send anything for anon channels (this will trigger the bottom coment) */
+		if (IsAnonymous(chptr))
+			continue;
 
 		RB_DLINK_FOREACH_SAFE(uptr, next_uptr, chptr->locmembers.head)
 		{

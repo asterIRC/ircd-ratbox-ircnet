@@ -446,6 +446,9 @@ channel_member_names(struct Channel *chptr, struct Client *client_p, int show_eo
 			if(IsInvisible(target_p) && !is_member)
 				continue;
 
+			if (IsAnonymous(chptr) && (target_p != client_p))
+				continue;
+
 			/* space, possible "@+" prefix */
 			if(cur_len + strlen(target_p->name) + 3 >= BUFSIZE - 3)
 			{
@@ -1102,7 +1105,7 @@ static void	reop_channel(struct Channel *chptr)
 			chptr->chname, enforcing, rb_current_time() - chptr->reop);
 		matched->flags |= CHFL_CHANOP;
 		sendto_channel_local(ALL_MEMBERS, chptr, ":%s MODE %s +o %s",
-			me.name, chptr->chname, matched->client_p->name);
+			me.name, chptr->chname, Anon(matched->client_p->name));
 		sendto_server(&me, chptr, CAP_TS6, NOCAPS, ":%s TMODE %ld %s +o %s",
 			me.id, (long)chptr->channelts, chptr->chname, matched->client_p->name);
 		chptr->reop = chptr->opquit = 0;

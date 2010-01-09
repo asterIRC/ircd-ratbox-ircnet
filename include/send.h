@@ -50,6 +50,7 @@ AFP(2, 3);
 			       struct Channel *chptr, const char *, ...) AFP(5, 6);
 
      void sendto_channel_local(int type, struct Channel *, const char *, ...) AFP(3, 4);
+     void sendto_channel_anon(struct Client *anon, struct Channel *, const char *, ...) AFP(3, 4);
      void sendto_common_channels_local(struct Client *, const char *, ...) AFP(2, 3);
 
 

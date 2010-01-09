@@ -107,8 +107,8 @@ m_topic(struct Client *client_p, struct Client *source_p, int parc, const char *
 				      chptr->topic == NULL ? "" : chptr->topic->topic);
 			sendto_channel_local(ALL_MEMBERS,
 					     chptr, ":%s!%s@%s TOPIC %s :%s",
-					     source_p->name, source_p->username,
-					     source_p->host, chptr->chname,
+					     Anonymize(chptr, source_p->name, source_p->username,
+					     source_p->host), chptr->chname,
 					     chptr->topic == NULL ? "" : chptr->topic->topic);
 		}
 		else

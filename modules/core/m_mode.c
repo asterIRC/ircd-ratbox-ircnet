@@ -1462,8 +1462,8 @@ set_channel_mode(struct Client *client_p, struct Client *source_p,
 		mlen = rb_sprintf(modebuf, ":%s MODE %s ", source_p->name, chptr->chname);
 	else
 		mlen = rb_sprintf(modebuf, ":%s!%s@%s MODE %s ",
-				  source_p->name, source_p->username,
-				  source_p->host, chptr->chname);
+				  Anonymize(chptr, source_p->name, source_p->username,
+				  source_p->host), chptr->chname);
 
 	for(j = 0, flags = ALL_MEMBERS; j < 2; j++, flags = ONLY_CHANOPS)
 	{
@@ -1525,7 +1525,11 @@ set_channel_mode(struct Client *client_p, struct Client *source_p,
 			if(mode_changes[i].arg != NULL)
 			{
 				paracount++;
-				len = rb_sprintf(pbuf, "%s ", mode_changes[i].arg);
+				/* anonymize mode changes; too */
+				if (IsAnonymous(chptr) && strchr("Oov", mode_changes[i].letter))
+					len = rb_sprintf(pbuf, "%s ", Anon(mode_changes[i].arg));
+				else
+					len = rb_sprintf(pbuf, "%s ", mode_changes[i].arg);
 				pbuf += len;
 				paralen += len;
 			}
