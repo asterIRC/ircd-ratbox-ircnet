@@ -486,6 +486,43 @@ del_invite(struct Channel *chptr, struct Client *who)
 	rb_dlinkFindDestroy(chptr, &who->localClient->invited);
 }
 
+/*
+ * match_ban()
+ *
+ * input  - banlist (&chptr->banlist etc), 'who' is to be matched
+ *	    if 'cache' is specified, we will be using cached values of n!u@h
+ *          be sure the previously uncached call had the same 'who'
+ *	    (it's also checked internally but don't rely on it).
+ * output - the ban matched by the user 'who'
+ *
+ * refactored here as it was too hard for my eyes seeing the same thing
+ * splattered all over the place --sd
+ */
+struct	Ban *match_ban(rb_dlink_list *bl, struct Client *who, int cache)
+{
+	static char mys[4][NICKLEN + USERLEN + HOSTLEN];
+	struct Ban *ban;
+	static struct Client *cachedwho = NULL;
+	rb_dlink_node *ptr;
+
+	if (!cache || (who != cachedwho)) {
+		cachedwho = who;
+		rb_sprintf(mys[0], "%s!%s@%s", who->name, who->username, who->host);
+		rb_sprintf(mys[1], "%s!%s@%s", who->name, who->username, who->sockhost);
+		rb_sprintf(mys[2], "%s!%s@%s", who->id, who->username, who->host);
+		rb_sprintf(mys[3], "%s!%s@%s", who->id, who->username, who->sockhost);
+	}
+	
+	RB_DLINK_FOREACH(ptr, bl->head) {
+		int i;
+		ban = ptr->data;
+		for (i = 0; i < 4; i++)
+			if (match(ban->banstr, mys[i]))
+				return ban;
+	};
+	return NULL;
+}
+
 /* is_banned()
  *
  * input	- channel to check bans for, user to check bans against
@@ -494,78 +531,22 @@ del_invite(struct Channel *chptr, struct Client *who)
  * side effects -
  */
 int
-is_banned(struct Channel *chptr, struct Client *who, struct membership *msptr,
-	  const char *s, const char *s2)
+is_banned(struct Channel *chptr, struct Client *who, struct membership *msptr)
 {
-	char src_host[NICKLEN + USERLEN + HOSTLEN + 6];
-	char src_iphost[NICKLEN + USERLEN + HOSTLEN + 6];
-	rb_dlink_node *ptr;
-	struct Ban *actualBan = NULL;
-	struct Ban *actualExcept = NULL;
-
 	if(!MyClient(who))
 		return 0;
 
-	/* if the buffers havent been built, do it here */
-	if(s == NULL)
-	{
-		rb_sprintf(src_host, "%s!%s@%s", who->name, who->username, who->host);
-		rb_sprintf(src_iphost, "%s!%s@%s", who->name, who->username, who->sockhost);
-
-		s = src_host;
-		s2 = src_iphost;
-	}
-
-	RB_DLINK_FOREACH(ptr, chptr->banlist.head)
-	{
-		actualBan = ptr->data;
-		if(match(actualBan->banstr, s) ||
-		   match(actualBan->banstr, s2) || match_cidr(actualBan->banstr, s2))
-			break;
-		else
-			actualBan = NULL;
-	}
-
-	if((actualBan != NULL) && ConfigChannel.use_except)
-	{
-		RB_DLINK_FOREACH(ptr, chptr->exceptlist.head)
-		{
-			actualExcept = ptr->data;
-
-			/* theyre exempted.. */
-			if(match(actualExcept->banstr, s) ||
-			   match(actualExcept->banstr, s2) || match_cidr(actualExcept->banstr, s2))
-			{
-				/* cache the fact theyre not banned */
-				if(msptr != NULL)
-				{
-					msptr->ban_serial = chptr->ban_serial;
-					msptr->flags &= ~CHFL_BANNED;
-				}
-
-				return CHFL_EXCEPTION;
-			}
+	if (match_ban(&chptr->banlist, who, 0)) {
+		if (ConfigChannel.use_except && match_ban(&chptr->exceptlist, who, 1)) {
+			if (msptr)
+				msptr->flags &= ~CHFL_BANNED;
+			return CHFL_EXCEPTION;
 		}
-	}
-
-	/* cache the banned/not banned status */
-	if(msptr != NULL)
-	{
-		msptr->ban_serial = chptr->ban_serial;
-
-		if(actualBan != NULL)
-		{
+		if (msptr)
 			msptr->flags |= CHFL_BANNED;
-			return CHFL_BAN;
-		}
-		else
-		{
-			msptr->flags &= ~CHFL_BANNED;
-			return 0;
-		}
+		return CHFL_BAN;
 	}
-
-	return ((actualBan ? CHFL_BAN : 0));
+	return 0;
 }
 
 /* can_send()
@@ -615,7 +596,7 @@ can_send(struct Channel *chptr, struct Client *source_p, struct membership *mspt
 			if(can_send_banned(msptr))
 				return CAN_SEND_NO;
 		}
-		else if(is_banned(chptr, source_p, msptr, NULL, NULL) == CHFL_BAN)
+		else if(is_banned(chptr, source_p, msptr) == CHFL_BAN)
 			return CAN_SEND_NO;
 	}
 

@@ -853,15 +853,10 @@ can_join(struct Client *source_p, struct Channel *chptr, char *key)
 	rb_dlink_node *lp;
 	rb_dlink_node *ptr;
 	struct Ban *invex = NULL;
-	char src_host[NICKLEN + USERLEN + HOSTLEN + 6];
-	char src_iphost[NICKLEN + USERLEN + HOSTLEN + 6];
 
 	s_assert(source_p->localClient != NULL);
 
-	rb_sprintf(src_host, "%s!%s@%s", source_p->name, source_p->username, source_p->host);
-	rb_sprintf(src_iphost, "%s!%s@%s", source_p->name, source_p->username, source_p->sockhost);
-
-	if((is_banned(chptr, source_p, NULL, src_host, src_iphost)) == CHFL_BAN)
+	if((is_banned(chptr, source_p, NULL)) == CHFL_BAN)
 		return (ERR_BANNEDFROMCHAN);
 
 	if(chptr->mode.mode & MODE_INVITEONLY)
@@ -875,16 +870,8 @@ can_join(struct Client *source_p, struct Channel *chptr, char *key)
 		{
 			if(!ConfigChannel.use_invex)
 				return (ERR_INVITEONLYCHAN);
-			RB_DLINK_FOREACH(ptr, chptr->invexlist.head)
-			{
-				invex = ptr->data;
-				if(match(invex->banstr, src_host)
-				   || match(invex->banstr, src_iphost)
-				   || match_cidr(invex->banstr, src_iphost))
-					break;
-			}
-			if(ptr == NULL)
-				return (ERR_INVITEONLYCHAN);
+			if (!match_ban(&chptr->invexlist, source_p, 1)) /* cached by is_banned */
+				return ERR_INVITEONLYCHAN;
 		}
 	}
 
