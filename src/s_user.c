@@ -250,6 +250,7 @@ show_lusers(struct Client *source_p)
 int
 register_local_user(struct Client *client_p, struct Client *source_p, const char *username)
 {
+	static int uidserial = 0;
 	struct ConfItem *aconf;
 	char tmpstr2[IRCD_BUFSIZE];
 	char ipaddr[HOSTIPLEN];
@@ -502,7 +503,8 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 
 	add_to_hash(HASH_HOSTNAME, source_p->host, source_p);
 
-	strcpy(source_p->id, generate_uid());
+	strcpy(source_p->id, me.id);
+	generate_uid(source_p->id + SIDLEN, IDLEN - SIDLEN, uidserial++);
 	add_to_hash(HASH_ID, source_p->id, source_p);
 
 	if(ConfigFileEntry.default_invisible)

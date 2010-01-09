@@ -1690,52 +1690,18 @@ free_away(struct Client *client_p)
 	}
 }
 
-void
-init_uid(void)
+/* the previous one doing fingercounting was too funny */
+char *generate_uid(char *buf, int len, unsigned l)
 {
+	static unsigned char alphabet[36] =
+	"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 	int i;
-
-	for(i = 0; i < 3; i++)
-		current_uid[i] = me.id[i];
-
-	for(i = 3; i < 9; i++)
-		current_uid[i] = 'A';
-
-	current_uid[9] = '\0';
-}
-
-
-char *
-generate_uid(void)
-{
-	int i;
-
-	for(i = 8; i > 3; i--)
-	{
-		if(current_uid[i] == 'Z')
-		{
-			current_uid[i] = '0';
-			return current_uid;
-		}
-		else if(current_uid[i] != '9')
-		{
-			current_uid[i]++;
-			return current_uid;
-		}
-		else
-			current_uid[i] = 'A';
+	for (i = len-1; i >= 0; i--){
+		buf[i] = alphabet[l % 36];
+		l /= 36;
 	}
-
-	/* if this next if() triggers, we're fucked. */
-	if(current_uid[3] == 'Z')
-	{
-		current_uid[i] = 'A';
-		s_assert(0);
-	}
-	else
-		current_uid[i]++;
-
-	return current_uid;
+	buf[len] = 0;
+	return buf;
 }
 
 /*

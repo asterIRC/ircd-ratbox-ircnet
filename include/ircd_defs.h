@@ -84,6 +84,7 @@
 				/* comply with RFC1123                     */
 #define IRCD_RES_HOSTLEN 255	/* Must match with resolver/res.h          */
 
+#define SIDLEN		3
 #define USERLEN         10
 #define REALLEN         50
 #define KILLLEN         90

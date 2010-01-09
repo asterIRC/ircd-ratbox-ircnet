@@ -370,7 +370,7 @@ struct User *make_user(struct Client *);
 struct Server *make_server(struct Client *);
 void close_connection(struct Client *);
 void init_uid(void);
-char *generate_uid(void);
+char *generate_uid(char *buf, int len, unsigned l);
 
 void flood_endgrace(struct Client *);
 void allocate_away(struct Client *);
