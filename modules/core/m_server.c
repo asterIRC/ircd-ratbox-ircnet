@@ -303,8 +303,7 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		return 0;
 	}
 
-	if(!IsDigit(parv[3][0]) || !IsIdChar(parv[3][1]) ||
-	   !IsIdChar(parv[3][2]) || parv[3][3] != '\0')
+	if(clean_uid(parv[3]) && (strlen(parv[3]) == SIDLEN))
 	{
 		sendto_one(client_p, "ERROR :Invalid SID");
 		sendto_realops_flags(UMODE_ALL, L_ALL,

@@ -1707,9 +1707,6 @@ clean_uid(const char *uid)
 			return 0;
 	}
 
-	if(len != IDLEN - 1)
-		return 0;
-
 	return 1;
 }
 

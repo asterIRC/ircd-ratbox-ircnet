@@ -87,7 +87,6 @@ static int change_remote_nick(struct Client *, struct Client *, time_t, const ch
 static int clean_nick(const char *, int loc_client);
 static int clean_username(const char *);
 static int clean_host(const char *);
-static int clean_uid(const char *uid);
 
 static void set_initial_nick(struct Client *client_p, struct Client *source_p, char *nick);
 static void change_local_nick(struct Client *client_p, struct Client *source_p, char *nick, int);
@@ -369,7 +368,7 @@ ms_uid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		return 0;
 	}
 
-	if(!clean_uid(parv[8]))
+	if(!clean_uid(parv[8]) || (strlen(parv[8]) != IDLEN))
 	{
 		ServerStats.is_kill++;
 		sendto_realops_flags(UMODE_DEBUG, L_ALL,

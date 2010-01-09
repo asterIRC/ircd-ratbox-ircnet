@@ -1030,7 +1030,7 @@ conf_set_serverinfo_sid(confentry_t * entry, conf_t * conf, struct conf_items *i
 
 	if(ServerInfo.sid[0] == '\0')
 	{
-		if(!IsDigit(sid[0]) || !IsIdChar(sid[1]) || !IsIdChar(sid[2]) || sid[3] != '\0')
+		if(clean_uid(sid) && (strlen(sid)==SIDLEN))
 		{
 			conf_report_error_nl("Error serverinfo::sid -- invalid sid at %s:%d", conf->filename, conf->line);
 			return;

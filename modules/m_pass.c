@@ -82,8 +82,7 @@ mr_pass(struct Client *client_p, struct Client *source_p, int parc, const char *
 		if(parc == 5 && atoi(parv[3]) >= 6)
 		{
 			/* only mark as TS6 if the SID is valid.. */
-			if(IsDigit(parv[4][0]) && IsIdChar(parv[4][1]) &&
-			   IsIdChar(parv[4][2]) && parv[4][3] == '\0')
+			if(clean_uid(parv[4]) && strlen(parv[4] == SIDLEN))
 			{
 				client_p->localClient->caps |= CAP_TS6;
 				strcpy(client_p->id, parv[4]);
