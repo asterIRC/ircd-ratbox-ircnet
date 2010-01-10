@@ -24,8 +24,6 @@
  *  $Id: m_join.c 26586 2009-05-28 19:20:14Z jilles $
  */
 
-#define COMPAT_211
-
 #include "stdinc.h"
 #include "struct.h"
 #include "channel.h"

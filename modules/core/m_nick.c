@@ -62,6 +62,13 @@ static int ms_uid(struct Client *, struct Client *, int, const char **);
 static int ms_save(struct Client *, struct Client *, int, const char **);
 static int can_save(struct Client *);
 static void save_user(struct Client *, struct Client *, struct Client *);
+#ifdef COMPAT_211
+static int ms_unick(struct Client *, struct Client *, int, const char **);
+struct Message unick_msgtab = {
+	"UNICK", 0, 0, 0, MFLG_SLOW,
+	{mg_ignore, mg_ignore, mg_ignore, {ms_unick, 8}, mg_ignore, mg_ignore}
+};
+#endif
 
 struct Message nick_msgtab = {
 	"NICK", 0, 0, 0, MFLG_SLOW,
@@ -78,7 +85,11 @@ struct Message save_msgtab = {
 	{mg_ignore, mg_ignore, mg_ignore, {ms_save, 3}, mg_ignore, mg_ignore}
 };
 
-mapi_clist_av2 nick_clist[] = { &nick_msgtab, &uid_msgtab, &save_msgtab, NULL };
+mapi_clist_av2 nick_clist[] = { &nick_msgtab, &uid_msgtab, &save_msgtab,
+#ifdef COMPAT_211
+ &unick_msgtab,
+#endif
+ NULL };
 
 DECLARE_MODULE_AV2(nick, NULL, NULL, nick_clist, NULL, NULL, "$Revision: 26596 $");
 
@@ -316,6 +327,40 @@ ms_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 	return 0;
 }
+
+#ifdef COMPAT_211
+/*
+** m_unick
+**      parv[0] = sender prefix
+**      parv[1] = nickname
+**      parv[2] = uid
+**      parv[3] = username (login name, account)
+**      parv[4] = client host name
+**      parv[5] = client ip
+**      parv[6] = users mode
+**      parv[7] = users real name info
+**
+** cut'n'pasted from 2.11, let's just hack parv[] again to avoid code duplication.
+*/
+static int
+ms_unick(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+{
+	const char *fakeparv[11];
+	char hopbuf[32];
+	sprintf(hopbuf, "%d", source_p->serv?source_p->serv->hops:1);
+	fakeparv[0] = parv[0]; /* pfx */
+	fakeparv[1] = parv[1]; /* nick */
+	fakeparv[2] = hopbuf; /* hops */
+	fakeparv[3] = "0"; /* blah blah */
+	fakeparv[4] = parv[6]; /* umodes */
+	fakeparv[5] = parv[3]; /* username */
+	fakeparv[6] = parv[4]; /* hostname */
+	fakeparv[7] = parv[5]; /* IP */
+	fakeparv[8] = parv[2]; /* UID */
+	fakeparv[9] = parv[7]; /* gecos */
+	return ms_uid(client_p, source_p, 10, parv);
+}
+#endif
 
 /* ms_uid()
  *     parv[1] - nickname

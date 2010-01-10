@@ -675,18 +675,25 @@ burst_TS6(struct Client *client_p)
 	{
 		chptr = ptr->data;
 
+		/* this can actually happen now as we're doing chandelay
 		s_assert(rb_dlink_list_length(&chptr->members) > 0);
-		if(rb_dlink_list_length(&chptr->members) <= 0)
+		*/
+
+		if(*chptr->chname != '#' && (IsCapable(client_p, CAP_IRCNET) && *chptr->chname != '!'))
 			continue;
 
-		if(*chptr->chname != '#')
-			continue;
 
 		cur_len = mlen = rb_sprintf(buf, ":%s SJOIN %ld %s %s :", me.id,
 					    (long)chptr->channelts, chptr->chname,
 					    channel_modes(chptr, client_p));
-
 		t = buf + mlen;
+
+		if (rb_dlink_list_length(&chptr->members) <= 0) {
+			if (*chptr->chname != '!')
+				continue;
+			/* burst empty !channels, too. */
+		}
+
 
 		RB_DLINK_FOREACH(uptr, chptr->members.head)
 		{
@@ -743,6 +750,165 @@ burst_TS6(struct Client *client_p)
 	hclientinfo.target = NULL;
 	call_hook(h_burst_finished, &hclientinfo);
 }
+
+#ifdef COMPAT_211
+/* burst_modes_211()
+ *
+ * input	- client to burst to, channel name, list to burst, mode flag
+ * output	-
+ * side effects - client is sent a list of +b, +e, or +I modes
+ */
+static void
+burst_modes_211(struct Client *client_p, struct Channel *chptr, rb_dlink_list *list, char flag)
+{
+	char modebuf[BUFSIZE];
+	char parabuf[BUFSIZE];
+	rb_dlink_node *ptr;
+	struct Ban *banptr;
+	int modecount = 0;
+	int mpos, ppos;
+
+	RB_DLINK_FOREACH(ptr, list->head)
+	{
+		banptr = ptr->data;
+		if (!modecount) {
+			mpos = rb_sprintf(modebuf, ":%s MODE %s +");
+			ppos = 0;
+		}
+
+		modebuf[mpos++] = flag;
+		modebuf[mpos] = 0;
+		ppos += rb_sprintf(parabuf + ppos, " %s", banptr->banstr);
+
+		if (modecount == MAXMODEPARAMS || (!ptr->next)) {
+			sendto_one(client_p, "%s %s", modebuf, parabuf);
+			modecount = 0;
+		}
+	}
+}
+
+
+
+static void
+burst_211(struct Client *client_p)
+{
+	static char ubuf[12];
+	char buf[BUFSIZE];
+	struct Client *target_p;
+	struct Channel *chptr;
+	struct membership *msptr;
+	hook_data_client hclientinfo;
+	hook_data_channel hchaninfo;
+	rb_dlink_node *ptr;
+	rb_dlink_node *uptr;
+	char *t;
+	int tlen, mlen;
+	int cur_len = 0;
+
+	hclientinfo.client = hchaninfo.client = client_p;
+
+	RB_DLINK_FOREACH(ptr, global_client_list.head)
+	{
+		target_p = ptr->data;
+
+		if(!IsClient(target_p))
+			continue;
+
+		send_umode(NULL, target_p, 0, SEND_UMODES, ubuf);
+		if(!*ubuf)
+		{
+			ubuf[0] = '+';
+			ubuf[1] = '\0';
+		}
+
+		sendto_server(client_p, NULL, CAP_211, NOCAPS,
+			":%s UNICK %s %s %s %s %s %s :%s",
+			target_p->servptr->id,
+			target_p->name,
+			target_p->id,
+			target_p->username,
+			target_p->host,
+			target_p->sockhost,
+			ubuf,
+			target_p->info);
+
+		hclientinfo.target = target_p;
+		call_hook(h_burst_client, &hclientinfo);
+	}
+
+	RB_DLINK_FOREACH(ptr, global_channel_list.head)
+	{
+		chptr = ptr->data;
+
+		if(*chptr->chname != '#' && (IsCapable(client_p, CAP_IRCNET) && *chptr->chname != '!'))
+			continue;
+
+
+		cur_len = mlen = rb_sprintf(buf, ":%s NJOIN %s :", me.id, chptr->chname);
+		t = buf + mlen;
+
+		if (rb_dlink_list_length(&chptr->members) <= 0) {
+			if (*chptr->chname != '!')
+				continue;
+			/* burst empty !channels, using the '.' hack */
+			*t++ = '.';
+			*t++ = ' ';
+			cur_len += 2;
+		}
+
+		RB_DLINK_FOREACH(uptr, chptr->members.head)
+		{
+			msptr = uptr->data;
+
+			tlen = strlen(use_id(msptr->client_p)) + 1;
+			if(is_chanop(msptr))
+				tlen++;
+			if(is_voiced(msptr))
+				tlen++;
+
+			if(cur_len + tlen >= BUFSIZE - 3)
+			{
+				*(t - 1) = '\0';
+				sendto_one_buffer(client_p, buf);
+				cur_len = mlen;
+				t = buf + mlen;
+			}
+
+			rb_sprintf(t, "%s%s ", find_channel_status(msptr, 1),
+				   use_id(msptr->client_p));
+
+			cur_len += tlen;
+			t += tlen;
+		}
+
+		/* remove trailing space */
+		*(t - 1) = '\0';
+		sendto_one_buffer(client_p, buf);
+
+		sendto_one(client_p, ":%s MODE %s %s",
+			me.id, chptr->chname, channel_modes(chptr, client_p));
+
+		if(rb_dlink_list_length(&chptr->banlist) > 0)
+			burst_modes_211(client_p, chptr, &chptr->banlist, 'b');
+
+		if(rb_dlink_list_length(&chptr->exceptlist) > 0)
+			burst_modes_211(client_p, chptr, &chptr->exceptlist, 'e');
+
+		if(rb_dlink_list_length(&chptr->invexlist) > 0)
+			burst_modes_211(client_p, chptr, &chptr->invexlist, 'I');
+
+		if(rb_dlink_list_length(&chptr->reoplist) > 0)
+			burst_modes_211(client_p, chptr, &chptr->reoplist, 'R');
+
+		hchaninfo.chptr = chptr;
+		call_hook(h_burst_channel, &hchaninfo);
+	}
+	
+	hclientinfo.target = NULL;
+	call_hook(h_burst_finished, &hclientinfo);
+}
+
+#endif
 
 /*
  * server_estab
@@ -841,8 +1007,11 @@ server_estab(struct Client *client_p)
 	{
 		start_zlib_session(client_p);
 	}
-	sendto_one(client_p, "SVINFO %d %d 0 :%ld", TS_CURRENT, TS_MIN,
-		   (long int)rb_current_time());
+#ifdef COMPAT_211
+	if (IsCapable(client_p, CAP_TS6))
+		sendto_one(client_p, "SVINFO %d %d 0 :%ld", TS_CURRENT, TS_MIN,
+			   (long int)rb_current_time());
+#endif
 
 	client_p->servptr = &me;
 
@@ -915,9 +1084,12 @@ server_estab(struct Client *client_p)
 		if(target_p == client_p)
 			continue;
 
-		sendto_one(target_p, ":%s SID %s 2 %s :%s%s",
-			   me.id, client_p->name, client_p->id,
-			   IsHidden(client_p) ? "(H) " : "", client_p->info);
+#ifdef COMPAT_211
+		if (IsCapable(target_p, CAP_TS6))
+#endif
+			sendto_one(target_p, ":%s SID %s 2 %s :%s%s",
+				   me.id, client_p->name, client_p->id,
+				   IsHidden(client_p) ? "(H) " : "", client_p->info);
 
 		if(IsCapable(target_p, CAP_ENCAP) && !EmptyString(client_p->serv->fullcaps))
 			sendto_one(target_p, ":%s ENCAP * GCAP :%s",
@@ -961,7 +1133,15 @@ server_estab(struct Client *client_p)
 				   get_id(target_p, client_p), target_p->serv->fullcaps);
 	}
 
+#ifdef COMPAT_211
+	if (IsCapable(client_p, CAP_TS6)) {
+		burst_TS6(client_p);
+	} else if (IsCapable(client_p, CAP_211)) {
+		burst_211(client_p);
+	}
+#else
 	burst_TS6(client_p);
+#endif
 
 	/* Always send a PING after connect burst is done */
 	sendto_one(client_p, "PING :%s", get_id(&me, client_p));

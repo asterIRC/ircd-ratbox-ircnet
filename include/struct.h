@@ -47,6 +47,7 @@ struct Server
 	char by[NICKLEN];
 	rb_dlink_list servers;
 	rb_dlink_list users;
+	int hops;
 	int caps;		/* capabilities bit-field */
 	char *fullcaps;
 };

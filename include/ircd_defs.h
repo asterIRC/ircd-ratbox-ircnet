@@ -127,6 +127,6 @@
 #define PATRICIA_BITS	32
 #endif
 
-
+#define COMPAT_211
 
 #endif /* INCLUDED_ircd_defs_h */
