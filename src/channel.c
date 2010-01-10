@@ -49,7 +49,7 @@ static rb_bh *topic_heap;
 static rb_bh *member_heap;
 struct ev_entry *checksplit_ev;
 
-static int channel_capabs[] = { CAP_EX, CAP_IE,
+static int channel_capabs[] = { CAP_EX, CAP_IE, CAP_IRCNET,
 #ifdef ENABLE_SERVICES
 	CAP_SERVICE,
 #endif
@@ -1058,8 +1058,14 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
 		if(pbl && parabuf[pbl - 1] == ' ')
 			parabuf[pbl - 1] = 0;
 
-		if(nc != 0)
-			sendto_server(client_p, chptr, cap, nocap, "%s %s", modebuf, parabuf);
+		if(nc != 0) {
+			sendto_server(client_p, chptr, cap, nocap|CAP_211, "%s %s", modebuf, parabuf);
+#ifdef COMPAT_211
+			/* better have this outside of the capability combo thingy */
+			sendto_server(client_p, chptr, cap|CAP_211, nocap, ":%s MODE %s %s %s",
+				source_p->id, chptr->chname, modebuf, parabuf);
+#endif
+		}
 	}
 }
 
