@@ -70,7 +70,7 @@ mr_pass(struct Client *client_p, struct Client *source_p, int parc, const char *
 	{
 #ifdef COMPAT_211
 		/* detected 2.11 protocol? */
-		if (strlen(parv[2] == 10)) {
+		if (strlen(parv[2]) == 10) {
 			/* nah, it's just us pretending. will fill the SID in server stage though. */
 			if (!memcmp(parv[2], "0301", 4)) {
 				client_p->localClient->caps |= CAP_TS6+CAPS_IRCNET;

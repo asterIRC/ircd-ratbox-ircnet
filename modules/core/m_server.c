@@ -263,7 +263,17 @@ static int
 ms_server(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	const char *name = parv[1];
-
+#ifdef COMPAT_211
+	if (IsCapable(client_p, CAP_211)) {
+		const char *fakeparv[5];
+		fakeparv[0] = parv[0];
+		fakeparv[1] = parv[1];
+		fakeparv[2] = parv[2];
+		fakeparv[3] = parv[3];
+		fakeparv[4] = parv[5]; /* this is all suspiciously equivalent :) */
+		return ms_sid(client_p, source_p, 5, fakeparv);
+	}
+#endif
 	sendto_one(client_p, "ERROR :Introduced server %s is not TS6", name);
 	sendto_realops_flags(UMODE_ALL, L_ALL, "Link %s cancelled, introduced server %s is not TS6", client_p->name, name);
 	exit_client(client_p, client_p, &me, "Introduced server not TS6");
@@ -788,7 +798,7 @@ burst_modes_211(struct Client *client_p, struct Channel *chptr, rb_dlink_list *l
 	{
 		banptr = ptr->data;
 		if (!modecount) {
-			mpos = rb_sprintf(modebuf, ":%s MODE %s +");
+			mpos = rb_sprintf(modebuf, ":%s MODE %s +", me.id, banptr->banstr);
 			ppos = 0;
 		}
 
@@ -992,15 +1002,32 @@ server_estab(struct Client *client_p)
 		 */
 		if(!EmptyString(server_p->spasswd))
 		{
+#ifdef COMPAT_211
+			if (IsCapable(client_p, CAP_211))
+				 /* XXX what is all this trailing cruft? */
+				sendto_one(client_p, "PASS %s 0301000000 IRC|aCDEFHJKMQRTu P",
+				   server_p->spasswd);
+			if (IsCapable(client_p, CAP_TS6))
+#endif
 			sendto_one(client_p, "PASS %s TS %d :%s",
 				   server_p->spasswd, TS_CURRENT, me.id);
+
 		}
 
 		/* pass info to new server */
+#ifdef COMPAT_211
+		if (!IsCapable(client_p, CAP_211))
+#endif
 		send_capabilities(client_p, default_server_capabs
 				  | (ServerConfCompressed(server_p) && zlib_ok ? CAP_ZIP : 0)
 				  | (ServerConfTb(server_p) ? CAP_TB : 0));
 
+#ifdef COMPAT_211
+		if (IsCapable(client_p, CAP_211)) {
+			sendto_one(client_p, "SERVER %s 1 %s :%s", me.name, me.id,
+				(me.info[0]) ? (me.info) : "IRCers United");
+		} else if (IsCapable(client_p, CAP_TS6))
+#endif
 		sendto_one(client_p, "SERVER %s 1 :%s%s",
 			   me.name,
 			   ConfigServerHide.hidden ? "(H) " : "",
@@ -1025,9 +1052,9 @@ server_estab(struct Client *client_p)
 	}
 #ifdef COMPAT_211
 	if (IsCapable(client_p, CAP_TS6))
+#endif
 		sendto_one(client_p, "SVINFO %d %d 0 :%ld", TS_CURRENT, TS_MIN,
 			   (long int)rb_current_time());
-#endif
 
 	client_p->servptr = &me;
 
@@ -1101,11 +1128,15 @@ server_estab(struct Client *client_p)
 			continue;
 
 #ifdef COMPAT_211
-		if (IsCapable(target_p, CAP_TS6))
+		if (IsCapable(target_p, CAP_211))
+		{
+			sendto_one(target_p, ":%s SERVER %s 2 %s 0301000000 :%s",
+				me.id, client_p->name, client_p->id,  client_p->info);
+		} else if (IsCapable(target_p, CAP_TS6))
 #endif
-			sendto_one(target_p, ":%s SID %s 2 %s :%s%s",
-				   me.id, client_p->name, client_p->id,
-				   IsHidden(client_p) ? "(H) " : "", client_p->info);
+		sendto_one(target_p, ":%s SID %s 2 %s :%s%s",
+			   me.id, client_p->name, client_p->id,
+			   IsHidden(client_p) ? "(H) " : "", client_p->info);
 
 		if(IsCapable(target_p, CAP_ENCAP) && !EmptyString(client_p->serv->fullcaps))
 			sendto_one(target_p, ":%s ENCAP * GCAP :%s",
@@ -1139,10 +1170,21 @@ server_estab(struct Client *client_p)
 			continue;
 
 		/* presumption, if target has an id, so does its uplink */
-		sendto_one(client_p, ":%s SID %s %d %s :%s%s",
-			   target_p->servptr->id, target_p->name,
-			   target_p->hopcount + 1, target_p->id,
-			   IsHidden(target_p) ? "(H) " : "", target_p->info);
+#ifdef COMPAT_211
+		if (IsCapable(client_p, CAP_TS6))
+#endif
+			sendto_one(client_p, ":%s SID %s %d %s :%s%s",
+				   target_p->servptr->id, target_p->name,
+				   target_p->hopcount + 1, target_p->id,
+				   IsHidden(target_p) ? "(H) " : "", target_p->info);
+#ifdef COMPAT_211
+		if (IsCapable(client_p, CAP_211))
+		{
+			sendto_one(target_p, ":%s SERVER %s %d %s 0301000000 :%s",
+				target_p->servptr->id, target_p->name, target_p->hopcount+1,
+				target_p->id, client_p->info);
+		}
+#endif
 
 		if(IsCapable(client_p, CAP_ENCAP) && !EmptyString(target_p->serv->fullcaps))
 			sendto_one(client_p, ":%s ENCAP * GCAP :%s",
@@ -1154,6 +1196,16 @@ server_estab(struct Client *client_p)
 		burst_TS6(client_p);
 	} else if (IsCapable(client_p, CAP_211)) {
 		burst_211(client_p);
+		/* spit out EOBs */
+		RB_DLINK_FOREACH(ptr, global_serv_list.head)
+		{
+			target_p = ptr->data;
+			if(IsMe(target_p) || target_p->from == client_p)
+				continue;
+			target_p = ptr->data;
+			if (HasSentEob(target_p))
+				sendto_one(client_p, ":%s EOB :%s", me.id, target_p->id);
+		}
 	}
 #else
 	burst_TS6(client_p);
