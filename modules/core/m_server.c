@@ -1004,8 +1004,7 @@ server_estab(struct Client *client_p)
 		{
 #ifdef COMPAT_211
 			if (IsCapable(client_p, CAP_211))
-				 /* XXX what is all this trailing cruft? */
-				sendto_one(client_p, "PASS %s 0301000000 IRC|aCDEFHJKMQRTu P",
+				sendto_one(client_p, "PASS %s " IRCNET_FAKESTRING,
 				   server_p->spasswd);
 			if (IsCapable(client_p, CAP_TS6))
 #endif
@@ -1130,8 +1129,8 @@ server_estab(struct Client *client_p)
 #ifdef COMPAT_211
 		if (IsCapable(target_p, CAP_211))
 		{
-			sendto_one(target_p, ":%s SERVER %s 2 %s 0301000000 :%s",
-				me.id, client_p->name, client_p->id,  client_p->info);
+			sendto_one(target_p, ":%s SERVER %s 2 %s %10s :%s",
+				me.id, client_p->name, client_p->id, IRCNET_FAKESTRING, client_p->info);
 		} else if (IsCapable(target_p, CAP_TS6))
 #endif
 		sendto_one(target_p, ":%s SID %s 2 %s :%s%s",
@@ -1180,9 +1179,9 @@ server_estab(struct Client *client_p)
 #ifdef COMPAT_211
 		if (IsCapable(client_p, CAP_211))
 		{
-			sendto_one(target_p, ":%s SERVER %s %d %s 0301000000 :%s",
+			sendto_one(target_p, ":%s SERVER %s %d %s %s :%s",
 				target_p->servptr->id, target_p->name, target_p->hopcount+1,
-				target_p->id, client_p->info);
+				target_p->id, IRCNET_FAKESTRING, client_p->info);
 		}
 #endif
 

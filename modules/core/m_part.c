@@ -123,7 +123,7 @@ part_one_client(struct Client *client_p, struct Client *source_p, char *name, ch
 				       ConfigFileEntry.anti_spam_exit_message_time) <
 				      rb_current_time()))))
 	{
-		sendto_server(client_p, chptr, CAP_TS6, NOCAPS,
+		sendto_server(client_p, chptr, NOCAPS, NOCAPS,
 			      ":%s PART %s :%s", source_p->id, chptr->chname, reason);
 		sendto_channel_anon(source_p, chptr, ":%s!%s@%s PART %s :%s",
 				     source_p->name, source_p->username,
@@ -131,7 +131,7 @@ part_one_client(struct Client *client_p, struct Client *source_p, char *name, ch
 	}
 	else
 	{
-		sendto_server(client_p, chptr, CAP_TS6, NOCAPS,
+		sendto_server(client_p, chptr, NOCAPS, NOCAPS,
 			      ":%s PART %s", source_p->id, chptr->chname);
 		sendto_channel_anon(source_p, chptr, ":%s!%s@%s PART %s",
 				     source_p->name, source_p->username,

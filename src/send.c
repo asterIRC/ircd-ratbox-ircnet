@@ -455,11 +455,13 @@ sendto_server(struct Client *one, struct Channel *chptr, unsigned long caps,
 	rb_dlink_node *next_ptr;
 	buf_head_t linebuf;
 
+#ifndef COMPAT_211
 	if(nocaps & CAP_TS6)
 	{
 		/* nothing should do this now */
 		abort();
 	}
+#endif
 
 	/* noone to send to.. */
 	if(rb_dlink_list_length(&serv_list) == 0)

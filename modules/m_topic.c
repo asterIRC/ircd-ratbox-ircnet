@@ -101,7 +101,7 @@ m_topic(struct Client *client_p, struct Client *source_p, int parc, const char *
 				   source_p->name, source_p->username, source_p->host);
 			set_channel_topic(chptr, parv[2], topic_info, rb_current_time());
 
-			sendto_server(client_p, chptr, CAP_TS6, NOCAPS,
+			sendto_server(client_p, chptr, NOCAPS, NOCAPS,
 				      ":%s TOPIC %s :%s",
 				      source_p->id, chptr->chname,
 				      chptr->topic == NULL ? "" : chptr->topic->topic);

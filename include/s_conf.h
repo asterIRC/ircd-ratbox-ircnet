@@ -254,7 +254,7 @@ struct config_server_hide
 struct server_info
 {
 	char *name;
-	char sid[4];
+	char sid[SIDLEN+1];
 	char *description;
 	char *network_name;
 	char *network_desc;

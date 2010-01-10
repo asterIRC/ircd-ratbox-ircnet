@@ -358,7 +358,7 @@ ms_unick(struct Client *client_p, struct Client *source_p, int parc, const char 
 	fakeparv[7] = parv[5]; /* IP */
 	fakeparv[8] = parv[2]; /* UID */
 	fakeparv[9] = parv[7]; /* gecos */
-	return ms_uid(client_p, source_p, 10, parv);
+	return ms_uid(client_p, source_p, 10, fakeparv);
 }
 #endif
 
