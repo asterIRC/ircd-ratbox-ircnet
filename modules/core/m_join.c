@@ -24,6 +24,8 @@
  *  $Id: m_join.c 26586 2009-05-28 19:20:14Z jilles $
  */
 
+#define COMPAT_211
+
 #include "stdinc.h"
 #include "struct.h"
 #include "channel.h"
@@ -42,6 +44,14 @@
 static int m_join(struct Client *, struct Client *, int, const char **);
 static int ms_join(struct Client *, struct Client *, int, const char **);
 static int ms_sjoin(struct Client *, struct Client *, int, const char **);
+#ifdef COMPAT_211
+static void sjoin_211(struct Client *source_p, struct Client *client_p, struct Channel *chptr, char *buf);
+static int ms_njoin(struct Client *, struct Client *, int, const char **);
+struct Message njoin_msgtab = {
+	"NJOIN", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_ignore, mg_ignore, {ms_njoin, 0}, mg_ignore, mg_ignore}
+};
+#endif
 
 struct Message join_msgtab = {
 	"JOIN", 0, 0, 0, MFLG_SLOW,
@@ -53,7 +63,11 @@ struct Message sjoin_msgtab = {
 	{mg_unreg, mg_ignore, mg_ignore, {ms_sjoin, 0}, mg_ignore, mg_ignore}
 };
 
-mapi_clist_av2 join_clist[] = { &join_msgtab, &sjoin_msgtab, NULL };
+mapi_clist_av2 join_clist[] = { &join_msgtab, &sjoin_msgtab,
+#ifdef COMPAT_211
+ &njoin_msgtab,
+#endif
+ NULL };
 
 DECLARE_MODULE_AV2(join, NULL, NULL, join_clist, NULL, NULL, "$Revision: 26586 $");
 
@@ -300,26 +314,51 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		/* its a new channel, set +nt and burst. */
 		if(flags & CHFL_CHANOP)
 		{
+			const char *mstr = "";
+#ifndef COMPAT_211
+			/* as we don't want to issue MODE right after NJOIN! */
+			mstr = "nt";
+
 			chptr->channelts = rb_current_time();
 			chptr->mode.mode |= MODE_TOPICLIMIT;
 			chptr->mode.mode |= MODE_NOPRIVMSGS;
 
-			sendto_channel_local(ONLY_CHANOPS, chptr, ":%s MODE %s +nt",
-					     me.name, chptr->chname);
-
+			sendto_channel_local(ONLY_CHANOPS, chptr, ":%s MODE %s +%s",
+					     me.name, chptr->chname, mstr);
+#endif
+			/* non-ircnet TS6 servers only (no means of +O/!channels) */
 			if(*chptr->chname == '#')
 			{
-				sendto_server(client_p, chptr, CAP_TS6, NOCAPS,
-					      ":%s SJOIN %ld %s +nt :@%s",
-					      me.id, (long)chptr->channelts,
-					      chptr->chname, source_p->id);
+				sendto_server(client_p, chptr, CAP_TS6, CAP_IRCNET,
+					      ":%s SJOIN %ld %s +%s :@%s",
+ 					      me.id, (long)chptr->channelts,
+					      chptr->chname, mstr, source_p->id);
 			}
+			/* ircnet TS6/non-TS6 servers */
+			if (*chptr->chname == '#' || *chptr->chname == '!') {
+				sendto_server(client_p, chptr, CAP_TS6+CAP_IRCNET, NOCAPS,
+					      ":%s SJOIN %ld %s +%s :@%s%s",
+					      me.id, (long)chptr->channelts,
+					      chptr->chname, mstr, (flags & CHFL_UNIQOP)?"@":"", source_p->id);
+#ifdef COMPAT_211
+				sendto_server(client_p, chptr, CAP_211, NOCAPS,
+					      ":%s NJOIN %s :@%s%s",
+					      me.id,
+					      chptr->chname, (flags & CHFL_UNIQOP)?"@":"", source_p->id);
+#endif
+			}
+
 		}
 		else
 		{
 			sendto_server(client_p, chptr, CAP_TS6, NOCAPS,
 				      ":%s JOIN %ld %s +",
 				      source_p->id, (long)chptr->channelts, chptr->chname);
+#ifdef COMPAT_211
+			sendto_server(client_p, chptr, CAP_211, NOCAPS,
+				      ":%s NJOIN %s :%s",
+				      me.id, chptr->chname, source_p->id);
+#endif
 		}
 
 		del_invite(chptr, source_p);
@@ -439,8 +478,45 @@ ms_join(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 	sendto_server(client_p, chptr, CAP_TS6, NOCAPS,
 		      ":%s JOIN %ld %s +", source_p->id, (long)chptr->channelts, chptr->chname);
+#ifdef COMPAT_211
+	sendto_server(client_p, chptr, CAP_211, NOCAPS,
+		      ":%s NJOIN %s :%s", me.id, chptr->chname, source_p->id);
+#endif
 	return 0;
 }
+
+#ifdef COMPAT_211
+ /*
+ * ms_njoin
+ * parv[1] - channel
+ * parv[2] - @+members
+ *
+ * This is a TERRIBLE hack and I think i'm going to burn in hell for this.
+ * Nonetheless, it's just an emulation and it will be eventually gone.
+ * Since its much simpler to hack the s2s protocol together on this side.. --sd
+ */
+static int
+ms_njoin(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+{
+	const char *fakeparv[5];
+	fakeparv[0] = parv[0];
+	fakeparv[1] = "0";
+	fakeparv[2] = parv[1];
+	fakeparv[3] = "+";
+	fakeparv[4] = parv[2];
+	return ms_sjoin(client_p, source_p, 5, fakeparv);
+}
+
+
+/* we'll try to be kinda smartass about this and just use the buffer built
+   for SJOIN (as NJOIN will be always shorter) */
+static void sjoin_211(struct Client *source_p, struct Client *client_p, struct Channel *chptr, char *buf)
+{
+	sendto_server(client_p->from, NULL, CAP_211, NOCAPS, ":%s NJOIN %s :%s",
+		source_p->id, chptr->chname, buf);
+}
+#endif
+
 
 /*
  * ms_sjoin
@@ -644,10 +720,13 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 	{
 		fl = 0;
 
-		for(i = 0; i < 2; i++)
+		for(i = 0; i < 3; i++)
 		{
 			if(*s == '@')
 			{
+				/* we're seeing '@' again, UNIQOP */
+				if (fl & CHFL_CHANOP)
+					fl |= CHFL_UNIQOP;
 				fl |= CHFL_CHANOP;
 				s++;
 			}
@@ -671,14 +750,21 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 		{
 			*(ptr_uid - 1) = '\0';
 			sendto_server(client_p->from, NULL, CAP_TS6, NOCAPS, "%s", buf_uid);
+#ifdef COMPAT_211
+			sjoin_211(source_p, client_p, chptr, buf_uid + mlen_uid);
+#endif
 			ptr_uid = buf_uid + mlen_uid;
 			len_uid = 0;
 		}
 
 		if(keep_new_modes)
 		{
-			if(fl & CHFL_CHANOP)
+			if(fl & (CHFL_CHANOP|CHFL_UNIQOP))
 			{
+				if (fl & CHFL_UNIQOP) {
+					*ptr_uid++ = '@';
+					len_uid++;
+				}
 				*ptr_uid++ = '@';
 				len_uid++;
 			}
@@ -801,6 +887,13 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 	*(ptr_uid - 1) = '\0';
 
 	sendto_server(client_p->from, NULL, CAP_TS6, NOCAPS, "%s", buf_uid);
+#ifdef COMPAT_211
+	sjoin_211(source_p, client_p, chptr, buf_uid + mlen_uid);
+	/* set the modes */
+	if (modes != empty_modes)
+		sendto_server(client_p->from, NULL, CAP_211, NOCAPS, ":%s MODE %s %s",
+			source_p->name, chptr->chname, modes);
+#endif
 
 	/* if the source does TS6 we have to remove our bans.  Its now safe
 	 * to issue -b's to the non-ts6 servers, as the sjoin we've just
@@ -854,6 +947,9 @@ do_join_0(struct Client *client_p, struct Client *source_p)
 
 
 	sendto_server(client_p, NULL, CAP_TS6, NOCAPS, ":%s JOIN 0", source_p->id);
+#ifdef COMPAT_211
+	sendto_server(client_p, NULL, CAP_211, NOCAPS, ":%s JOIN 0", source_p->id);
+#endif
 
 	if(source_p->user->channel.head && MyConnect(source_p) &&
 	   !IsOper(source_p) && !IsExemptSpambot(source_p))
