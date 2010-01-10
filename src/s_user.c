@@ -581,6 +581,19 @@ introduce_client(struct Client *client_p, struct Client *source_p)
 		      source_p->username, source_p->host,
 		      IsIPSpoof(source_p) ? "0" : source_p->sockhost,
 		      source_p->id, source_p->info);
+
+#ifdef COMPAT_211
+	sendto_server(client_p, NULL, CAP_211, NOCAPS,
+			":%s UNICK %s %s %s %s %s %s :%s",
+			source_p->servptr->id,
+			source_p->name,
+			source_p->id,
+			source_p->username,
+			source_p->host,
+			source_p->sockhost,
+			ubuf,
+			source_p->info);
+#endif
 }
 
 /* report_and_set_user_flags
