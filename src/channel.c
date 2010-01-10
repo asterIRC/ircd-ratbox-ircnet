@@ -503,34 +503,35 @@ del_invite(struct Channel *chptr, struct Client *who)
  * match_ban()
  *
  * input  - banlist (&chptr->banlist etc), 'who' is to be matched
- *	    if 'cache' is specified, we will be using cached values of n!u@h
- *          be sure the previously uncached call had the same 'who'
- *	    (it's also checked internally but don't rely on it).
+ *	    if 'nuhs' is specified it must point to buffer of MATCHBANSZ
+ *	    'init' being non-zero initializes the cache, otherwise values
+ *	    from previous call are used.
  * output - the ban matched by the user 'who'
  *
- * refactored here as it was too hard for my eyes seeing the same thing
- * splattered all over the place --sd
  */
-struct	Ban *match_ban(rb_dlink_list *bl, struct Client *who, int cache)
+struct	Ban *match_ban(rb_dlink_list *bl, struct Client *who, char *nuhs, int init)
 {
-	static char mys[4][NICKLEN + USERLEN + HOSTLEN];
+	char my_nuhs[MATCHBANSZ];
 	struct Ban *ban;
-	static struct Client *cachedwho = NULL;
 	rb_dlink_node *ptr;
 
-	if (!cache || (who != cachedwho)) {
-		cachedwho = who;
-		rb_sprintf(mys[0], "%s!%s@%s", who->name, who->username, who->host);
-		rb_sprintf(mys[1], "%s!%s@%s", who->name, who->username, who->sockhost);
-		rb_sprintf(mys[2], "%s!%s@%s", who->id, who->username, who->host);
-		rb_sprintf(mys[3], "%s!%s@%s", who->id, who->username, who->sockhost);
+	if (!nuhs) {
+		nuhs = my_nuhs;
+		init = 1;
+	}
+
+ 	if (init) {
+		rb_sprintf(&nuhs[0], "%s!%s@%s", who->name, who->username, who->host);
+		rb_sprintf(&nuhs[USERHOST_REPLYLEN], "%s!%s@%s", who->name, who->username, who->sockhost);
+		rb_sprintf(&nuhs[USERHOST_REPLYLEN*2], "%s!%s@%s", who->id, who->username, who->host);
+		rb_sprintf(&nuhs[USERHOST_REPLYLEN*3], "%s!%s@%s", who->id, who->username, who->sockhost);
 	}
 	
 	RB_DLINK_FOREACH(ptr, bl->head) {
 		int i;
 		ban = ptr->data;
 		for (i = 0; i < 4; i++)
-			if (match(ban->banstr, mys[i]))
+			if (match(ban->banstr, nuhs[i*USERHOST_REPLYLEN]))
 				return ban;
 	};
 	return NULL;
@@ -546,11 +547,13 @@ struct	Ban *match_ban(rb_dlink_list *bl, struct Client *who, int cache)
 int
 is_banned(struct Channel *chptr, struct Client *who, struct membership *msptr)
 {
+	char bufmb[MATCHBANSZ];
+
 	if(!MyClient(who))
 		return 0;
 
-	if (match_ban(&chptr->banlist, who, 0)) {
-		if (ConfigChannel.use_except && match_ban(&chptr->exceptlist, who, 1)) {
+	if (match_ban(&chptr->banlist, who, bufmb, 1)) {
+		if (ConfigChannel.use_except && match_ban(&chptr->exceptlist, who, bufmb, 0)) {
 			if (msptr)
 				msptr->flags &= ~CHFL_BANNED;
 			return CHFL_EXCEPTION;
@@ -1096,7 +1099,7 @@ static void	reop_channel(struct Channel *chptr)
 
 		if ((!matched ||
 			(matched->client_p->localClient->lasttime < msptr->client_p->localClient->lasttime)) &&
-			match_ban(&chptr->reoplist, msptr->client_p, 0))
+			match_ban(&chptr->reoplist, msptr->client_p, NULL, 0))
 		{
 			matched = msptr;
 		}

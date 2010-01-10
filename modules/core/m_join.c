@@ -1002,7 +1002,6 @@ can_join(struct Client *source_p, struct Channel *chptr, char *key)
 {
 	rb_dlink_node *lp;
 	rb_dlink_node *ptr;
-	struct Ban *invex = NULL;
 
 	s_assert(source_p->localClient != NULL);
 
@@ -1012,7 +1011,7 @@ can_join(struct Client *source_p, struct Channel *chptr, char *key)
 	/* if the channel is opless and the client matches a reop mask,
          * override everything, but ONLY in case there is noone else
          * matching already on the channel. --sd */
-	if (chptr->reop && match_ban(&chptr->reoplist, source_p, 0)) {
+	if (chptr->reop && match_ban(&chptr->reoplist, source_p, NULL, 0)) {
 		int opseen = 0;
 		RB_DLINK_FOREACH(lp, chptr->members.head) {
 			struct membership *m = lp->data;
@@ -1021,7 +1020,7 @@ can_join(struct Client *source_p, struct Channel *chptr, char *key)
 				opseen++;
 				break;
 			}
-			if (match_ban(&chptr->reoplist, m->client_p, 0)) {
+			if (match_ban(&chptr->reoplist, m->client_p, NULL, 0)) {
 				opseen++;
 				break;
 			}
@@ -1045,7 +1044,7 @@ can_join(struct Client *source_p, struct Channel *chptr, char *key)
 		{
 			if(!ConfigChannel.use_invex)
 				return (ERR_INVITEONLYCHAN);
-			if (!match_ban(&chptr->invexlist, source_p, 1)) /* cached by is_banned */
+			if (!match_ban(&chptr->invexlist, source_p, NULL, 0)) /* cached by is_banned */
 				return ERR_INVITEONLYCHAN;
 		}
 	}
