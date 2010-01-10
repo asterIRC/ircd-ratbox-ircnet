@@ -68,6 +68,19 @@ mr_pass(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 	if(parc > 2)
 	{
+#ifdef COMPAT_211
+		/* detected 2.11 protocol? */
+		if (strlen(parv[2] == 10)) {
+			/* nah, it's just us pretending. will fill the SID in server stage though. */
+			if (!memcmp(parv[2], "0301", 4)) {
+				client_p->localClient->caps |= CAP_TS6+CAPS_IRCNET;
+			} else {
+				/* legacy 2.11 */
+				client_p->localClient->caps |= CAP_211+CAPS_IRCNET;
+			}
+			return 0;
+		}
+#endif
 		/* 
 		 * It looks to me as if orabidoo wanted to have more
 		 * than one set of option strings possible here...

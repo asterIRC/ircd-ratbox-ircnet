@@ -97,8 +97,21 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, const char
 
 	name = parv[1];
 	hop = atoi(parv[2]);
+
+#ifdef COMPAT_211
+	/* not so fast here, possible 2.11 emu */
+	if (IsCapable(client_p, CAP_IRCNET) && !client_p->id[0]) {
+		if (clean_uid(parv[3]) != SIDLEN) {
+			exit_client(client_p, client_p, client_p, "Invalid SID");
+			return 0;
+		}
+		strcpy(client_p->id, parv[3]);
+		rb_strlcpy(info, parv[4], sizeof(info));
+	} else
+#endif
 	rb_strlcpy(info, parv[3], sizeof(info));
 
+#ifndef COMPAT_211
 	/* 
 	 * Reject a direct nonTS server connection if we're TS_ONLY -orabidoo
 	 */
@@ -107,6 +120,7 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, const char
 		exit_client(client_p, client_p, client_p, "Non-TS server");
 		return 0;
 	}
+#endif
 
 	if(!valid_servername(name))
 	{
@@ -178,6 +192,7 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, const char
 		break;
 	}
 
+#ifndef COMPAT_211
 	/* require TS6 for direct links */
 	if(!IsCapable(client_p, CAP_TS6))
 	{
@@ -186,6 +201,7 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, const char
 		exit_client(client_p, client_p, client_p, "Incompatible TS version");
 		return 0;
 	}
+#endif
 
 	if((target_p = find_server(NULL, name)))
 	{

@@ -347,7 +347,7 @@ ms_unick(struct Client *client_p, struct Client *source_p, int parc, const char 
 {
 	const char *fakeparv[11];
 	char hopbuf[32];
-	sprintf(hopbuf, "%d", source_p->serv?source_p->serv->hops:1);
+	sprintf(hopbuf, "%d", source_p->servptr->hopcount:1);
 	fakeparv[0] = parv[0]; /* pfx */
 	fakeparv[1] = parv[1]; /* nick */
 	fakeparv[2] = hopbuf; /* hops */
