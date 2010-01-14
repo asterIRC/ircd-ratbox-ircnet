@@ -86,14 +86,20 @@
 				/* comply with RFC1123                     */
 #define IRCD_RES_HOSTLEN 255	/* Must match with resolver/res.h          */
 
-#define SIDLEN		4
-#define CHIDLEN		5
+#define MINSIDLEN	3	/* minimum SID len accepted */
+#define MAXSIDLEN	4	/* maximum SID len */
+#define CHIDLEN		5	/* !channel prefix id len */
 #define USERLEN         10
 #define REALLEN         50
 #define KILLLEN         90
 #define CHANNELLEN      200
 #define LOC_CHANNELLEN	50
-#define IDLEN		9
+#define MINIDLEN	9	/* minimum id len accepted */
+#define MAXIDLEN	10	/* max id len accepted */
+#define IDLEN		9	/* id len we'll use */
+
+#define MINUIDLEN	(MINSIDLEN + MINIDLEN)
+#define MAXUIDLEN	(MAXSIDLEN + MAXIDLEN)
 
 /* always v6 sized, as we can have a v6 sockhost for a remote client */
 #define HOSTIPLEN	53	/* sizeof("ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255.ipv6") */

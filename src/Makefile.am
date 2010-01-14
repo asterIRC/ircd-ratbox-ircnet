@@ -57,6 +57,7 @@ libcore_la_SOURCES =			\
 	supported.c			\
 	whowas.c			\
 	version.c			\
+	uid.c				\
 	ircd_parser.y			\
 	ircd_lexer.l                       
                         

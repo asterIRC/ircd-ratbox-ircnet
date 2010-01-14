@@ -53,6 +53,7 @@
 #include "hash.h"
 #include "sslproc.h"
 #include "blacklist.h"
+#include "uid.h"
 
 #define CF_TYPE(x) ((x) & CF_MTYPE)
 
@@ -1030,7 +1031,7 @@ conf_set_serverinfo_sid(confentry_t * entry, conf_t * conf, struct conf_items *i
 
 	if(ServerInfo.sid[0] == '\0')
 	{
-		if(clean_uid(sid) != SIDLEN)
+		if(!check_sid(sid))
 		{
 			conf_report_error_nl("Error serverinfo::sid -- invalid sid at %s:%d", conf->filename, conf->line);
 			return;

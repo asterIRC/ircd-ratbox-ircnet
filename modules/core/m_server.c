@@ -45,6 +45,7 @@
 #include "s_user.h"
 #include "reject.h"
 #include "sslproc.h"
+#include "uid.h"
 
 static int mr_server(struct Client *, struct Client *, int, const char **);
 static int ms_server(struct Client *, struct Client *, int, const char **);
@@ -101,7 +102,7 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, const char
 #ifdef COMPAT_211
 	/* not so fast here, possible 2.11 emu */
 	if (IsCapable(client_p, CAP_IRCNET) && !client_p->id[0]) {
-		if (clean_uid(parv[3]) != SIDLEN) {
+		if (!check_sid(parv[3])) {
 			exit_client(client_p, client_p, client_p, "Invalid SID");
 			return 0;
 		}
@@ -329,7 +330,7 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		return 0;
 	}
 
-	if(clean_uid(parv[3]) && (strlen(parv[3]) == SIDLEN))
+	if (!check_sid(parv[3]))
 	{
 		sendto_one(client_p, "ERROR :Invalid SID");
 		sendto_realops_flags(UMODE_ALL, L_ALL,

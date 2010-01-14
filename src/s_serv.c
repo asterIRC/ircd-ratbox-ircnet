@@ -633,7 +633,6 @@ serv_connect_callback(rb_fde_t *F, int status, void *data)
 	if(!EmptyString(server_p->spasswd))
 	{
 #ifdef COMPAT_211
-		 /* XXX what is all this trailing cruft? */
 		sendto_one(client_p, "PASS %s " IRCNET_FAKESTRING,
 		   server_p->spasswd);
 		sendto_one(client_p, "SERVER %s 1 %s :%s", me.name, me.id,
@@ -643,13 +642,13 @@ serv_connect_callback(rb_fde_t *F, int status, void *data)
 #endif
 	}
 
-#ifndef COMPAT_211
 	/* pass my info to the new server */
 	send_capabilities(client_p, default_server_capabs
 			  | (ServerConfCompressed(server_p) && zlib_ok ? CAP_ZIP : 0)
 			  | (ServerConfTb(server_p) ? CAP_TB : 0));
 
 
+#ifndef COMPAT_211
 	sendto_one(client_p, "SERVER %s 1 :%s%s", me.name,
 		   ConfigServerHide.hidden ? "(H) " : "", me.info);
 #endif

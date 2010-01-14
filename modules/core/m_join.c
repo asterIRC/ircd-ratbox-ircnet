@@ -38,6 +38,7 @@
 #include "parse.h"
 #include "modules.h"
 #include "s_log.h"
+#include "uid.h"
 
 static int m_join(struct Client *, struct Client *, int, const char **);
 static int ms_join(struct Client *, struct Client *, int, const char **);
@@ -334,12 +335,12 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 			}
 			/* ircnet TS6/non-TS6 servers */
 			if (*chptr->chname == '#' || *chptr->chname == '!') {
-				sendto_server(client_p, chptr, CAP_TS6+CAP_IRCNET, NOCAPS,
+				sendto_server(client_p, chptr, CAP_TS6|CAP_IRCNET, CAP_211,
 					      ":%s SJOIN %ld %s +%s :@%s%s",
 					      me.id, (long)chptr->channelts,
 					      chptr->chname, mstr, (flags & CHFL_UNIQOP)?"@":"", source_p->id);
 #ifdef COMPAT_211
-				sendto_server(client_p, chptr, CAP_211, NOCAPS,
+				sendto_server(client_p, chptr, CAP_TS6|CAP_211, NOCAPS,
 					      ":%s NJOIN %s :@%s%s",
 					      me.id,
 					      chptr->chname, (flags & CHFL_UNIQOP)?"@":"", source_p->id);
@@ -349,11 +350,11 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		}
 		else
 		{
-			sendto_server(client_p, chptr, CAP_TS6, NOCAPS,
+			sendto_server(client_p, chptr, CAP_TS6, CAP_211,
 				      ":%s JOIN %ld %s +",
 				      source_p->id, (long)chptr->channelts, chptr->chname);
 #ifdef COMPAT_211
-			sendto_server(client_p, chptr, CAP_211, NOCAPS,
+			sendto_server(client_p, chptr, CAP_TS6|CAP_211, NOCAPS,
 				      ":%s NJOIN %s :%s",
 				      me.id, chptr->chname, source_p->id);
 #endif
@@ -474,10 +475,10 @@ ms_join(struct Client *client_p, struct Client *source_p, int parc, const char *
 				     source_p->host, chptr->chname);
 	}
 
-	sendto_server(client_p, chptr, CAP_TS6, NOCAPS,
+	sendto_server(client_p, chptr, CAP_TS6, CAP_211,
 		      ":%s JOIN %ld %s +", source_p->id, (long)chptr->channelts, chptr->chname);
 #ifdef COMPAT_211
-	sendto_server(client_p, chptr, CAP_211, NOCAPS,
+	sendto_server(client_p, chptr, CAP_TS6|CAP_211, NOCAPS,
 		      ":%s NJOIN %s :%s", me.id, chptr->chname, source_p->id);
 #endif
 	return 0;
@@ -744,7 +745,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 		/* check we can fit another status+nick+space into a buffer */
 
-		if((mlen_uid + len_uid + IDLEN + 3) > (BUFSIZE - 3))
+		if((mlen_uid + len_uid + MAXIDLEN + 3) > (BUFSIZE - 3))
 		{
 			*(ptr_uid - 1) = '\0';
 			sendto_server(client_p->from, NULL, CAP_TS6, NOCAPS, "%s", buf_uid);
@@ -1001,7 +1002,6 @@ static int
 can_join(struct Client *source_p, struct Channel *chptr, char *key)
 {
 	rb_dlink_node *lp;
-	rb_dlink_node *ptr;
 
 	s_assert(source_p->localClient != NULL);
 

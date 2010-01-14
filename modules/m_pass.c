@@ -34,6 +34,7 @@
 #include "modules.h"
 #include "s_serv.h"
 #include "s_conf.h"
+#include "uid.h"
 
 static int mr_pass(struct Client *, struct Client *, int, const char **);
 
@@ -76,7 +77,7 @@ mr_pass(struct Client *client_p, struct Client *source_p, int parc, const char *
 				client_p->localClient->caps |= CAP_TS6+CAPS_IRCNET;
 			} else {
 				/* legacy 2.11 */
-				client_p->localClient->caps |= CAP_211+CAPS_IRCNET;
+				client_p->localClient->caps |= CAP_211+CAP_TS6+CAPS_IRCNET;
 			}
 			return 0;
 		}
@@ -95,7 +96,7 @@ mr_pass(struct Client *client_p, struct Client *source_p, int parc, const char *
 		if(parc == 5 && atoi(parv[3]) >= 6)
 		{
 			/* only mark as TS6 if the SID is valid.. */
-			if(clean_uid(parv[4]) == SIDLEN)
+			if(check_sid(parv[4]))
 			{
 				client_p->localClient->caps |= CAP_TS6;
 				strcpy(client_p->id, parv[4]);

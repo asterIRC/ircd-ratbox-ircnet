@@ -46,6 +46,7 @@
 #include "s_newconf.h"
 #include "monitor.h"
 #include "reject.h"
+#include "uid.h"
 
 /* Give all UID nicks the same TS. This ensures nick TS is always the same on
  * all servers for each nick-user pair, also if a user with a UID nick changes
@@ -413,7 +414,7 @@ ms_uid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		return 0;
 	}
 
-	if(clean_uid(parv[8]) != IDLEN)
+	if(check_uid(parv[8]))
 	{
 		ServerStats.is_kill++;
 		sendto_realops_flags(UMODE_DEBUG, L_ALL,

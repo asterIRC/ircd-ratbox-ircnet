@@ -504,7 +504,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 	add_to_hash(HASH_HOSTNAME, source_p->host, source_p);
 
 	strcpy(source_p->id, me.id);
-	generate_uid(source_p->id + SIDLEN, IDLEN - SIDLEN, uidserial++);
+	generate_uid(source_p->id + strlen(me.id), IDLEN - strlen(me.id), uidserial++);
 	add_to_hash(HASH_ID, source_p->id, source_p);
 
 	if(ConfigFileEntry.default_invisible)

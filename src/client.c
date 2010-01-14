@@ -53,6 +53,7 @@
 #include "parse.h"
 #include "sslproc.h"
 #include "blacklist.h"
+#include "uid.h"
 
 #define DEBUG_EXITED_CLIENTS
 
@@ -74,7 +75,6 @@ static rb_bh *client_heap = NULL;
 static rb_bh *lclient_heap = NULL;
 static rb_bh *user_heap = NULL;
 static rb_bh *away_heap = NULL;
-static char current_uid[IDLEN];
 
 
 rb_dlink_list dead_list;
@@ -1690,40 +1690,6 @@ free_away(struct Client *client_p)
 	}
 }
 
-/* moved from m_nick, ensures the uid is valid */
-int
-clean_uid(const char *uid)
-{
-	int len = 1;
-
-	if(!IsDigit(*uid++))
-		return 0;
-
-	for(; *uid; uid++)
-	{
-		len++;
-
-		if(!IsIdChar(*uid))
-			return 0;
-	}
-
-	return len;
-}
-
-
-/* the previous one doing fingercounting was too funny */
-char *generate_uid(char *buf, int len, unsigned l)
-{
-	static unsigned char alphabet[36] =
-	"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-	int i;
-	for (i = len-1; i >= 0; i--){
-		buf[i] = alphabet[l % 36];
-		l /= 36;
-	}
-	buf[len] = 0;
-	return buf;
-}
 
 /*
  * close_connection
