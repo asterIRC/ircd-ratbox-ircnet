@@ -696,7 +696,7 @@ chm_simple(struct Client *source_p, struct Channel *chptr,
 
 	/* +r/MODE_REOP is aliased over MODE_REGONLY, the meaning being assumed
 	   by channel name */
-	if (chptr->chname[0] != '!' || !ConfigChannel.reop) {
+	if ((mode_type & MODE_REOP) && (chptr->chname[0] != '!')) {
 #ifdef ENABLE_SERVICES
 		if (mode_type & (MODE_REGONLY)) {
 			chm_regonly(source_p, chptr, atlevel, parc, parn, parv, errors, dir, c, mode_type);

@@ -784,34 +784,53 @@ burst_TS6(struct Client *client_p)
  * side effects - client is sent a list of +b, +e, or +I modes
  */
 static void
-burst_modes_211(struct Client *client_p, struct Channel *chptr, rb_dlink_list *list, char flag)
+burst_modes_211(struct Client *client_p, struct Channel *chptr, rb_dlink_list *list, char c)
 {
-	char modebuf[BUFSIZE];
-	char parabuf[BUFSIZE];
-	rb_dlink_node *ptr;
+	static char lmodebuf[BUFSIZE];
+	static char lparabuf[BUFSIZE];
 	struct Ban *banptr;
-	int modecount = 0;
-	int mpos, ppos;
+	rb_dlink_node *ptr;
+	rb_dlink_node *next_ptr;
+	char *mbuf, *pbuf;
+	int count = 0;
+	int cur_len, mlen, plen;
 
-	RB_DLINK_FOREACH(ptr, list->head)
+	pbuf = lparabuf;
+
+	cur_len = mlen = rb_sprintf(lmodebuf, ":%s MODE %s +", me.id, chptr->chname);
+	mbuf = lmodebuf + mlen;
+
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, list->head)
 	{
 		banptr = ptr->data;
-		if (!modecount) {
-			mpos = rb_sprintf(modebuf, ":%s MODE %s +", me.id, banptr->banstr);
-			ppos = 0;
+
+		/* trailing space, and the mode letter itself */
+		plen = strlen(banptr->banstr) + 2;
+
+		if(count >= MAXMODEPARAMS || (cur_len + plen) > BUFSIZE - 4)
+		{
+			/* remove trailing space */
+			*mbuf = '\0';
+			*(pbuf - 1) = '\0';
+
+			sendto_one(client_p, "%s %s", lmodebuf, lparabuf);
+
+			cur_len = mlen;
+			mbuf = lmodebuf + mlen;
+			pbuf = lparabuf;
+			count = 0;
 		}
 
-		modebuf[mpos++] = flag;
-		modebuf[mpos] = 0;
-		ppos += rb_sprintf(parabuf + ppos, " %s", banptr->banstr);
-
-		if (modecount == MAXMODEPARAMS || (!ptr->next)) {
-			sendto_one(client_p, "%s %s", modebuf, parabuf);
-			modecount = 0;
-		}
+		*mbuf++ = c;
+		cur_len += plen;
+		pbuf += rb_sprintf(pbuf, "%s ", banptr->banstr);
+		count++;
 	}
-}
 
+	*mbuf = '\0';
+	*(pbuf - 1) = '\0';
+	sendto_one(client_p, "%s %s", lmodebuf, lparabuf);
+}
 
 
 static void
@@ -846,7 +865,7 @@ burst_211(struct Client *client_p)
 			ubuf[1] = '\0';
 		}
 
-		sendto_server(client_p, NULL, CAP_211, NOCAPS,
+		sendto_one(client_p,
 			":%s UNICK %s %s %s %s %s %s :%s",
 			target_p->servptr->id,
 			target_p->name,

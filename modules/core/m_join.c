@@ -566,9 +566,10 @@ static int
 ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	static char modebuf[MODEBUFLEN];
+	static char parabuf[MODEBUFLEN];
 	static char *mbuf;
+	static char *pbuf;
 	static char buf_uid[BUFSIZE];
-	static const char *para[MAXMODEPARAMS];
 	static const char empty_modes[] = "0";
 	struct Channel *chptr;
 	struct Client *target_p;
@@ -589,7 +590,6 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 	char *ptr_uid;
 	char *p;
 	int i;
-	static char empty[] = "";
 	int pargs;
 
 	/* I dont trust servers *not* to end up sending us a blank sjoin, so
@@ -734,7 +734,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 	ptr_uid = buf_uid + mlen_uid;
 
 	mbuf = modebuf;
-	para[0] = para[1] = para[2] = para[3] = empty;
+	pbuf = parabuf;
 	pargs = 0;
 	len_uid = 0;
 
@@ -832,7 +832,10 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 		if(fl & CHFL_CHANOP)
 		{
 			*mbuf++ = 'o';
-			para[pargs++] = target_p->name;
+			pargs++;
+			
+			*pbuf++ = ' ';
+			pbuf += sprintf(pbuf, target_p->name);
 
 			/* a +ov user.. bleh */
 			if(fl & CHFL_VOICE)
@@ -844,37 +847,37 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 				{
 					*mbuf = '\0';
 					sendto_channel_local(ALL_MEMBERS, chptr,
-							     ":%s MODE %s %s %s %s %s %s",
+							     ":%s MODE %s %s%s",
 							     source_p->name, chptr->chname,
-							     modebuf,
-							     para[0], para[1], para[2], para[3]);
+							     modebuf, parabuf);
 					mbuf = modebuf;
+					pbuf = parabuf;
 					*mbuf++ = '+';
-					para[0] = para[1] = para[2] = para[3] = NULL;
 					pargs = 0;
 				}
 
 				*mbuf++ = 'v';
-				para[pargs++] = target_p->name;
+				*pbuf++ = ' ';
+				pbuf += rb_sprintf(pbuf, Anon(target_p->name));
 			}
 		}
 		else if(fl & CHFL_VOICE)
 		{
 			*mbuf++ = 'v';
-			para[pargs++] = target_p->name;
+			*pbuf++ = ' ';
+			pbuf += rb_sprintf(pbuf, Anon(target_p->name));
 		}
 
 		if(pargs >= MAXMODEPARAMS)
 		{
 			*mbuf = '\0';
 			sendto_channel_local(ALL_MEMBERS, chptr,
-					     ":%s MODE %s %s %s %s %s %s",
-					     source_p->name,
-					     chptr->chname,
-					     modebuf, para[0], para[1], para[2], para[3]);
+						     ":%s MODE %s %s%s",
+						     source_p->name, chptr->chname,
+						     modebuf, parabuf);
 			mbuf = modebuf;
+			pbuf = parabuf;
 			*mbuf++ = '+';
-			para[0] = para[1] = para[2] = para[3] = NULL;
 			pargs = 0;
 		}
 
@@ -903,10 +906,9 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 	if(pargs)
 	{
 		sendto_channel_local(ALL_MEMBERS, chptr,
-				     ":%s MODE %s %s %s %s %s %s",
-				     source_p->name, chptr->chname, modebuf,
-				     para[0], CheckEmpty(para[1]), CheckEmpty(para[2]),
-				     CheckEmpty(para[3]));
+					     ":%s MODE %s %s%s",
+					     source_p->name, chptr->chname,
+					     modebuf, parabuf);
 	}
 
 	if(!joins)
@@ -1237,16 +1239,14 @@ remove_our_modes(struct Channel *chptr)
 	struct membership *msptr;
 	rb_dlink_node *ptr;
 	char lmodebuf[MODEBUFLEN];
-	const char *lpara[MAXMODEPARAMS];
+	char lparabuf[MODEBUFLEN];
 	char *mbuf;
+	char *pbuf;
 	int count = 0;
-	int i;
 
 	mbuf = lmodebuf;
+	pbuf = lparabuf;
 	*mbuf++ = '-';
-
-	for(i = 0; i < MAXMODEPARAMS; i++)
-		lpara[i] = NULL;
 
 	RB_DLINK_FOREACH(ptr, chptr->members.head)
 	{
@@ -1255,8 +1255,8 @@ remove_our_modes(struct Channel *chptr)
 		if(is_chanop(msptr))
 		{
 			msptr->flags &= ~CHFL_CHANOP;
-			lpara[count++] = Anon(msptr->client_p->name);
 			*mbuf++ = 'o';
+			pbuf += rb_sprintf(pbuf, " %s", Anon(msptr->client_p->name));
 
 			/* +ov, might not fit so check. */
 			if(is_voiced(msptr))
@@ -1265,30 +1265,29 @@ remove_our_modes(struct Channel *chptr)
 				{
 					*mbuf = '\0';
 					sendto_channel_local(ALL_MEMBERS, chptr,
-							     ":%s MODE %s %s %s %s %s %s",
+							     ":%s MODE %s %s%s",
 							     me.name, chptr->chname,
-							     lmodebuf, lpara[0], lpara[1],
-							     lpara[2], lpara[3]);
+							     lmodebuf, lparabuf);
 
 					/* preserve the initial '-' */
 					mbuf = lmodebuf;
+					pbuf = lparabuf;
 					*mbuf++ = '-';
 					count = 0;
-
-					for(i = 0; i < MAXMODEPARAMS; i++)
-						lpara[i] = NULL;
 				}
 
 				msptr->flags &= ~CHFL_VOICE;
-				lpara[count++] = Anon(msptr->client_p->name);
 				*mbuf++ = 'v';
+				count++;
+				pbuf += rb_sprintf(pbuf, " %s", Anon(msptr->client_p->name));
 			}
 		}
 		else if(is_voiced(msptr))
 		{
 			msptr->flags &= ~CHFL_VOICE;
-			lpara[count++] = Anon(msptr->client_p->name);
 			*mbuf++ = 'v';
+			count++;
+			pbuf += rb_sprintf(pbuf, " %s", Anon(msptr->client_p->name));
 		}
 		else
 			continue;
@@ -1297,15 +1296,13 @@ remove_our_modes(struct Channel *chptr)
 		{
 			*mbuf = '\0';
 			sendto_channel_local(ALL_MEMBERS, chptr,
-					     ":%s MODE %s %s %s %s %s %s",
-					     me.name, chptr->chname, lmodebuf,
-					     lpara[0], lpara[1], lpara[2], lpara[3]);
+						     ":%s MODE %s %s%s",
+						     me.name, chptr->chname,
+						     lmodebuf, lparabuf);
 			mbuf = lmodebuf;
+			pbuf = lparabuf;
 			*mbuf++ = '-';
 			count = 0;
-
-			for(i = 0; i < MAXMODEPARAMS; i++)
-				lpara[i] = NULL;
 		}
 	}
 
@@ -1313,13 +1310,9 @@ remove_our_modes(struct Channel *chptr)
 	{
 		*mbuf = '\0';
 		sendto_channel_local(ALL_MEMBERS, chptr,
-				     ":%s MODE %s %s %s %s %s %s",
-				     me.name, chptr->chname, lmodebuf,
-				     EmptyString(lpara[0]) ? "" : lpara[0],
-				     EmptyString(lpara[1]) ? "" : lpara[1],
-				     EmptyString(lpara[2]) ? "" : lpara[2],
-				     EmptyString(lpara[3]) ? "" : lpara[3]);
-
+					     ":%s MODE %s %s%s",
+					     me.name, chptr->chname,
+					     lmodebuf, lparabuf);
 	}
 }
 
