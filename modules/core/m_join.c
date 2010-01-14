@@ -185,40 +185,65 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		}
 
 		/* IRCNet !channels, creation logic moved from hash.c */
-		if (*name == '!') {
+		if (*name == '!')
+		{
 			rb_dlink_node *lp;
 			char *sn = name + 1; /* shortname */
 
-			if ((name[1] == '!') || (name[1] == '#'))
+			/* !!name or !# will attempt to create the channel */
+			if ((name[1] == '!') || (name[1] == '#')) {
 				sn = name + 2;
+				creating = 1;
+			}
+
+			/* there could be more channels with the same shortname;
+			   therefore the list */
 			lp = find_channels(sn);
-			if (!lp) {
+
+			/* non-existant, great. */
+			if (!lp)
+			{
 				static char chname[CHANNELLEN+1];
-				/* no match found and we're not creating */
-				if (((sn - name) != 2) || (!name[2])) {
+
+				/* no match found, alson just !! or !# is harmful. */
+				if ((creating) || (!name[2]))
+				{
 					sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL,
 					   form_str(ERR_NOSUCHCHANNEL), name);
 					continue;
 				}
+
 				/* otherwise build the channel name */
 				generate_uid(chname + 1, CHIDLEN, time(NULL));
 				chname[0] = '!';
+
+				/* append the shortname to the generated prefix */
 				(void)rb_strlcat(chname, sn, sizeof(chname));
 				name = chname;
 			} else {
 				int nclashes = 0;
-				/* channel name found, but check for duplicates! */
+				/* channel name found, so we'll check if there's more ..*/
 				chptr = lp->data;
+
+				/* don't trust the user supplied value */
 				sn = chptr->chname + CHIDLEN + 1; /* take the name from here */
-				RB_DLINK_FOREACH(lp, lp->next) {
+
+				/* if theres more, report each every one so the user can join using the longname */
+				RB_DLINK_FOREACH(lp, lp->next)
+				{
 					chptr = lp->data;
-					if ((chptr->chname[0] == '!') && !irccmp(sn, chptr->chname + 1 + CHIDLEN)) {
+
+					if ((chptr->chname[0] == '!') &&
+					    !irccmp(sn, chptr->chname + 1 + CHIDLEN)) {
 						sendto_one(source_p, form_str(ERR_TOOMANYTARGETS),
 						   me.name, source_p->name, chptr->chname);
 						nclashes++;
 					}
 				}
+
 				if (nclashes) continue;
+
+				/* chptr might have changed :) */
 				name = sn - CHIDLEN - 1;
 			}
 		}
@@ -267,6 +292,11 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		if(flags == 0)	/* if channel doesn't exist, don't penalize */
 			successful_join_count++;
 
+		/* IRCNet splitmode behaviour */
+		if(splitmode && (*name != '&') &&
+		   ConfigChannel.no_ops_on_split)
+			flags = 0;
+
 		if(chptr == NULL)	/* If I already have a chptr, no point doing this */
 		{
 			chptr = get_or_create_channel(source_p, name, NULL);
@@ -283,6 +313,9 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 		if (IsLocked(chptr))
 		{
+			if(successful_join_count > 0)
+				successful_join_count--;
+
 			sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
 					   me.name, source_p->name, name);
 			continue;

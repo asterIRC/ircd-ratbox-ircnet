@@ -1,7 +1,5 @@
-A lot of you were asking for it, so here we go...
-
-IRCNet support for ratbox 3.1-svn
-=================================
+IRCNet support for ratbox 3.1
+=============================
 
 User-visible features implemented for IRCNet compatibility:
 -----------------------------------------------------------
@@ -9,13 +7,14 @@ User-visible features implemented for IRCNet compatibility:
 	   additionaly conflicting names are reported)
 	* +r for !channels (identical to IRCNet)
 	* +a (anonymous) flag for !channels
-	  DIFFERENCES: channel members will NOT see joins/modes/parts at all,
-	  except their own. (censorship to anonymous!anonymous. is applied
-	  only for PRIVMSG, NOTICE and TOPIC)
+	  DIFFERENCES: channel members will NOT see joins/parts at all,
+	  (except their own, of course).
+	  "Censorship" to anonymous!anonymous. is applied to everything,
+	  including targets of +o/+v modechanges.
 	* +R for &, # and !channels, channel { reop = 300 }; in config
 	  DIFFERENCES: when channel is opless and there is no user matching
 	  among the current members, a joining user matching +R will be always
-	  let in no matter the current +bilk flags.
+	  let in no matter the current +bilk flags (2.11 overrides only limits).
 	* chandelay (channel { delay = 1800; } in config) will enable
 	  channel locking when @user is lost in a netsplit and the channel gets
 	  empty.
@@ -25,8 +24,7 @@ TS6 -> 2.11 emulation
 ---------------------
 	* SJOIN is translated to NJOIN, including appropiate MODEs if necessary
 	* UID is translated to UNICK
-	* PASS password TS 6 SID -> PASS password 0301000000 IRC|aCDEFHJKMQRTu P SIDSTRING
-	  (if the remote side is actually a ratbox, it will have to use SID from parv[5])
+	* PASS password TS 6 SID -> PASS password 0211030199 IRC|aCDEFHJKMQRTu P
 	* TMODE is translated to MODE
 	* BMASK is translated to MODE +bbb as appropiate
 2.11 -> TS6 emulation
@@ -35,9 +33,9 @@ TS6 -> 2.11 emulation
 	* UNICK is translated to UID with TS 0
 
 This should make IRCNet compatibility pretty stable as we pass everything needed.
-A joining user or mode coming from a 2.11 server will clear current TS to zero.
-This should enforce no-TS behaviour on mixed net, after all servers are switched to
-ratbox, a simple script could be linked to re-TS all channels.
+A joining user from a 2.11 server will clear the current TS to zero.
+This should enforce no-TS behaviour on a mixed net, after all the servers
+are switched to ratbox, a special backdoor command could be used to re-TS channels.
 
 As a safety-net measure for development, in any case we would be spewing
 SQUIT or KILL in COMPAT_211 mode, we'd rather SQUIT ourselves from that

@@ -692,7 +692,7 @@ check_spambot_warning(struct Client *source_p, const char *name)
 void
 check_splitmode(void *unused)
 {
-	if(splitchecking && (ConfigChannel.no_join_on_split || ConfigChannel.no_create_on_split))
+	if(splitchecking && (ConfigChannel.no_join_on_split || ConfigChannel.no_create_on_split || ConfigChannel.no_ops_on_split))
 	{
 		/* not split, we're being asked to check now because someone
 		 * has left
