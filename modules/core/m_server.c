@@ -193,16 +193,14 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, const char
 		break;
 	}
 
-#ifndef COMPAT_211
 	/* require TS6 for direct links */
 	if(!IsCapable(client_p, CAP_TS6))
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL,
-				     "Link %s dropped, TS6 protocol is required", name);
+				     "Link %s dropped, TS6 protocol is required (%s)", name,show_capabilities(client_p));
 		exit_client(client_p, client_p, client_p, "Incompatible TS version");
 		return 0;
 	}
-#endif
 
 	if((target_p = find_server(NULL, name)))
 	{
@@ -399,7 +397,7 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	add_to_hash(HASH_ID, target_p->id, target_p);
 	rb_dlinkAdd(target_p, &target_p->lnode, &target_p->servptr->serv->servers);
 
-	sendto_server(client_p, NULL, CAP_TS6, NOCAPS,
+	sendto_server(client_p, NULL, CAP_TS6, CAP_211,
 		      ":%s SID %s %d %s :%s%s",
 		      source_p->id, target_p->name, target_p->hopcount + 1,
 		      target_p->id, IsHidden(target_p) ? "(H) " : "", target_p->info);
@@ -1007,7 +1005,7 @@ server_estab(struct Client *client_p)
 			if (IsCapable(client_p, CAP_211))
 				sendto_one(client_p, "PASS %s " IRCNET_FAKESTRING,
 				   server_p->spasswd);
-			if (IsCapable(client_p, CAP_TS6))
+			else
 #endif
 			sendto_one(client_p, "PASS %s TS %d :%s",
 				   server_p->spasswd, TS_CURRENT, me.id);
@@ -1016,7 +1014,7 @@ server_estab(struct Client *client_p)
 
 		/* pass info to new server */
 #ifdef COMPAT_211
-		if (!IsCapable(client_p, CAP_211))
+		if (NotCapable(client_p, CAP_211))
 #endif
 		send_capabilities(client_p, default_server_capabs
 				  | (ServerConfCompressed(server_p) && zlib_ok ? CAP_ZIP : 0)
@@ -1026,7 +1024,7 @@ server_estab(struct Client *client_p)
 		if (IsCapable(client_p, CAP_211)) {
 			sendto_one(client_p, "SERVER %s 1 %s :%s", me.name, me.id,
 				(me.info[0]) ? (me.info) : "IRCers United");
-		} else if (IsCapable(client_p, CAP_TS6))
+		} else
 #endif
 		sendto_one(client_p, "SERVER %s 1 :%s%s",
 			   me.name,
@@ -1051,7 +1049,7 @@ server_estab(struct Client *client_p)
 		start_zlib_session(client_p);
 	}
 #ifdef COMPAT_211
-	if (IsCapable(client_p, CAP_TS6))
+	if (NotCapable(client_p, CAP_211))
 #endif
 		sendto_one(client_p, "SVINFO %d %d 0 :%ld", TS_CURRENT, TS_MIN,
 			   (long int)rb_current_time());
@@ -1132,7 +1130,7 @@ server_estab(struct Client *client_p)
 		{
 			sendto_one(target_p, ":%s SERVER %s 2 %s %10s :%s",
 				me.id, client_p->name, client_p->id, IRCNET_FAKESTRING, client_p->info);
-		} else if (IsCapable(target_p, CAP_TS6))
+		}
 #endif
 		sendto_one(target_p, ":%s SID %s 2 %s :%s%s",
 			   me.id, client_p->name, client_p->id,
@@ -1171,7 +1169,7 @@ server_estab(struct Client *client_p)
 
 		/* presumption, if target has an id, so does its uplink */
 #ifdef COMPAT_211
-		if (IsCapable(client_p, CAP_TS6))
+		if (NotCapable(client_p, CAP_211))
 #endif
 			sendto_one(client_p, ":%s SID %s %d %s :%s%s",
 				   target_p->servptr->id, target_p->name,
@@ -1192,9 +1190,7 @@ server_estab(struct Client *client_p)
 	}
 
 #ifdef COMPAT_211
-	if (IsCapable(client_p, CAP_TS6)) {
-		burst_TS6(client_p);
-	} else if (IsCapable(client_p, CAP_211)) {
+	if (IsCapable(client_p, CAP_211)) {
 		burst_211(client_p);
 		/* spit out EOBs */
 		RB_DLINK_FOREACH(ptr, global_serv_list.head)
@@ -1206,7 +1202,7 @@ server_estab(struct Client *client_p)
 			if (HasSentEob(target_p))
 				sendto_one(client_p, ":%s EOB :%s", me.id, target_p->id);
 		}
-	}
+	} else
 #else
 	burst_TS6(client_p);
 #endif

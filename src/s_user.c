@@ -51,6 +51,7 @@
 #include "hook.h"
 #include "monitor.h"
 #include "blacklist.h"
+#include "uid.h"
 
 static void report_and_set_user_flags(struct Client *, struct ConfItem *);
 void user_welcome(struct Client *source_p);
@@ -573,7 +574,7 @@ introduce_client(struct Client *client_p, struct Client *source_p)
 		ubuf[1] = '\0';
 	}
 
-	sendto_server(client_p, NULL, CAP_TS6, NOCAPS,
+	sendto_server(client_p, NULL, CAP_TS6, CAP_211,
 		      ":%s UID %s %d %ld %s %s %s %s %s :%s",
 		      source_p->servptr->id, source_p->name,
 		      source_p->hopcount + 1,

@@ -24,8 +24,6 @@
  *  $Id: ircd_defs.h 26700 2009-10-18 19:53:24Z jilles $
  */
 
-#define COMPAT_211
-#define IRCNET_FAKESTRING "0211030199 IRC|aCDEFHJKMQRTu P"
 /*
  * NOTE: NICKLEN and TOPICLEN do not live here anymore. Set it with configure
  * Otherwise there are no user servicable part here. 
@@ -37,6 +35,9 @@
   */
 #ifndef INCLUDED_ircd_defs_h
 #define INCLUDED_ircd_defs_h
+
+/* a password string used by ircnet servers (fake version: 2.11.3p199) */
+#define IRCNET_FAKESTRING "0211030199 IRC|aCDEFHJKMQRTu P"
 
 /* For those unfamiliar with GNU format attributes, a is the 1 based
  * argument number of the format string, and b is the 1 based argument

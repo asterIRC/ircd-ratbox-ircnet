@@ -74,10 +74,10 @@ mr_pass(struct Client *client_p, struct Client *source_p, int parc, const char *
 		if (strlen(parv[2]) == 10) {
 			/* nah, it's just us pretending. will fill the SID in server stage though. */
 			if (!memcmp(parv[2], IRCNET_FAKESTRING, 10)) {
-				client_p->localClient->caps |= CAP_TS6+CAPS_IRCNET;
+				client_p->localClient->caps |= CAPS_IRCNET;
 			} else {
 				/* legacy 2.11 */
-				client_p->localClient->caps |= CAP_211+CAP_TS6+CAPS_IRCNET;
+				client_p->localClient->caps |= CAP_211+CAPS_IRCNET;
 			}
 			return 0;
 		}

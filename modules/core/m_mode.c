@@ -338,6 +338,9 @@ ms_bmask(struct Client *client_p, struct Client *source_p, int parc, const char 
 				*mbuf = '\0';
 				*(pbuf - 1) = '\0';
 				sendto_channel_local(mems, chptr, "%s %s", modebuf, parabuf);
+#ifdef COMPAT_211
+				sendto_server(client_p, chptr, CAP_211|needcap, NOCAPS, "%s %s", modebuf, parabuf);
+#endif
 				mbuf = modebuf + mlen;
 				pbuf = parabuf;
 				plen = modecount = 0;
@@ -370,9 +373,12 @@ ms_bmask(struct Client *client_p, struct Client *source_p, int parc, const char 
 		*mbuf = '\0';
 		*(pbuf - 1) = '\0';
 		sendto_channel_local(mems, chptr, "%s %s", modebuf, parabuf);
+#ifdef COMPAT_211
+		sendto_server(client_p, chptr, CAP_211|needcap, NOCAPS, "%s %s", modebuf, parabuf);
+#endif
 	}
 
-	sendto_server(client_p, chptr, CAP_TS6 | needcap, NOCAPS, ":%s BMASK %ld %s %s :%s",
+	sendto_server(client_p, chptr, CAP_TS6 | needcap, CAP_211, ":%s BMASK %ld %s %s :%s",
 		      source_p->id, (long)chptr->channelts, chptr->chname, parv[3], parv[4]);
 	return 0;
 }

@@ -531,7 +531,7 @@ struct	Ban *match_ban(rb_dlink_list *bl, struct Client *who, char *nuhs, int ini
 		int i;
 		ban = ptr->data;
 		for (i = 0; i < 4; i++)
-			if (match(ban->banstr, nuhs[i*USERHOST_REPLYLEN]))
+			if (match(ban->banstr, &nuhs[i*USERHOST_REPLYLEN]))
 				return ban;
 	};
 	return NULL;
@@ -1026,9 +1026,14 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
 			if(arg && ((mc == MAXMODEPARAMSSERV) ||
 				   ((mbl + pbl + arglen + 4) > (BUFSIZE - 3))))
 			{
-				if(nc != 0)
-					sendto_server(client_p, chptr, cap, nocap,
+				if(nc != 0) {
+					sendto_server(client_p, chptr, cap, nocap|CAP_211,
 						      "%s %s", modebuf, parabuf);
+#ifdef COMPAT_211
+					sendto_server(client_p, chptr, cap|CAP_211, nocap, ":%s MODE %s %s %s",
+						source_p->id, chptr->chname, modebuf + preflen, parabuf);
+#endif
+				}
 				nc = 0;
 				mc = 0;
 
@@ -1064,9 +1069,8 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
 		if(nc != 0) {
 			sendto_server(client_p, chptr, cap, nocap|CAP_211, "%s %s", modebuf, parabuf);
 #ifdef COMPAT_211
-			/* better have this outside of the capability combo thingy */
 			sendto_server(client_p, chptr, cap|CAP_211, nocap, ":%s MODE %s %s %s",
-				source_p->id, chptr->chname, modebuf, parabuf);
+				source_p->id, chptr->chname, modebuf + preflen, parabuf);
 #endif
 		}
 	}

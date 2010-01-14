@@ -18,6 +18,9 @@
 /* Size of the client heap. */
 #undef CLIENT_HEAP_SIZE
 
+/* IRCNet 2.11 compatibility */
+#undef COMPAT_211
+
 /* Size of the confitem heap. */
 #undef CONFITEM_HEAP_SIZE
 
@@ -192,6 +195,9 @@
 
 /* Define to the one symbol short name of this package. */
 #undef PACKAGE_TARNAME
+
+/* Define to the home page for this package. */
+#undef PACKAGE_URL
 
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION

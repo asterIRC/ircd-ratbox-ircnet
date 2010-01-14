@@ -487,6 +487,18 @@ if test "x$ratbox_services" = "xyes"; then
 	M_SERVICES="m_services.la"
 fi
 
+NICKLEN=9
+
+AC_ARG_ENABLE(compat211,
+AC_HELP_STRING([--enable-compat211],[Enable IRCNet 2.11 linking code.]),
+[compat211=$enableval], [compat211=no])
+
+
+if test "x$compat211" = "xyes"; then
+	AC_DEFINE([COMPAT_211], 1, [IRCNet 2.11 compatibility])
+	NICKLEN=15
+fi
+
 AM_CONDITIONAL([ENABLE_SERVICES], [test x"$M_SERVICES" != "x"])
 
 AC_ARG_ENABLE(small-net,
@@ -545,7 +557,7 @@ AC_HELP_STRING([--with-nicklen=LENGTH],[Set the nick length to LENGTH (default 9
   else
 	NICKLEN="$withval"
   fi
-], [NICKLEN=9])
+])
 
 AC_DEFINE_UNQUOTED(NICKLEN, (${NICKLEN}+1), [Nickname length])
 AC_DEFINE_UNQUOTED(RATBOX_CONFIGURE_OPTS, "$ac_configure_args", [configure arguments])
@@ -639,6 +651,7 @@ echo "IO Debugging hooks ............. $iodebug"
 echo "Assert debugging ............... $assert"
 echo "Small network .................. $small_net"
 echo "ratbox-services compatibility .. $ratbox_services"
+echo "IRC-2.11 linking compatbility .. $compat211"
 echo
 echo "Configured limits:"
 echo "NICKLEN ................. $NICKLEN"

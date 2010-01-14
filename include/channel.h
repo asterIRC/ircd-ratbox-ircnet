@@ -30,8 +30,8 @@
 #define MODEBUFLEN      200
 
 /* Maximum mode changes allowed per client, per server is different */
-#define MAXMODEPARAMS   4
-#define MAXMODEPARAMSSERV 10
+#define MAXMODEPARAMS   3
+#define MAXMODEPARAMSSERV 3
 
 extern struct ev_entry *checksplit_ev;
 struct Client;

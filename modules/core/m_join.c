@@ -188,6 +188,7 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		if (*name == '!')
 		{
 			rb_dlink_node *lp;
+			int creating = 0;
 			char *sn = name + 1; /* shortname */
 
 			/* !!name or !# will attempt to create the channel */
@@ -206,7 +207,7 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 				static char chname[CHANNELLEN+1];
 
 				/* no match found, alson just !! or !# is harmful. */
-				if ((creating) || (!name[2]))
+				if ((!creating) || (!name[2]))
 				{
 					sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL,
 					   form_str(ERR_NOSUCHCHANNEL), name);
