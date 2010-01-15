@@ -139,7 +139,7 @@ mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	if(target_server != NULL)
 	{
-		sendto_match_servs(source_p, target_server, CAP_ENCAP, NOCAPS,
+		sendto_match_servs(source_p, target_server, CAP_ENCAP, CAP_211,
 				   "ENCAP %s XLINE %d %s 2 :%s",
 				   target_server, temp_time, name, reason);
 
@@ -368,7 +368,7 @@ mo_unxline(struct Client *client_p, struct Client *source_p, int parc, const cha
 			return 0;
 		}
 
-		sendto_match_servs(source_p, parv[3], CAP_ENCAP, NOCAPS,
+		sendto_match_servs(source_p, parv[3], CAP_ENCAP, CAP_211,
 				   "ENCAP %s UNXLINE %s", parv[3], parv[1]);
 
 		if(match(parv[3], me.name) == 0)
