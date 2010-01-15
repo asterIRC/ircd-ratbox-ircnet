@@ -63,6 +63,7 @@ struct AuthRequest
 	int rport;
 };
 
+#ifndef COMPAT_211
 /*
  * a bit different approach
  * this replaces the original sendheader macros
@@ -77,6 +78,7 @@ static const char *HeaderMessages[] = {
 	"NOTICE AUTH :*** No Ident response",
 	"NOTICE AUTH :*** Your hostname is too long, ignoring hostname"
 };
+#endif
 
 typedef enum
 {
@@ -90,7 +92,11 @@ typedef enum
 }
 ReportType;
 
+#ifndef COMPAT_211
 #define sendheader(c, r) sendto_one(c, HeaderMessages[(r)])
+#else
+#define sendheader(c, r) do {} while(0)
+#endif
 
 static rb_dlink_list auth_poll_list;
 static rb_bh *auth_heap;
@@ -371,8 +377,10 @@ start_auth(struct Client *client)
 	if(client == NULL)
 		return;
 
+#ifndef COMPAT_211
 	/* to aid bopm which needs something unique to match against */
 	sendto_one(client, "NOTICE AUTH :*** Processing connection to %s", me.name);
+#endif
 
 	auth = make_auth_request(client);
 
