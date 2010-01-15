@@ -1022,8 +1022,9 @@ server_estab(struct Client *client_p)
 		{
 #ifdef COMPAT_211
 			if (IsCapable(client_p, CAP_211))
-				sendto_one(client_p, "PASS %s " IRCNET_FAKESTRING,
-				   server_p->spasswd);
+				sendto_one(client_p, "PASS %s " IRCNET_FAKESTRING "%s%s",
+				   server_p->spasswd, ServerConfCompressed(server_p) && zlib_ok ? "Z" : "",
+					ServerConfTb(server_p) ? "T" : "");
 			else
 #endif
 			sendto_one(client_p, "PASS %s TS %d :%s",

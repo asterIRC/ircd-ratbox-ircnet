@@ -71,10 +71,16 @@ mr_pass(struct Client *client_p, struct Client *source_p, int parc, const char *
 	{
 #ifdef COMPAT_211
 		/* detected 2.11 protocol? */
-		if (strlen(parv[2]) == 10) {
+		if (strlen(parv[2]) == 10 && parc > 4) {
 			/* nah, it's just us pretending. will fill the SID in server stage though. */
 			if (!memcmp(parv[2], IRCNET_FAKESTRING, 10)) {
-				client_p->localClient->caps |= CAPS_IRCNET;
+				 /* so they'll have same caps as we do. */
+				client_p->localClient->caps |= CAP_MASK & ~(CAP_TB|CAP_ZIP);
+				/* we couldn't use CAPAB, so let's play the IRCNet way */
+				if (strchr(parv[4], 'Z'))
+					client_p->localClient->caps |= CAP_ZIP;
+				if (strchr(parv[4], 'T'))
+					client_p->localClient->caps |= CAP_TB;
 			} else {
 				/* legacy 2.11 */
 				client_p->localClient->caps |= CAP_211+CAPS_IRCNET;

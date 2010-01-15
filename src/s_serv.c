@@ -633,8 +633,9 @@ serv_connect_callback(rb_fde_t *F, int status, void *data)
 	if(!EmptyString(server_p->spasswd))
 	{
 #ifdef COMPAT_211
-		sendto_one(client_p, "PASS %s " IRCNET_FAKESTRING,
-		   server_p->spasswd);
+		sendto_one(client_p, "PASS %s " IRCNET_FAKESTRING "%s%s",
+		   server_p->spasswd, ServerConfCompressed(server_p) && zlib_ok ? "Z" : "",
+					ServerConfTb(server_p) ? "T" : "");
 		sendto_one(client_p, "SERVER %s 1 %s :%s", me.name, me.id,
 			(me.info[0]) ? (me.info) : "IRCers United");
 #else
@@ -644,7 +645,6 @@ serv_connect_callback(rb_fde_t *F, int status, void *data)
 
 	/* pass my info to the new server */
 #ifndef COMPAT_211
-	/* XXX todo */
 	send_capabilities(client_p, default_server_capabs
 			  | (ServerConfCompressed(server_p) && zlib_ok ? CAP_ZIP : 0)
 			  | (ServerConfTb(server_p) ? CAP_TB : 0));
