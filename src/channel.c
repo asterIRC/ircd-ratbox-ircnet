@@ -1129,8 +1129,8 @@ static void	reop_channel(struct Channel *chptr)
 
 void	expire_chandelay(void *unused)
 {
-	rb_dlink_node *ptr;
-	RB_DLINK_FOREACH(ptr, global_channel_list.head)
+	rb_dlink_node *ptr, *next_ptr;
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, global_channel_list.head)
 	{
 		struct Channel *chptr = ptr->data;
 

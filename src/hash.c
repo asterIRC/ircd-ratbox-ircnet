@@ -369,7 +369,7 @@ find_server(struct Client *source_p, const char *name)
 	if(EmptyString(name))
 		return NULL;
 
-	if((source_p == NULL || !MyClient(source_p)) && IsDigit(*name) && strlen(name) == 3)
+	if((source_p == NULL || !MyClient(source_p)) && check_sid(name))
 	{
 		target_p = find_id(name);
 		return (target_p);

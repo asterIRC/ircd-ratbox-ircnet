@@ -542,8 +542,11 @@ ms_njoin(struct Client *client_p, struct Client *source_p, int parc, const char 
    for SJOIN (as NJOIN will be always shorter) */
 static void sjoin_211(struct Client *source_p, struct Client *client_p, struct Channel *chptr, char *buf)
 {
+	char *p;
+	for (p = buf; *p; p++) if (*p == ' ') *p = ',';
 	sendto_server(client_p->from, NULL, CAP_211, NOCAPS, ":%s NJOIN %s :%s",
 		source_p->id, chptr->chname, buf);
+	for (p = buf; *p; p++) if (*p == ',') *p = ' ';
 }
 #endif
 
@@ -741,10 +744,9 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 	 * first space to \0, so s is just the first nick, and point p to the
 	 * second nick
 	 */
-	if((p = strchr(s, ' ')) != NULL)
-	{
-		*p++ = '\0';
-	}
+
+	for (p = s; ((*p && *p != ' ') && (*p != ',')); p++);
+	*p++ = 0;
 
 	while(s)
 	{
@@ -893,9 +895,10 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 		 * we cant check it for spaces.. if there are no spaces, then when
 		 * we next get here, s will be NULL
 		 */
-		if(s && ((p = strchr(s, ' ')) != NULL))
-		{
-			*p++ = '\0';
+
+		if (s) {
+			for (p = s; ((*p && *p != ' ') && (*p != ',')); p++);
+			*p++ = 0;
 		}
 	}
 
@@ -910,10 +913,14 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	if(!joins)
 	{
-		if(isnew)
-			destroy_channel(chptr);
-
-		return 0;
+		/* this just triggers chandelay for !channels */
+		if (*chptr->chname == '!')
+			chptr->opquit = rb_current_time();
+		else {
+			if(isnew)
+				destroy_channel(chptr);
+			return 0;
+		}
 	}
 
 	*(ptr_uid - 1) = '\0';
