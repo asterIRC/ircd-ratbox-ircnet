@@ -421,7 +421,7 @@ sendto_one_numeric(struct Client *target_p, int numeric, const char *pattern, ..
 	va_start(args, pattern);
 	rb_linebuf_putmsg(&linebuf, pattern, &args,
 			  ":%s %03d %s ",
-			  get_id(&me, target_p), numeric, get_id(target_p, target_p));
+			  me.name, numeric, get_id(target_p, target_p));
 	va_end(args);
 
 	send_linebuf(dest_p, &linebuf);

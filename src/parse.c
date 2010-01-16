@@ -166,7 +166,13 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 				return;
 			}
 
-			para[0] = LOCAL_COPY(from->name);
+			/* If this is a masked server, make sure to use
+			 * the true name from the prefix.
+			 */
+			if (strchr(sender, '.'))
+				para[0] = LOCAL_COPY(sender);
+			else
+				para[0] = LOCAL_COPY(from->name);
 
 			/* fake direction, hmm. */
 			if(from->from != client_p)
@@ -698,7 +704,7 @@ do_numeric(char numeric[], struct Client *client_p, struct Client *source_p, int
 
 		/* Fake it for server hiding, if its our client */
 		sendto_one(target_p, ":%s %s %s%s",
-			   get_id(source_p, target_p), numeric, get_id(target_p, target_p), buffer);
+			   parv[0], numeric, get_id(target_p, target_p), buffer);
 		return;
 	}
 	else if((chptr = find_channel(parv[1])) != NULL)

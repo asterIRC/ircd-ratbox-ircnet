@@ -70,12 +70,12 @@ m_ping(struct Client *client_p, struct Client *source_p, int parc, const char *p
 #ifdef COMPAT_211
 			if(IsCapable(target_p->from, CAP_211))
 				sendto_one(target_p, ":%s PING %s :%s",
-					   get_id(source_p, target_p),
+					   parv[0],
 					   source_p->name, target_p->name);
 			else
 #endif
 			sendto_one(target_p, ":%s PING %s :%s",
-				   get_id(source_p, target_p),
+				   parv[0],
 				   source_p->name, get_id(target_p, target_p));
 		}
 		else
@@ -107,12 +107,12 @@ ms_ping(struct Client *client_p, struct Client *source_p, int parc, const char *
 #ifdef COMPAT_211
 			if(IsCapable(source_p->from, CAP_211))
 				sendto_one(target_p, ":%s PING %s :%s",
-					   get_id(source_p, target_p), source_p->name,
+					   parv[0], source_p->name,
 					   target_p->name);
 			else
 #endif
 			sendto_one(target_p, ":%s PING %s :%s",
-				   get_id(source_p, target_p), source_p->name,
+				   parv[0], source_p->name,
 				   get_id(target_p, target_p));
 		}
 		/* not directed at an id.. */
@@ -125,11 +125,11 @@ ms_ping(struct Client *client_p, struct Client *source_p, int parc, const char *
 #ifdef COMPAT_211
 		if(IsCapable(source_p->from, CAP_211))
 			sendto_one(source_p, ":%s PONG %s :%s",
-				   get_id(&me, source_p), me.name, source_p->name);
+				   me.name, me.name, source_p->name);
 		else
 #endif
 		sendto_one(source_p, ":%s PONG %s :%s",
-			   get_id(&me, source_p), me.name, get_id(source_p, source_p));
+			   me.name, me.name, get_id(source_p, source_p));
 	}
 
 	return 0;
