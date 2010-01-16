@@ -46,7 +46,7 @@ static char *clean_string(char *dest, const unsigned char *src, size_t len);
 
 struct Message links_msgtab = {
 	"LINKS", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, {m_links, 0}, {mo_links, 0}, mg_ignore, mg_ignore, {mo_links, 0}}
+	{mg_unreg, {m_links, 0}, {mo_links, 0}, {mo_links, 0}, mg_ignore, {mo_links, 0}}
 };
 
 int doing_links_hook;
@@ -106,11 +106,14 @@ mo_links(struct Client *client_p, struct Client *source_p, int parc, const char 
 	if(*mask)		/* only necessary if there is a mask */
 		mask = collapse(clean_string(clean_mask, (const unsigned char *)mask, 2 * HOSTLEN));
 
-	hd.client = source_p;
-	hd.arg1 = mask;
-	hd.arg2 = NULL;
+	if(!IsServer(source_p))
+	{
+		hd.client = source_p;
+		hd.arg1 = mask;
+		hd.arg2 = NULL;
 
-	call_hook(doing_links_hook, &hd);
+		call_hook(doing_links_hook, &hd);
+	}
 	SetCork(source_p);
 	RB_DLINK_FOREACH(ptr, global_serv_list.head)
 	{
