@@ -51,6 +51,7 @@ DECLARE_MODULE_AV2(capab, NULL, NULL, capab_clist, NULL, NULL, "$Revision: 26421
 
 /*
  * mr_capab - CAPAB message handler
+ *      parv[0] = sender prefix
  *      parv[1] = space-separated list of capabilities
  *
  */

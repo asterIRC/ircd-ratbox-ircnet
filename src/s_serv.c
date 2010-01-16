@@ -118,7 +118,8 @@ hunt_server(struct Client *client_p, struct Client *source_p,
 	 * Assume it's me, if no server
 	 */
 	if(parc <= server || EmptyString(parv[server]) ||
-	   match(parv[server], me.name) || (strcmp(parv[server], me.id) == 0))
+	   match(me.name, parv[server]) || match(parv[server], me.name) ||
+	   (strcmp(parv[server], me.id) == 0))
 		return (HUNTED_ISME);
 
 	new = LOCAL_COPY(parv[server]);
@@ -134,6 +135,10 @@ hunt_server(struct Client *client_p, struct Client *source_p,
 		target_p = find_client(new);
 
 	if(target_p)
+		if(target_p->from == source_p->from && !MyConnect(target_p))
+			target_p = NULL;
+
+	if(target_p == NULL && (target_p = find_server(source_p, new)))
 		if(target_p->from == source_p->from && !MyConnect(target_p))
 			target_p = NULL;
 

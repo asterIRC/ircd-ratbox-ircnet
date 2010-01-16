@@ -57,6 +57,7 @@ DECLARE_MODULE_AV2(connect, NULL, NULL, connect_clist, NULL, NULL, "$Revision: 2
  * Added by Jto 11 Feb 1989
  *
  * m_connect
+ *      parv[0] = sender prefix
  *      parv[1] = servername
  *      parv[2] = port number
  *      parv[3] = remote server
@@ -127,7 +128,7 @@ mo_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 	 * Notify all operators about remote connect requests
 	 */
 
-	ilog(L_SERVER, "CONNECT From %s : %s %s", source_p->name, parv[1], parc > 2 ? parv[2] : "");
+	ilog(L_SERVER, "CONNECT From %s : %s %s", parv[0], parv[1], parc > 2 ? parv[2] : "");
 
 	server_p->port = port;
 	/*
@@ -160,6 +161,7 @@ mo_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
  * Added by Jto 11 Feb 1989
  *
  * m_connect
+ *      parv[0] = sender prefix
  *      parv[1] = servername
  *      parv[2] = port number
  *      parv[3] = remote server

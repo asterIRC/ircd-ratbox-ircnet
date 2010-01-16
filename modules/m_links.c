@@ -64,8 +64,10 @@ static void send_links_cache(struct Client *source_p);
 
 /*
  * m_links - LINKS message handler
+ *      parv[0] = sender prefix
  *      parv[1] = servername mask
  * or
+ *      parv[0] = sender prefix
  *      parv[1] = server to query 
  *      parv[2] = servername mask
  */

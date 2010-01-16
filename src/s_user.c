@@ -691,6 +691,7 @@ report_and_set_user_flags(struct Client *source_p, struct ConfItem *aconf)
  * user_mode - set get current users mode
  *
  * m_umode() added 15/10/91 By Darren Reed.
+ * parv[0] - sender
  * parv[1] - username to change mode for
  * parv[2] - modes to change
  */

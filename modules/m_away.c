@@ -63,6 +63,7 @@ DECLARE_MODULE_AV2(away, NULL, NULL, away_clist, NULL, NULL, "$Revision: 26576 $
 
 /*
 ** m_away
+**      parv[0] = sender prefix
 **      parv[1] = away message
 */
 static int

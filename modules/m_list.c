@@ -55,6 +55,7 @@ static void list_limit_channels(struct Client *source_p, const char *param);
 static void list_named_channel(struct Client *source_p, const char *name);
 
 /* m_list()
+ *      parv[0] = sender prefix
  *      parv[1] = channel
  */
 static int
@@ -88,6 +89,7 @@ m_list(struct Client *client_p, struct Client *source_p, int parc, const char *p
 }
 
 /* mo_list()
+ *      parv[0] = sender prefix
  *      parv[1] = channel
  */
 static int

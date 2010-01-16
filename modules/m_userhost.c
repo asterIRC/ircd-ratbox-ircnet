@@ -62,7 +62,7 @@ m_userhost(struct Client *client_p, struct Client *source_p, int parc, const cha
 	int cur_len;
 	int rl;
 
-	cur_len = rb_sprintf(buf, form_str(RPL_USERHOST), me.name, source_p->name, "");
+	cur_len = rb_sprintf(buf, form_str(RPL_USERHOST), me.name, parv[0], "");
 	t = buf + cur_len;
 
 	for(i = 1; i <= 5; i++)

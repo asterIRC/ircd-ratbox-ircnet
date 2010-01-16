@@ -50,6 +50,7 @@ DECLARE_MODULE_AV2(invite, NULL, NULL, invite_clist, NULL, NULL, "$Revision: 264
 static void add_invite(struct Channel *, struct Client *);
 
 /* m_invite()
+ *      parv[0] - sender prefix
  *      parv[1] - user to invite
  *      parv[2] - channel name
  */

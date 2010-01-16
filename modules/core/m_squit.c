@@ -62,6 +62,7 @@ static struct squit_parms *find_squit(struct Client *client_p,
 
 /*
  * mo_squit - SQUIT message handler
+ *      parv[0] = sender prefix
  *      parv[1] = server name
  *      parv[2] = comment
  */
@@ -103,6 +104,7 @@ mo_squit(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 /*
  * ms_squit - SQUIT message handler
+ *      parv[0] = sender prefix
  *      parv[1] = server name
  *      parv[2] = comment
  */
@@ -144,7 +146,7 @@ ms_squit(struct Client *client_p, struct Client *source_p, int parc, const char 
 			      ":%s WALLOPS :Remote SQUIT %s from %s (%s)",
 			      me.id, target_p->name, source_p->name, comment);
 
-		ilog(L_SERVER, "SQUIT From %s : %s (%s)", source_p->name, target_p->name, comment);
+		ilog(L_SERVER, "SQUIT From %s : %s (%s)", parv[0], target_p->name, comment);
 
 	}
 	exit_client(client_p, target_p, source_p, comment);

@@ -63,6 +63,7 @@ static void list_named_channel(struct Client *source_p, const char *name);
 
 /*
 ** mo_olist
+**      parv[0] = sender prefix
 **      parv[1] = channel
 */
 static int

@@ -50,6 +50,7 @@ DECLARE_MODULE_AV2(topic, NULL, NULL, topic_clist, NULL, NULL, "$Revision: 26576
 
 /*
  * m_topic
+ *      parv[0] = sender prefix
  *      parv[1] = channel name
  *	parv[2] = new topic, if setting topic
  */

@@ -52,6 +52,7 @@ DECLARE_MODULE_AV2(pass, NULL, NULL, pass_clist, NULL, NULL, "$Revision: 26453 $
  *
  *
  * mr_pass - PASS message handler
+ *      parv[0] = sender prefix
  *      parv[1] = password
  *      parv[2] = "TS" if this server supports TS.
  *      parv[3] = optional TS version field -- needed for TS6

@@ -51,6 +51,7 @@ DECLARE_MODULE_AV2(ping, NULL, NULL, ping_clist, NULL, NULL, "$Revision: 26421 $
 
 /*
 ** m_ping
+**      parv[0] = sender prefix
 **      parv[1] = origin
 **      parv[2] = destination
 */

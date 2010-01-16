@@ -56,6 +56,7 @@ static void names_global(struct Client *source_p);
 
 /*
  * m_names
+ *      parv[0] = sender prefix
  *      parv[1] = channel
  */
 static int

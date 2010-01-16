@@ -49,6 +49,7 @@ DECLARE_MODULE_AV2(opme, NULL, NULL, opme_clist, NULL, NULL, "$Revision: 26421 $
 
 /*
 ** mo_opme
+**      parv[0] = sender prefix
 **      parv[1] = channel
 */
 static int
@@ -78,8 +79,8 @@ mo_opme(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 		if(is_chanop(msptr))
 		{
-			sendto_one_notice(source_p, ":%s Channel is not opless",
-				   parv[1]);
+			sendto_one(source_p, ":%s NOTICE %s :%s Channel is not opless",
+				   me.name, parv[0], parv[1]);
 			return 0;
 		}
 	}

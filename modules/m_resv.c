@@ -74,6 +74,7 @@ static void resv_chan_forcepart(const char *name, const char *reason, int temp_t
 
 /*
  * mo_resv()
+ *      parv[0] = sender prefix
  *      parv[1] = channel/nick to forbid
  *      parv[2] = reason
  */
@@ -328,6 +329,7 @@ parse_resv(struct Client *source_p, const char *name, const char *reason, int te
 
 /*
  * mo_unresv()
+ *     parv[0] = sender prefix
  *     parv[1] = channel/nick to unforbid
  */
 static int

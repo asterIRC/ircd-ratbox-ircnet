@@ -52,6 +52,7 @@ DECLARE_MODULE_AV2(version, NULL, NULL, version_clist, NULL, NULL, "$Revision: 2
 
 /*
  * m_version - VERSION command handler
+ *      parv[0] = sender prefix
  *      parv[1] = remote server
  */
 static int
@@ -84,6 +85,7 @@ m_version(struct Client *client_p, struct Client *source_p, int parc, const char
 
 /*
  * mo_version - VERSION command handler
+ *      parv[0] = sender prefix
  *      parv[1] = remote server
  */
 static int

@@ -153,13 +153,13 @@ int m_unregistered(struct Client *, struct Client *, int, const char **);
  *
  *    parv    a NULL terminated list of parameter pointers,
  *
- *                    parv[0], unused for historical reasons (formerly
- *                            sender name)
+ *                    parv[0], sender (prefix string), if not present
+ *                            this points to an empty string.
  *                    parv[1]...parv[parc-1]
  *                            pointers to additional parameters
  *                    parv[parc] == NULL, *always*
  *
- *            note:   it is guaranteed that parv[1]..parv[parc-1] are all
+ *            note:   it is guaranteed that parv[0]..parv[parc-1] are all
  *                    non-NULL pointers.
  */
 

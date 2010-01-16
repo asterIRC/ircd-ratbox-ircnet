@@ -50,6 +50,7 @@ DECLARE_MODULE_AV2(locops, NULL, NULL, locops_clist, NULL, NULL, "$Revision: 264
 /*
  * m_locops - LOCOPS message handler
  * (write to *all* local opers currently online)
+ *      parv[0] = sender prefix
  *      parv[1] = message text
  */
 static int

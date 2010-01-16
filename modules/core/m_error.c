@@ -85,6 +85,7 @@ is_safe_error(const char *message)
  * although this is called internally from other functions
  * --msa
  *
+ *      parv[0] = sender prefix
  *      parv[*] = parameters
  */
 int

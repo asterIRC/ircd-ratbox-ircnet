@@ -84,6 +84,7 @@ enum
 
 /*
  * mr_server - SERVER message handler
+ *      parv[0] = sender prefix
  *      parv[1] = servername
  *      parv[2] = serverinfo/hopcount
  *      parv[3] = serverinfo
@@ -254,6 +255,7 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, const char
 
 /*
  * ms_server - SERVER message handler
+ *      parv[0] = sender prefix
  *      parv[1] = servername
  *      parv[2] = serverinfo/hopcount
  *      parv[3] = serverinfo

@@ -57,6 +57,7 @@ DECLARE_MODULE_AV2(kill, NULL, NULL, kill_clist, NULL, NULL, "$Revision: 26421 $
 
 /*
 ** mo_kill
+**      parv[0] = sender prefix
 **      parv[1] = kill victim
 **      parv[2] = kill path
 */
@@ -119,7 +120,7 @@ mo_kill(struct Client *client_p, struct Client *source_p, int parc, const char *
 	 * that have been around for ever, for no reason.. */
 	sendto_realops_flags(UMODE_ALL, L_ALL,
 			     "Received KILL message for %s. From %s Path: %s (%s)",
-			     target_p->name, source_p->name, me.name, reason);
+			     target_p->name, parv[0], me.name, reason);
 
 	ilog(L_KILL, "%c %s %s!%s@%s %s %s",
 	     MyConnect(target_p) ? 'L' : 'G', get_oper_name(source_p),
@@ -151,6 +152,7 @@ mo_kill(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 /*
  * ms_kill
+ *      parv[0] = sender prefix
  *      parv[1] = kill victim
  *      parv[2] = kill path and reason
  */
@@ -231,7 +233,7 @@ ms_kill(struct Client *client_p, struct Client *source_p, int parc, const char *
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "Received KILL message for %s. From %s Path: %s!%s!%s!%s %s",
-				     target_p->name, source_p->name, source_p->servptr->name,
+				     target_p->name, parv[0], source_p->servptr->name,
 				     source_p->host, source_p->username, source_p->name, reason);
 
 		ilog(L_KILL, "%c %s %s!%s@%s %s %s",
@@ -243,7 +245,7 @@ ms_kill(struct Client *client_p, struct Client *source_p, int parc, const char *
 	{
 		sendto_realops_flags(UMODE_SKILL, L_ALL,
 				     "Received KILL message for %s. From %s %s",
-				     target_p->name, source_p->name, reason);
+				     target_p->name, parv[0], reason);
 
 		ilog(L_KILL, "S %s %s!%s@%s %s %s",
 		     source_p->name, target_p->name, target_p->username,

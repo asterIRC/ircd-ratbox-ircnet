@@ -94,6 +94,7 @@ DECLARE_MODULE_AV2(trace, NULL, NULL, trace_clist, trace_hlist, NULL, "$Revision
 
 /*
  * m_trace
+ *      parv[0] = sender prefix
  *      parv[1] = servername
  */
 static int
@@ -142,7 +143,8 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 					{
 						ac2ptr = ptr->data;
 
-						if(match(tname, ac2ptr->name))
+						if(match(tname, ac2ptr->name)
+						   || match(ac2ptr->name, tname))
 							break;
 						else
 							ac2ptr = NULL;
@@ -465,6 +467,7 @@ trace_spy(struct Client *source_p, struct Client *target_p)
 
 /*
  * m_etrace
+ *      parv[0] = sender prefix
  *      parv[1] = options [or target]
  *	parv[2] = [target]
  */

@@ -69,6 +69,7 @@ DECLARE_MODULE_AV2(whois, NULL, NULL, whois_clist, whois_hlist, NULL, "$Revision
 
 /*
  * m_whois
+ *      parv[0] = sender prefix
  *      parv[1] = nickname masklist
  */
 static int
@@ -114,6 +115,7 @@ m_whois(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 /*
  * ms_whois
+ *      parv[0] = sender prefix
  *      parv[1] = server to reply
  *      parv[2] = nickname to whois
  */

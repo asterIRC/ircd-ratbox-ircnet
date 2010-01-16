@@ -160,6 +160,7 @@ DECLARE_MODULE_AV2(
 
 /*
  * mr_test
+ *      parv[0] = sender prefix
  *      parv[1] = parameter
  */
 
@@ -188,6 +189,7 @@ munreg_test(struct Client *client_p, struct Client *source_p, int parc, const ch
 
 /*
  * mclient_test
+ *      parv[0] = sender prefix
  *      parv[1] = parameter
  */
 static int
@@ -213,6 +215,7 @@ mclient_test(struct Client *client_p, struct Client *source_p, int parc, const c
 
 /*
  * mrclient_test
+ *      parv[0] = sender prefix
  *      parv[1] = parameter
  */
 static int
@@ -235,6 +238,7 @@ mrclient_test(struct Client *client_p, struct Client *source_p, int parc, const 
 
 /*
  * mserver_test
+ *      parv[0] = sender prefix
  *      parv[1] = parameter
  */
 static int
@@ -257,6 +261,7 @@ mserver_test(struct Client *client_p, struct Client *source_p, int parc, const c
 
 /*
  * moper_test
+ *      parv[0] = sender prefix
  *      parv[1] = parameter
  */
 static int

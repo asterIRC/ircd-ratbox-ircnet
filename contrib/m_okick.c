@@ -52,6 +52,7 @@ DECLARE_MODULE_AV2(okick, NULL, NULL, okick_clist, NULL, NULL, "$Revision: 26421
 
 /*
 ** m_okick
+**      parv[0] = sender prefix
 **      parv[1] = channel
 **      parv[2] = client to kick
 **      parv[3] = kick comment
@@ -72,7 +73,7 @@ mo_okick(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	if(*parv[2] == '\0')
 	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, source_p->name, "KICK");
+		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, parv[0], "KICK");
 		return 0;
 	}
 
@@ -107,14 +108,14 @@ mo_okick(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	if((target_p = find_client(user)) == NULL)
 	{
-		sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name, source_p->name, user);
+		sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name, parv[0], user);
 		return 0;
 	}
 
 	if((msptr = find_channel_membership(chptr, target_p)) == NULL)
 	{
 		sendto_one(source_p, form_str(ERR_USERNOTINCHANNEL),
-			   me.name, source_p->name, parv[1], parv[2]);
+			   me.name, parv[0], parv[1], parv[2]);
 		return 0;
 	}
 
