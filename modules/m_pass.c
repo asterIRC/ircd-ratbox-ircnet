@@ -75,7 +75,7 @@ mr_pass(struct Client *client_p, struct Client *source_p, int parc, const char *
 			/* nah, it's just us pretending. will fill the SID in server stage though. */
 			if (!memcmp(parv[2], IRCNET_FAKESTRING, 10)) {
 				 /* so they'll have same caps as we do. */
-				client_p->localClient->caps |= CAP_MASK & ~(CAP_TB|CAP_ZIP);
+				client_p->localClient->caps |= (CAP_TS6|CAP_MASK) & ~(CAP_TB|CAP_ZIP);
 				/* we couldn't use CAPAB, so let's play the IRCNet way */
 				if (strchr(parv[4], 'Z'))
 					client_p->localClient->caps |= CAP_ZIP;
