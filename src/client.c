@@ -1212,6 +1212,20 @@ exit_remote_server(struct Client *client_p, struct Client *source_p, struct Clie
 	if(IsClient(from))
 		rb_snprintf(newcomment, sizeof(newcomment), "by %s: %s", from->name, comment);
 
+#ifdef COMPAT_211
+	/* 2.11 throws away SQUITs with empty comments */
+	if(*comment == '\0')
+		comment = "<>";
+
+	/* 2.11 uses unconnect semantics, confirm the SQUIT here on behalf
+	 * of the removed server's uplink.
+	 */
+	if(IsServer(client_p) && IsCapable(client_p, CAP_211) &&
+			source_p->from != client_p)
+		sendto_one(client_p, "SQUIT %s :by %s: %s",
+				source_p->id, from->name, comment);
+#endif
+
 	if(source_p->serv != NULL)
 		remove_dependents(client_p, source_p, IsClient(from) ? newcomment : comment,
 				  comment1);
