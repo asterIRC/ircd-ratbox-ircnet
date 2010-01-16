@@ -410,6 +410,12 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 			     "Server %s being introduced by %s", target_p->name, source_p->name);
 
 	/* quick, dirty EOB.  you know you love it. */
+#ifdef COMPAT_211
+	if(IsCapable(target_p->from, CAP_211))
+		sendto_one(target_p, ":%s PING %s %s",
+			   get_id(&me, target_p), me.name, target_p->name);
+	else
+#endif
 	sendto_one(target_p, ":%s PING %s %s",
 		   get_id(&me, target_p), me.name, get_id(target_p, target_p));
 
@@ -1241,7 +1247,7 @@ server_estab(struct Client *client_p)
 	burst_TS6(client_p);
 
 	/* Always send a PING after connect burst is done */
-	sendto_one(client_p, "PING :%s", get_id(&me, client_p));
+	sendto_one(client_p, "PING :%s", me.name);
 
 	ClearCork(client_p);
 	send_pop_queue(client_p);

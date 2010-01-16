@@ -66,6 +66,13 @@ m_ping(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	{
 		if((target_p = find_server(source_p, destination)))
 		{
+#ifdef COMPAT_211
+			if(IsCapable(target_p->from, CAP_211))
+				sendto_one(target_p, ":%s PING %s :%s",
+					   get_id(source_p, target_p),
+					   source_p->name, target_p->name);
+			else
+#endif
 			sendto_one(target_p, ":%s PING %s :%s",
 				   get_id(source_p, target_p),
 				   source_p->name, get_id(target_p, target_p));
@@ -95,17 +102,34 @@ ms_ping(struct Client *client_p, struct Client *source_p, int parc, const char *
 	if(!EmptyString(destination) && irccmp(destination, me.name) && irccmp(destination, me.id))
 	{
 		if((target_p = find_client(destination)) && IsServer(target_p))
+		{
+#ifdef COMPAT_211
+			if(IsCapable(source_p->from, CAP_211))
+				sendto_one(target_p, ":%s PING %s :%s",
+					   get_id(source_p, target_p), source_p->name,
+					   target_p->name);
+			else
+#endif
 			sendto_one(target_p, ":%s PING %s :%s",
 				   get_id(source_p, target_p), source_p->name,
 				   get_id(target_p, target_p));
+		}
 		/* not directed at an id.. */
 		else if(!IsDigit(*destination))
 			sendto_one_numeric(source_p, ERR_NOSUCHSERVER,
 					   form_str(ERR_NOSUCHSERVER), destination);
 	}
 	else
+	{
+#ifdef COMPAT_211
+		if(IsCapable(source_p->from, CAP_211))
+			sendto_one(source_p, ":%s PONG %s :%s",
+				   get_id(&me, source_p), me.name, source_p->name);
+		else
+#endif
 		sendto_one(source_p, ":%s PONG %s :%s",
 			   get_id(&me, source_p), me.name, get_id(source_p, source_p));
+	}
 
 	return 0;
 }
