@@ -552,7 +552,6 @@ static void sjoin_211(struct Client *source_p, struct Client *client_p, struct C
 	for (p = buf; *p; p++) if (*p == ' ') *p = ',';
 	sendto_server(client_p->from, NULL, CAP_211, NOCAPS, ":%s NJOIN %s :%s",
 		source_p->id, chptr->chname, buf);
-	for (p = buf; *p; p++) if (*p == ',') *p = ' ';
 }
 #endif
 
