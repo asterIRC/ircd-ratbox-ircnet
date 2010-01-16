@@ -180,7 +180,7 @@ find_channel_status(struct membership *msptr, int combine)
 		*p++ = '@';
 	}
 
-	if (is_uniqop(msptr))
+	if (is_uniqop(msptr) && combine > 0)
 		*p++ = '@';
 
 	if(is_voiced(msptr))

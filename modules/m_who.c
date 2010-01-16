@@ -162,7 +162,7 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 		if(lp != NULL)
 			do_who(source_p, target_p, chptr->chname,
 			       find_channel_status(lp->data,
-						   IsCapable(source_p, CLICAP_MULTI_PREFIX)));
+						   -IsCapable(source_p, CLICAP_MULTI_PREFIX)));
 		else
 			do_who(source_p, target_p, NULL, "");
 
@@ -347,7 +347,7 @@ do_who_on_channel(struct Client *source_p, struct Channel *chptr, int server_ope
 
 		if((member || !IsInvisible(target_p)) && (!IsAnonymous(chptr) || target_p == source_p))
 			do_who(source_p, target_p, chptr->chname,
-			       find_channel_status(msptr, combine));
+			       find_channel_status(msptr, -combine));
 	}
 }
 

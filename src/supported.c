@@ -212,6 +212,14 @@ isupport_stringptr(const void *ptr)
 }
 
 static const char *
+isupport_idchan(const void *ptr)
+{
+	static char result[20];
+	rb_snprintf(result, sizeof result, "!:%d", CHIDLEN);
+	return result;
+}
+
+static const char *
 isupport_chanmodes(const void *ptr)
 {
 	static char result[80];
@@ -265,6 +273,7 @@ init_isupport(void)
 	add_isupport("CHANTYPES", isupport_string, "&#!");
 	add_isupport("EXCEPTS", isupport_boolean, &ConfigChannel.use_except);
 	add_isupport("INVEX", isupport_boolean, &ConfigChannel.use_invex);
+	add_isupport("IDCHAN", isupport_idchan, NULL);
 	add_isupport("CHANMODES", isupport_chanmodes, NULL);
 	add_isupport("CHANLIMIT", isupport_chanlimit, NULL);
 	add_isupport("PREFIX", isupport_string, "(ov)@+");

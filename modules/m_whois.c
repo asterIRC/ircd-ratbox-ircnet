@@ -289,7 +289,7 @@ single_whois(struct Client *source_p, struct Client *target_p, int operspy)
 
 				tlen = rb_sprintf(t, "%s%s%s ",
 						  visible ? "" : "!",
-						  find_channel_status(msptr, 1), chptr->chname);
+						  find_channel_status(msptr, -1), chptr->chname);
 				t += tlen;
 				cur_len += tlen;
 			}
