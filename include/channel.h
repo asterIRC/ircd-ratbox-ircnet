@@ -139,6 +139,7 @@ struct ChCapCombo
 #define ONLY_CHANOPSVOICED	(CHFL_CHANOP|CHFL_VOICE)
 
 #define is_chanop(x)	((x) && (x)->flags & CHFL_CHANOP)
+#define is_uniqop(x)	((x) && ((x)->flags & (CHFL_CHANOP|CHFL_UNIQOP))==(CHFL_CHANOP|CHFL_UNIQOP))
 #define is_voiced(x)	((x) && (x)->flags & CHFL_VOICE)
 #define is_chanop_voiced(x) ((x) && (x)->flags & (CHFL_CHANOP|CHFL_VOICE))
 #define is_deop(x)	((x) && (x)->flags & CHFL_DEOPPED)

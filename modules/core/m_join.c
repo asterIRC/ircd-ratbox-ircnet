@@ -838,8 +838,8 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 			*mbuf++ = 'o';
 			pargs++;
 			
-			*pbuf++ = ' ';
-			pbuf += sprintf(pbuf, target_p->name);
+			pbuf += rb_sprintf(pbuf, " %s", Anon(target_p->name));
+			pargs++;
 
 			/* a +ov user.. bleh */
 			if(fl & CHFL_VOICE)
@@ -861,15 +861,14 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 				}
 
 				*mbuf++ = 'v';
-				*pbuf++ = ' ';
-				pbuf += rb_sprintf(pbuf, Anon(target_p->name));
+				pbuf += rb_sprintf(pbuf, " %s", Anon(target_p->name));
 			}
 		}
 		else if(fl & CHFL_VOICE)
 		{
 			*mbuf++ = 'v';
-			*pbuf++ = ' ';
-			pbuf += rb_sprintf(pbuf, Anon(target_p->name));
+			pbuf += rb_sprintf(pbuf, " %s", Anon(target_p->name));
+			pargs++;
 		}
 
 		if(pargs >= MAXMODEPARAMS)

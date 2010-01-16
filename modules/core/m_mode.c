@@ -685,6 +685,8 @@ chm_simple(struct Client *source_p, struct Channel *chptr,
 	   int alevel, int parc, int *parn,
 	   const char **parv, int *errors, int dir, char c, long mode_type)
 {
+	int needcap = 0;
+
 	if(!alevel)
 	{
 		if(!(*errors & SM_ERR_NOOPS))
@@ -693,6 +695,9 @@ chm_simple(struct Client *source_p, struct Channel *chptr,
 		*errors |= SM_ERR_NOOPS;
 		return;
 	}
+
+	if (chptr->chname[0] == '!' && (mode_type & (MODE_ANONYMOUS|MODE_REOP)))
+		needcap = CAP_IRCNET;
 
 	/* +r/MODE_REOP is aliased over MODE_REGONLY, the meaning being assumed
 	   by channel name */
@@ -733,7 +738,7 @@ chm_simple(struct Client *source_p, struct Channel *chptr,
 
 		mode_changes[mode_count].letter = c;
 		mode_changes[mode_count].dir = MODE_ADD;
-		mode_changes[mode_count].caps = 0;
+		mode_changes[mode_count].caps = needcap;
 		mode_changes[mode_count].nocaps = 0;
 		mode_changes[mode_count].id = NULL;
 		mode_changes[mode_count].mems = ALL_MEMBERS;
@@ -745,7 +750,7 @@ chm_simple(struct Client *source_p, struct Channel *chptr,
 
 		mode_changes[mode_count].letter = c;
 		mode_changes[mode_count].dir = MODE_DEL;
-		mode_changes[mode_count].caps = 0;
+		mode_changes[mode_count].caps = needcap;
 		mode_changes[mode_count].nocaps = 0;
 		mode_changes[mode_count].mems = ALL_MEMBERS;
 		mode_changes[mode_count].id = NULL;

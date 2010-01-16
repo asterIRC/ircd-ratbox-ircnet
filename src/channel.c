@@ -180,6 +180,9 @@ find_channel_status(struct membership *msptr, int combine)
 		*p++ = '@';
 	}
 
+	if (is_uniqop(msptr))
+		*p++ = '@';
+
 	if(is_voiced(msptr))
 		*p++ = '+';
 
@@ -813,12 +816,12 @@ channel_modes(struct Channel *chptr, struct Client *client_p)
 		*mbuf++ = 'i';
 	if(chptr->mode.mode & MODE_NOPRIVMSGS)
 		*mbuf++ = 'n';
-#ifdef ENABLE_SERVICES
-	if(chptr->mode.mode & MODE_REGONLY)
+	if(chptr->mode.mode & (MODE_REGONLY|MODE_REOP))
 		*mbuf++ = 'r';
-#endif
 	if(chptr->mode.mode & MODE_SSLONLY)
 		*mbuf++ = 'S';
+	if(chptr->mode.mode & MODE_ANONYMOUS)
+		*mbuf++ = 'a';
 
 	if(chptr->mode.limit && *chptr->mode.key)
 	{

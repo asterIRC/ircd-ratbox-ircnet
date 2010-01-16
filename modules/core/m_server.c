@@ -907,6 +907,8 @@ burst_211(struct Client *client_p)
 			tlen = strlen(use_id(msptr->client_p)) + 1;
 			if(is_chanop(msptr))
 				tlen++;
+			if(is_uniqop(msptr))
+				tlen++;
 			if(is_voiced(msptr))
 				tlen++;
 
