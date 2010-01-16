@@ -868,7 +868,7 @@ burst_211(struct Client *client_p)
 		if(!IsClient(target_p))
 			continue;
 
-		send_umode(NULL, target_p, 0, SEND_UMODES, ubuf);
+		send_umode(NULL, target_p, 0, SEND_UMODES_211, ubuf);
 		if(!*ubuf)
 		{
 			ubuf[0] = '+';
@@ -876,14 +876,14 @@ burst_211(struct Client *client_p)
 		}
 
 		sendto_one(client_p,
-			":%s UNICK %s %s %s %s %s %s :%s",
+			":%s UNICK %s %s %s %s %s %s%s :%s",
 			target_p->servptr->id,
 			target_p->name,
 			target_p->id,
 			target_p->username,
 			target_p->host,
 			target_p->sockhost,
-			ubuf,
+			ubuf, target_p->user->away ? "a" : "",
 			target_p->info);
 
 		hclientinfo.target = target_p;

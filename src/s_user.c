@@ -588,15 +588,22 @@ introduce_client(struct Client *client_p, struct Client *source_p)
 		      source_p->id, source_p->info);
 
 #ifdef COMPAT_211
+	send_umode(NULL, source_p, 0, SEND_UMODES_211, ubuf);
+	if(!*ubuf)
+	{
+		ubuf[0] = '+';
+		ubuf[1] = '\0';
+	}
+
 	sendto_server(client_p, NULL, CAP_211, NOCAPS,
-			":%s UNICK %s %s %s %s %s %s :%s",
+			":%s UNICK %s %s %s %s %s %s%s :%s",
 			source_p->servptr->id,
 			source_p->name,
 			source_p->id,
 			source_p->username,
 			source_p->host,
 			source_p->sockhost,
-			ubuf,
+			ubuf, source_p->user->away ? "a" : "",
 			source_p->info);
 #endif
 }
@@ -898,8 +905,13 @@ send_umode(struct Client *client_p, struct Client *source_p, int old, int sendma
 	{
 		flag = user_modes[i].mode;
 
+#ifdef COMPAT_211
+		if(!(flag & sendmask))
+			continue;
+#else
 		if(MyClient(source_p) && !(flag & sendmask))
 			continue;
+#endif
 		if((flag & old) && !(source_p->umodes & flag))
 		{
 			if(what == MODE_DEL)
@@ -948,12 +960,24 @@ send_umode_out(struct Client *client_p, struct Client *source_p, int old)
 	{
 		target_p = ptr->data;
 
+#ifdef COMPAT_211
+		if(IsCapable(target_p, CAP_211))
+			continue;
+#endif
 		if((target_p != client_p) && (target_p != source_p) && (*buf))
 		{
 			sendto_one(target_p, ":%s MODE %s :%s",
 				   get_id(source_p, target_p), get_id(source_p, target_p), buf);
 		}
 	}
+
+#ifdef COMPAT_211
+	send_umode(NULL, source_p, old, SEND_UMODES_211, buf);
+	if (*buf)
+		sendto_server(client_p, NULL, CAP_211, NOCAPS,
+				":%s MODE %s :%s",
+				source_p->id, source_p->name, buf);
+#endif
 
 	if(client_p && MyClient(client_p))
 		send_umode(client_p, source_p, old, ALL_UMODES, buf);

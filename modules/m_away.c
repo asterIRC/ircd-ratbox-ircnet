@@ -80,8 +80,12 @@ m_away(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		if(source_p->user->away != NULL)
 		{
 			/* we now send this only if they were away before --is */
-			sendto_server(client_p, NULL, CAP_TS6, NOCAPS,
+			sendto_server(client_p, NULL, CAP_TS6, CAP_211,
 				      ":%s AWAY", source_p->id);
+#ifdef COMPAT_211
+			sendto_server(client_p, NULL, CAP_211, NOCAPS,
+				      ":%s MODE %s :-a", source_p->id, source_p->name);
+#endif
 			free_away(source_p);
 		}
 		if(MyConnect(source_p))
@@ -94,8 +98,12 @@ m_away(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	{
 		allocate_away(source_p);
 		rb_strlcpy(source_p->user->away, parv[1], AWAYLEN);
-		sendto_server(client_p, NULL, CAP_TS6, NOCAPS,
+		sendto_server(client_p, NULL, CAP_TS6, CAP_211,
 			      ":%s AWAY :%s", source_p->id, source_p->user->away);
+#ifdef COMPAT_211
+		sendto_server(client_p, NULL, CAP_211, NOCAPS,
+			      ":%s MODE %s :+a", source_p->id, source_p->name);
+#endif
 
 	}
 	else
