@@ -295,6 +295,79 @@ find_id(const char *name)
 	return NULL;
 }
 
+/* hash_find_masked_server()
+ * 
+ * Whats happening in this next loop ? Well, it takes a name like
+ * foo.bar.edu and proceeds to earch for *.edu and then *.bar.edu.
+ * This is for checking full server names against masks although
+ * it isnt often done this way in lieu of using matches().
+ *
+ * Rewrote to do *.bar.edu first, which is the most likely case,
+ * also made const correct
+ * --Bleep
+ */
+static struct Client *
+hash_find_masked_server(struct Client *source_p, const char *name)
+{
+	char buf[HOSTLEN + 1];
+	char *p = buf;
+	char *s;
+	struct Client *server;
+
+	if('*' == *name || '.' == *name)
+		return NULL;
+
+	/* copy it across to give us a buffer to work on */
+	rb_strlcpy(buf, name, sizeof(buf));
+
+	while((s = strchr(p, '.')) != 0)
+	{
+		*--s = '*';
+		/*
+		 * Dont need to check IsServer() here since nicknames cant
+		 * have *'s in them anyway.
+		 */
+		if((server = find_server(source_p, s)))
+			return server;
+		p = s + 2;
+	}
+
+	return NULL;
+}
+
+/* find_any_client()
+ *
+ * finds a client/server/masked server entry from the hash
+ */
+struct Client *
+find_any_client(const char *name)
+{
+	struct Client *target_p;
+	rb_dlink_node *ptr;
+	unsigned int hashv;
+
+	s_assert(name != NULL);
+	if(EmptyString(name))
+		return NULL;
+
+	/* hunting for an id, not a nick */
+	if(IsDigit(*name))
+		return (find_id(name));
+
+	hashv = hash_nick(name);
+
+	RB_DLINK_FOREACH(ptr, clientTable[hashv].head)
+	{
+		target_p = ptr->data;
+
+		if(irccmp(name, target_p->name) == 0)
+			return target_p;
+	}
+
+	/* wasnt found, look for a masked server */
+	return hash_find_masked_server(NULL, name);
+}
+
 /* find_client()
  *
  * finds a client/server entry from the client hash table
@@ -385,7 +458,8 @@ find_server(struct Client *source_p, const char *name)
 			return target_p;
 	}
 
-	return NULL;
+	/* wasnt found, look for a masked server */
+	return hash_find_masked_server(source_p, name);
 }
 
 /* find_hostname()

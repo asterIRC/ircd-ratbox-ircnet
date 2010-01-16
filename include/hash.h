@@ -83,6 +83,7 @@ void init_hash(void);
 void add_to_hash(hash_type, const char *, void *);
 void del_from_hash(hash_type, const char *, void *);
 
+struct Client *find_any_client(const char *name);
 struct Client *find_client(const char *name);
 struct Client *find_named_client(const char *name);
 struct Client *find_server(struct Client *source_p, const char *name);

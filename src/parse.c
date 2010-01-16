@@ -156,7 +156,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 
 		if(*sender && IsServer(client_p))
 		{
-			from = find_client(sender);
+			from = find_any_client(sender);
 
 			/* didnt find any matching client, issue a kill */
 			if(from == NULL)
