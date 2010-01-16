@@ -182,6 +182,11 @@ hunt_server(struct Client *client_p, struct Client *source_p,
 			return HUNTED_ISME;
 
 		old = parv[server];
+#ifdef COMPAT_211
+		if (IsCapable(target_p->from, CAP_211) && IsClient(target_p))
+			parv[server] = target_p->name;
+		else
+#endif
 		parv[server] = get_id(target_p, target_p);
 
 		sendto_one(target_p, command, get_id(source_p, target_p),
