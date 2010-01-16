@@ -508,7 +508,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 	strcpy(source_p->id, me.id);
 	do {
 		generate_uid(source_p->id + strlen(me.id), IDLEN - strlen(me.id), uidserial++);
-	} while (!find_id(source_p->id));
+	} while (find_id(source_p->id));
 
 	add_to_hash(HASH_ID, source_p->id, source_p);
 
