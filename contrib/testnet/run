@@ -1,0 +1,10 @@
+#!/bin/sh
+rb=../ircd-ratbox-ircnet/ircd
+in=../irc2.11.2p2/x86_64-unknown-linux-gnu/ircd
+$rb -configfile `pwd`/rb3.conf -pidfile rb3
+$rb -configfile `pwd`/rb2.conf -pidfile rb2
+$rb -configfile `pwd`/rb1.conf -pidfile rb1
+
+$in -f in1.conf
+$in -f in2.conf
+$in -f in3.conf
