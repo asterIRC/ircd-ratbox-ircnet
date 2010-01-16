@@ -73,7 +73,7 @@ struct Message unick_msgtab = {
 
 struct Message nick_msgtab = {
 	"NICK", 0, 0, 0, MFLG_SLOW,
-	{{mr_nick, 0}, {m_nick, 0}, {mc_nick, 3}, {ms_nick, 0}, mg_ignore, {m_nick, 0}}
+	{{mr_nick, 0}, {m_nick, 0}, {mc_nick, 2}, {ms_nick, 0}, mg_ignore, {m_nick, 0}}
 };
 
 struct Message uid_msgtab = {
@@ -281,7 +281,7 @@ mc_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 		return 0;
 	}
 
-	newts = atol(parv[2]);
+	newts = parc>2?atol(parv[2]):0;
 	target_p = find_client(parv[1]);
 
 	/* if the nick doesnt exist, allow it and process like normal */
@@ -646,8 +646,10 @@ change_local_nick(struct Client *client_p, struct Client *source_p, char *nick, 
 
 		if(dosend)
 		{
-			sendto_server(client_p, NULL, CAP_TS6, NOCAPS, ":%s NICK %s :%ld",
+			sendto_server(client_p, NULL, CAP_TS6, CAP_211, ":%s NICK %s :%ld",
 				      source_p->id, nick, (long)source_p->tsinfo);
+			sendto_server(client_p, NULL, CAP_TS6|CAP_211, NOCAPS, ":%s NICK :%s",
+				      source_p->id, nick);
 		}
 	}
 
@@ -702,8 +704,10 @@ change_remote_nick(struct Client *client_p, struct Client *source_p,
 		add_history(source_p, 1);
 		if(dosend)
 		{
-			sendto_server(client_p, NULL, CAP_TS6, NOCAPS, ":%s NICK %s :%ld",
+			sendto_server(client_p, NULL, CAP_TS6, CAP_211, ":%s NICK %s :%ld",
 				      source_p->id, nick, (long)source_p->tsinfo);
+			sendto_server(client_p, NULL, CAP_TS6|CAP_211, NOCAPS, ":%s NICK :%s",
+				      source_p->id, nick);
 		}
 	}
 

@@ -230,7 +230,7 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 				name = chptr->chname;
 
 				/* if theres no full name match there may be more with short name.. */
-				if (irccmp(name+1, sn)) RB_DLINK_FOREACH(lp, lp)
+				if (irccmp(name+1, sn)) RB_DLINK_FOREACH(lp, lp->next)
 				{
 					chptr = lp->data;
 
@@ -242,7 +242,12 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 					}
 				}
 
-				if (nclashes) continue;
+				if (nclashes) {
+					/* report the first one found as well */
+					sendto_one(source_p, form_str(ERR_TOOMANYTARGETS),
+					   me.name, source_p->name, name);
+					 continue;
+				}
 			}
 		}
 
