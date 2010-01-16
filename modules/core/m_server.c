@@ -976,6 +976,7 @@ server_estab(struct Client *client_p)
 	const char *host;
 	char note[HOSTLEN + 10];
 	rb_dlink_node *ptr;
+	int cnt;
 
 	s_assert(NULL != client_p);
 	if(client_p == NULL)
@@ -1220,6 +1221,7 @@ server_estab(struct Client *client_p)
 	if (IsCapable(client_p, CAP_211)) {
 		burst_211(client_p);
 		/* spit out EOBs */
+		cnt = 0;
 		RB_DLINK_FOREACH(ptr, global_serv_list.head)
 		{
 			target_p = ptr->data;
@@ -1227,8 +1229,13 @@ server_estab(struct Client *client_p)
 				continue;
 			target_p = ptr->data;
 			if (HasSentEob(target_p))
+			{
 				sendto_one(client_p, ":%s EOB :%s", me.id, target_p->id);
+				cnt++;
+			}
 		}
+		if (!cnt)
+			sendto_one(client_p, ":%s EOB", me.id);
 	} else
 #endif
 	burst_TS6(client_p);
