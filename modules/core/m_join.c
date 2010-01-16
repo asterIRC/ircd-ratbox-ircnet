@@ -364,7 +364,7 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 			/* non-ircnet TS6 servers only (no means of +O/!channels) */
 			if(*chptr->chname == '#')
 			{
-				sendto_server(client_p, chptr, CAP_TS6, CAP_IRCNET,
+				sendto_server(client_p, chptr, CAP_TS6, CAP_IRCNET|CAP_211,
 					      ":%s SJOIN %ld %s +%s :@%s",
  					      me.id, (long)chptr->channelts,
 					      chptr->chname, mstr, source_p->id);
@@ -751,7 +751,8 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 	 */
 
 	for (p = s; ((*p && *p != ' ') && (*p != ',')); p++);
-	*p++ = 0;
+	if (*p)
+		*p++ = 0;
 
 	while(s)
 	{
@@ -786,7 +787,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 		if((mlen_uid + len_uid + MAXIDLEN + 3) > (BUFSIZE - 3))
 		{
 			*(ptr_uid - 1) = '\0';
-			sendto_server(client_p->from, NULL, CAP_TS6, NOCAPS, "%s", buf_uid);
+			sendto_server(client_p->from, NULL, CAP_TS6, CAP_211, "%s", buf_uid);
 #ifdef COMPAT_211
 			sjoin_211(source_p, client_p, chptr, buf_uid + mlen_uid);
 #endif
@@ -927,9 +928,14 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 		}
 	}
 
+	if (len_uid == 0)
+	{
+		*ptr_uid++ = '.';
+		*ptr_uid++ = '\0';
+	}
 	*(ptr_uid - 1) = '\0';
 
-	sendto_server(client_p->from, NULL, CAP_TS6, NOCAPS, "%s", buf_uid);
+	sendto_server(client_p->from, NULL, CAP_TS6, CAP_211, "%s", buf_uid);
 #ifdef COMPAT_211
 	sjoin_211(source_p, client_p, chptr, buf_uid + mlen_uid);
 	/* set the modes */

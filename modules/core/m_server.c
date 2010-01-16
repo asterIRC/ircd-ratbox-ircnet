@@ -401,6 +401,10 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		      ":%s SID %s %d %s :%s%s",
 		      source_p->id, target_p->name, target_p->hopcount + 1,
 		      target_p->id, IsHidden(target_p) ? "(H) " : "", target_p->info);
+	sendto_server(client_p, NULL, CAP_211, NOCAPS,
+		      ":%s SERVER %s %d %s %10s :%s",
+		      source_p->id, target_p->name, target_p->hopcount + 1,
+		      target_p->id, IRCNET_FAKESTRING, target_p->info);
 
 	sendto_realops_flags(UMODE_EXTERNAL, L_ALL,
 			     "Server %s being introduced by %s", target_p->name, source_p->name);
@@ -920,7 +924,7 @@ burst_211(struct Client *client_p)
 				t = buf + mlen;
 			}
 
-			rb_sprintf(t, "%s%s ", find_channel_status(msptr, 1),
+			rb_sprintf(t, "%s%s,", find_channel_status(msptr, 1),
 				   use_id(msptr->client_p));
 
 			cur_len += tlen;
@@ -1153,6 +1157,7 @@ server_estab(struct Client *client_p)
 			sendto_one(target_p, ":%s SERVER %s 2 %s %10s :%s",
 				me.id, client_p->name, client_p->id, IRCNET_FAKESTRING, client_p->info);
 		}
+		else
 #endif
 		sendto_one(target_p, ":%s SID %s 2 %s :%s%s",
 			   me.id, client_p->name, client_p->id,
@@ -1200,9 +1205,9 @@ server_estab(struct Client *client_p)
 #ifdef COMPAT_211
 		if (IsCapable(client_p, CAP_211))
 		{
-			sendto_one(target_p, ":%s SERVER %s %d %s %s :%s",
+			sendto_one(client_p, ":%s SERVER %s %d %s %s :%s",
 				target_p->servptr->id, target_p->name, target_p->hopcount+1,
-				target_p->id, IRCNET_FAKESTRING, client_p->info);
+				target_p->id, IRCNET_FAKESTRING, target_p->info);
 		}
 #endif
 
@@ -1225,9 +1230,8 @@ server_estab(struct Client *client_p)
 				sendto_one(client_p, ":%s EOB :%s", me.id, target_p->id);
 		}
 	} else
-#else
-	burst_TS6(client_p);
 #endif
+	burst_TS6(client_p);
 
 	/* Always send a PING after connect burst is done */
 	sendto_one(client_p, "PING :%s", get_id(&me, client_p));
