@@ -941,7 +941,15 @@ recurse_send_quits(struct Client *client_p, struct Client *source_p,
 
 	if(IsCapable(to, CAP_QS))
 	{
-		sendto_one(to, "SQUIT %s :%s", get_id(source_p, to), comment);
+		/* If this is a split within a mask, send the quit message
+		 * for the users as the squit message.
+		 */
+		if(source_p->name != source_p->servptr->name &&
+				match(ServerConfMask(to->localClient->att_sconf, me.name), source_p->name) &&
+				match(ServerConfMask(to->localClient->att_sconf, me.name), source_p->servptr->name))
+			sendto_one(to, "SQUIT %s :%s", get_id(source_p, to), comment1);
+		else
+			sendto_one(to, "SQUIT %s :%s", get_id(source_p, to), comment);
 	}
 	else
 	{
@@ -1202,13 +1210,28 @@ exit_remote_server(struct Client *client_p, struct Client *source_p, struct Clie
 	static char newcomment[BUFSIZE];
 	struct Client *target_p;
 
-	if(source_p->servptr)
-		strcpy(comment1, source_p->servptr->name);
+	/* If it is behind a mask, we cannot generate a good quit message for
+	 * the users.
+	 * If this comes from the direction of the splitting server, a
+	 * suitable message has been put into the squit reason.
+	 * If not, we have insufficient information.
+	 */
+	if(source_p->servptr->name == source_p->name)
+	{
+		if(source_p->from == client_p)
+			rb_strlcpy(comment1, comment, sizeof comment1);
+		else
+		{
+			strcpy(comment1, source_p->name);
+			strcat(comment1, " *.split");
+		}
+	}
 	else
-		strcpy(comment1, "<Unknown>");
-
-	strcat(comment1, " ");
-	strcat(comment1, source_p->name);
+	{
+		strcpy(comment1, source_p->servptr->name);
+		strcat(comment1, " ");
+		strcat(comment1, source_p->name);
+	}
 	if(IsClient(from))
 		rb_snprintf(newcomment, sizeof(newcomment), "by %s: %s", from->name, comment);
 
@@ -1222,8 +1245,19 @@ exit_remote_server(struct Client *client_p, struct Client *source_p, struct Clie
 	 */
 	if(IsServer(client_p) && IsCapable(client_p, CAP_211) &&
 			source_p->from != client_p)
-		sendto_one(client_p, "SQUIT %s :by %s: %s",
-				source_p->id, from->name, comment);
+	{
+		/* If this is a split within a mask, send the quit message
+		 * for the users as the squit message.
+		 */
+		if(source_p->servptr->name == source_p->name ||
+				(match(ServerConfMask(client_p->localClient->att_sconf, me.name), source_p->name) &&
+				match(ServerConfMask(client_p->localClient->att_sconf, me.name), source_p->servptr->name)))
+			sendto_one(client_p, "SQUIT %s :%s",
+					source_p->id, comment1);
+		else
+			sendto_one(client_p, "SQUIT %s :by %s: %s",
+					source_p->id, from->name, comment);
+	}
 #endif
 
 	if(source_p->serv != NULL)
@@ -1299,11 +1333,39 @@ exit_local_server(struct Client *client_p, struct Client *source_p, struct Clien
 	sendb = source_p->localClient->sendB;
 	recvb = source_p->localClient->receiveB;
 
+	strcpy(comment1, source_p->servptr->name);
+	strcat(comment1, " ");
+	strcat(comment1, source_p->name);
+
 	/* Always show source here, so the server notices show
 	 * which side initiated the split -- jilles
 	 */
 	rb_snprintf(newcomment, sizeof(newcomment), "by %s: %s",
 		    from == source_p ? me.name : from->name, comment);
+
+#ifdef COMPAT_211
+	/* 2.11 throws away SQUITs with empty comments */
+	if(*comment == '\0')
+		comment = "<>";
+
+	/* 2.11 uses unconnect semantics, confirm the SQUIT here. */
+	if(IsServer(client_p) && IsCapable(client_p, CAP_211) &&
+			source_p->from != client_p)
+	{
+		/* If this is a split within a mask, send the quit message
+		 * for the users as the squit message.
+		 */
+		if(source_p->name != source_p->servptr->name &&
+				match(ServerConfMask(client_p->localClient->att_sconf, me.name), source_p->name) &&
+				match(ServerConfMask(client_p->localClient->att_sconf, me.name), source_p->servptr->name))
+			sendto_one(client_p, "SQUIT %s :%s",
+					source_p->id, comment1);
+		else
+			sendto_one(client_p, "SQUIT %s :by %s: %s",
+					source_p->id, from->name, comment);
+	}
+#endif
+
 	if(!IsIOError(source_p))
 		sendto_one(source_p, "SQUIT %s :%s", source_p->id, newcomment);
 	if(client_p != NULL && source_p != client_p && !IsIOError(source_p))
@@ -1322,14 +1384,6 @@ exit_local_server(struct Client *client_p, struct Client *source_p, struct Clien
 
 	if(source_p->localClient->event != NULL)
 		rb_event_delete(source_p->localClient->event);
-
-	if(source_p->servptr)
-		strcpy(comment1, source_p->servptr->name);
-	else
-		strcpy(comment1, "<Unknown>");
-
-	strcat(comment1, " ");
-	strcat(comment1, source_p->name);
 
 	if(source_p->serv != NULL)
 		remove_dependents(client_p, source_p, IsClient(from) ? newcomment : comment,
