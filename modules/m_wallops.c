@@ -101,6 +101,7 @@ ms_wallops(struct Client *client_p, struct Client *source_p, int parc, const cha
 		sendto_wallops_flags(UMODE_WALLOP, source_p, "%s", parv[1]);
 
 	sendto_server(client_p, NULL, CAP_TS6, NOCAPS, ":%s WALLOPS :%s",
-		      source_p->id, parv[1]);
+		      IsClient(source_p) ? source_p->id : source_p->name,
+		      parv[1]);
 	return 0;
 }

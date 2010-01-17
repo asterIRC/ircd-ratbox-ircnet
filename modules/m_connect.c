@@ -227,7 +227,7 @@ ms_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 			     "Remote CONNECT %s %d from %s", parv[1], port, source_p->name);
 	sendto_server(NULL, NULL, CAP_TS6, NOCAPS,
 		      ":%s WALLOPS :Remote CONNECT %s %d from %s",
-		      me.id, parv[1], port, source_p->name);
+		      me.name, parv[1], port, source_p->name);
 
 	ilog(L_SERVER, "CONNECT From %s : %s %d", source_p->name, parv[1], port);
 
