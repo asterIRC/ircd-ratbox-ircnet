@@ -1784,6 +1784,13 @@ conf_set_end_connect(conf_t * conf)
 }
 
 static void
+conf_set_connect_mask(confentry_t *entry, conf_t *conf, struct conf_item *item)
+{
+	rb_free(t_server->mask);
+	t_server->mask = rb_strdup(entry->string);
+}
+
+static void
 conf_set_connect_host(confentry_t * entry, conf_t * conf, struct conf_items *item)
 {
 	rb_free(t_server->host);
@@ -2477,6 +2484,7 @@ static struct conf_items conf_serverhide_table[] =
 
 static struct conf_items conf_connect_table[] =
 {
+	{ "mask",	CF_QSTRING,   conf_set_connect_mask,	0, NULL },
 	{ "send_password",	CF_QSTRING,   conf_set_connect_send_password,	0, NULL },
 	{ "accept_password",	CF_QSTRING,   conf_set_connect_accept_password,	0, NULL },
 	{ "flags",	CF_STRING | CF_FLIST, conf_set_connect_flags,	0, NULL },

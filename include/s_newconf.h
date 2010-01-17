@@ -182,6 +182,7 @@ const char *get_oper_privs(int flags);
 
 struct server_conf
 {
+	char *mask;
 	char *name;
 	char *host;
 	char *passwd;
@@ -216,6 +217,7 @@ struct server_conf
 #define ServerConfTb(x)		((x)->flags & SERVER_TB)
 #define ServerConfAutoconn(x)	((x)->flags & SERVER_AUTOCONN)
 #define ServerConfSSL(x)	((x)->flags & SERVER_SSL)
+#define ServerConfMask(x,name)	((x)->mask ? (match((x)->mask, (name))?(x)->mask:(name)):(name))
 
 
 struct server_conf *make_server_conf(void);

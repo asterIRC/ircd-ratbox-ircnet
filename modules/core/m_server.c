@@ -1154,12 +1154,12 @@ server_estab(struct Client *client_p)
 
 #ifdef COMPAT_211
 		if (IsCapable(client_p, CAP_211)) {
-			sendto_one(client_p, "SERVER %s 1 %s :%s", me.name, me.id,
+			sendto_one(client_p, "SERVER %s 1 %s :%s", ServerConfMask(server_p, me.name), me.id,
 				(me.info[0]) ? (me.info) : "IRCers United");
 		} else
 #endif
 		sendto_one(client_p, "SERVER %s 1 :%s%s",
-			   me.name,
+			   ServerConfMask(server_p, me.name),
 			   ConfigServerHide.hidden ? "(H) " : "",
 			   (me.info[0]) ? (me.info) : "IRCers United");
 	}
@@ -1261,12 +1261,12 @@ server_estab(struct Client *client_p)
 		if (IsCapable(target_p, CAP_211))
 		{
 			sendto_one(target_p, ":%s SERVER %s 2 %s %10s :%s",
-				me.id, client_p->name, client_p->id, IRCNET_FAKESTRING, client_p->info);
+				me.id, ServerConfMask(server_p, client_p->name), client_p->id, IRCNET_FAKESTRING, client_p->info);
 		}
 		else
 #endif
 		sendto_one(target_p, ":%s SID %s 2 %s :%s%s",
-			   me.id, client_p->name, client_p->id,
+			   me.id, ServerConfMask(server_p, client_p->name), client_p->id,
 			   IsHidden(client_p) ? "(H) " : "", client_p->info);
 
 		if(IsCapable(target_p, CAP_ENCAP) && !EmptyString(client_p->serv->fullcaps))
@@ -1313,14 +1313,14 @@ server_estab(struct Client *client_p)
 		if (NotCapable(client_p, CAP_211))
 #endif
 			sendto_one(client_p, ":%s SID %s %d %s :%s%s",
-				   target_p->servptr->id, target_p->name,
+				   target_p->servptr->id, ServerConfMask(server_p, target_p->name),
 				   target_p->hopcount + 1, target_p->id,
 				   IsHidden(target_p) ? "(H) " : "", target_p->info);
 #ifdef COMPAT_211
 		if (IsCapable(client_p, CAP_211))
 		{
 			sendto_one(client_p, ":%s SERVER %s %d %s %s :%s",
-				target_p->servptr->id, target_p->name, target_p->hopcount+1,
+				target_p->servptr->id, ServerConfMask(server_p, target_p->name), target_p->hopcount+1,
 				target_p->id, IRCNET_FAKESTRING, target_p->info);
 		}
 #endif
