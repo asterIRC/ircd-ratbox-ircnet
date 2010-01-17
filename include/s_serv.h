@@ -69,7 +69,7 @@ struct Capability
 #define CAP_IRCNET	0x100000 /* IRCNet support - !channels, +rR */
 #define CAP_211		0x200000 /* we're talking 2.11 IRCNet protocol */
 
-#define CAPS_IRCNET	(CAP_EX|CAP_IE|CAP_TS6|CAP_RSFNC|CAP_SAVE|CAP_SAVETS_100|CAP_IRCNET)
+#define CAPS_IRCNET	(CAP_QS|CAP_EX|CAP_IE|CAP_TS6|CAP_RSFNC|CAP_SAVE|CAP_SAVETS_100|CAP_IRCNET)
 
 #define CAP_MASK        (CAP_QS  | CAP_EX   | CAP_CHW  | \
 			 CAP_IE  | CAP_SERVICE |\
