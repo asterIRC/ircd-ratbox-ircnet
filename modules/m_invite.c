@@ -154,6 +154,13 @@ m_invite(struct Client *client_p, struct Client *source_p, int parc, const char 
 			sendto_one_numeric(source_p, RPL_AWAY, form_str(RPL_AWAY),
 					   target_p->name, target_p->user->away);
 	}
+	/* invite timestamp */
+	else if(parc > 3 && !EmptyString(parv[3]))
+	{
+		/* this should never be less than */
+		if(atol(parv[3]) > chptr->channelts)
+			return 0;
+	}
 
 	if(MyConnect(target_p))
 	{
@@ -166,7 +173,8 @@ m_invite(struct Client *client_p, struct Client *source_p, int parc, const char 
 	}
 	else if(target_p->from != client_p)
 	{
-		sendto_one_prefix(target_p, source_p, "INVITE", ":%s", chptr->chname);
+		sendto_one_prefix(target_p, source_p, "INVITE", "%s %lu",
+				chptr->chname, (unsigned long) chptr->channelts);
 	}
 
 	return 0;
