@@ -1304,10 +1304,8 @@ exit_local_server(struct Client *client_p, struct Client *source_p, struct Clien
 	 */
 	rb_snprintf(newcomment, sizeof(newcomment), "by %s: %s",
 		    from == source_p ? me.name : from->name, comment);
-#if 0				/* let's not do this for now -- jilles */
 	if(!IsIOError(source_p))
 		sendto_one(source_p, "SQUIT %s :%s", source_p->id, newcomment);
-#endif
 	if(client_p != NULL && source_p != client_p && !IsIOError(source_p))
 	{
 		sendto_one(source_p, "ERROR :Closing Link: 127.0.0.1 %s (%s)",
