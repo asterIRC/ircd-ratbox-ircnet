@@ -1247,7 +1247,8 @@ exit_remote_server(struct Client *client_p, struct Client *source_p, struct Clie
 
 	del_from_hash(HASH_ID, source_p->id, source_p);
 
-	del_from_hash(HASH_CLIENT, source_p->name, source_p);
+	if(source_p->name != source_p->servptr->name)
+		del_from_hash(HASH_CLIENT, source_p->name, source_p);
 	remove_client_from_list(source_p);
 
 	SetDead(source_p);
@@ -1274,7 +1275,8 @@ qs_server(struct Client *source_p)
 
 	del_from_hash(HASH_ID, source_p->id, source_p);
 
-	del_from_hash(HASH_CLIENT, source_p->name, source_p);
+	if(source_p->name != source_p->servptr->name)
+		del_from_hash(HASH_CLIENT, source_p->name, source_p);
 	remove_client_from_list(source_p);
 
 	SetDead(source_p);

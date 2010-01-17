@@ -50,6 +50,7 @@
 static int mr_server(struct Client *, struct Client *, int, const char **);
 static int ms_server(struct Client *, struct Client *, int, const char **);
 static int ms_sid(struct Client *, struct Client *, int, const char **);
+static int ms_smask(struct Client *, struct Client *, int, const char **);
 
 struct Message server_msgtab = {
 	"SERVER", 0, 0, 0, MFLG_SLOW | MFLG_UNREG,
@@ -61,7 +62,12 @@ struct Message sid_msgtab = {
 	{mg_ignore, mg_reg, mg_ignore, {ms_sid, 5}, mg_ignore, mg_reg}
 };
 
-mapi_clist_av2 server_clist[] = { &server_msgtab, &sid_msgtab, NULL };
+struct Message smask_msgtab = {
+	"SMASK", 0, 0, 0, MFLG_SLOW,
+	{mg_ignore, mg_reg, mg_ignore, {ms_smask, 3}, mg_ignore, mg_reg}
+};
+
+mapi_clist_av2 server_clist[] = { &server_msgtab, &sid_msgtab, &smask_msgtab, NULL };
 
 DECLARE_MODULE_AV2(server, NULL, NULL, server_clist, NULL, NULL, "$Revision: 26588 $");
 
@@ -411,6 +417,73 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 	sendto_realops_flags(UMODE_EXTERNAL, L_ALL,
 			     "Server %s being introduced by %s", target_p->name, source_p->name);
+
+	/* quick, dirty EOB.  you know you love it. */
+#ifdef COMPAT_211
+	if(IsCapable(target_p->from, CAP_211))
+		sendto_one(target_p, ":%s PING %s %s",
+			   get_id(&me, target_p), me.name, target_p->name);
+	else
+#endif
+	sendto_one(target_p, ":%s PING %s %s",
+		   get_id(&me, target_p), me.name, get_id(target_p, target_p));
+
+	hdata.client = source_p;
+	hdata.target = target_p;
+	call_hook(h_server_introduced, &hdata);
+
+	return 0;
+}
+
+static int
+ms_smask(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+{
+	struct Client *target_p;
+	hook_data_client hdata;
+
+	/* collision on the SID? */
+	if((target_p = find_id(parv[1])) != NULL)
+	{
+		sendto_one(client_p, "ERROR :SID %s already exists", parv[1]);
+		sendto_realops_flags(UMODE_ALL, L_ALL,
+				     "Link %s cancelled, SID %s already exists",
+				     client_p->name, parv[3]);
+		ilog(L_SERVER, "Link %s cancelled, SID %s already exists", client_p->name, parv[1]);
+		exit_client(NULL, client_p, &me, "SID Exists");
+		return 0;
+	}
+
+	if (!check_sid(parv[1]))
+	{
+		sendto_one(client_p, "ERROR :Invalid SID");
+		sendto_realops_flags(UMODE_ALL, L_ALL,
+				     "Link %s cancelled, SID %s invalid", client_p->name, parv[1]);
+		ilog(L_SERVER, "Link %s cancelled, SID %s invalid", client_p->name, parv[1]);
+		exit_client(NULL, client_p, &me, "Bogus SID");
+		return 0;
+	}
+
+	/* ok, alls good */
+	target_p = make_client(client_p);
+	make_server(target_p);
+
+	target_p->name = source_p->name;
+
+	target_p->hopcount = source_p->hopcount + 1;
+	strcpy(target_p->id, parv[1]);
+	rb_strlcpy(client_p->info, "Masked Server", sizeof(client_p->info));
+
+	target_p->servptr = source_p;
+	SetServer(target_p);
+
+	rb_dlinkAddTail(target_p, &target_p->node, &global_client_list);
+	rb_dlinkAddTailAlloc(target_p, &global_serv_list);
+	add_to_hash(HASH_ID, target_p->id, target_p);
+	rb_dlinkAdd(target_p, &target_p->lnode, &target_p->servptr->serv->servers);
+
+	sendto_server(client_p, NULL, CAP_TS6, NOCAPS,
+		      ":%s SMASK %s %s",
+		      source_p->id, target_p->id, parv[2]);
 
 	/* quick, dirty EOB.  you know you love it. */
 #ifdef COMPAT_211
@@ -1226,6 +1299,14 @@ server_estab(struct Client *client_p)
 		/* target_p->from == target_p for target_p == client_p */
 		if(IsMe(target_p) || target_p->from == client_p)
 			continue;
+
+		if(target_p->name == target_p->servptr->name)
+		{
+			sendto_one(client_p, ":%s SMASK %s %s",
+				   target_p->servptr->id, target_p->id,
+				   IRCNET_FAKESTRING);
+			continue;
+		}
 
 		/* presumption, if target has an id, so does its uplink */
 #ifdef COMPAT_211
