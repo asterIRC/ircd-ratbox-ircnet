@@ -148,6 +148,12 @@ ms_whois(struct Client *client_p, struct Client *source_p, int parc, const char 
 	 */
 	if(!MyClient(target_p) && !IsMe(target_p))
 	{
+#ifdef COMPAT_211
+		if (IsCapable(target_p->from, CAP_211) && IsClient(target_p))
+			sendto_one(target_p, ":%s WHOIS %s :%s",
+				   get_id(source_p, target_p), target_p->name, parv[2]);
+		else
+#endif
 		sendto_one(target_p, ":%s WHOIS %s :%s",
 			   get_id(source_p, target_p), get_id(target_p, target_p), parv[2]);
 		return 0;
