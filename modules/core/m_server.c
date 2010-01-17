@@ -291,7 +291,7 @@ ms_server(struct Client *client_p, struct Client *source_p, int parc, const char
 static int
 ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	struct Client *target_p;
+	struct Client *target_p, *target2_p;
 	struct remote_conf *hub_p;
 	hook_data_client hdata;
 	rb_dlink_node *ptr;
@@ -406,14 +406,44 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	add_to_hash(HASH_ID, target_p->id, target_p);
 	rb_dlinkAdd(target_p, &target_p->lnode, &target_p->servptr->serv->servers);
 
-	sendto_server(client_p, NULL, CAP_TS6, CAP_211,
-		      ":%s SID %s %d %s :%s%s",
-		      source_p->id, target_p->name, target_p->hopcount + 1,
-		      target_p->id, IsHidden(target_p) ? "(H) " : "", target_p->info);
-	sendto_server(client_p, NULL, CAP_211, NOCAPS,
-		      ":%s SERVER %s %d %s %10s :%s",
-		      source_p->id, target_p->name, target_p->hopcount + 1,
-		      target_p->id, IRCNET_FAKESTRING, target_p->info);
+	/*
+	 ** Old sendto_server() call removed because we now
+	 ** need to send different names to different servers
+	 ** (domain name matching) Send new server to other servers.
+	 */
+	RB_DLINK_FOREACH(ptr, serv_list.head)
+	{
+		target2_p = ptr->data;
+
+		if(target2_p == client_p)
+			continue;
+
+		if(match(ServerConfMask(target2_p->localClient->att_sconf, me.name), target_p->name))
+		{
+			sendto_one(target2_p, ":%s SMASK %s %s",
+				   source_p->id, target_p->id,
+				   IRCNET_FAKESTRING);
+			continue;
+		}
+#ifdef COMPAT_211
+		if (IsCapable(target2_p, CAP_211))
+		{
+			sendto_one(target2_p, ":%s SERVER %s %d %s %10s :%s",
+				source_p->id, target_p->name,
+				target_p->hopcount + 1, target_p->id,
+				IRCNET_FAKESTRING, target_p->info);
+		}
+		else
+#endif
+		sendto_one(target2_p, ":%s SID %s %d %s :%s%s",
+			   source_p->id, target_p->name,
+			   target_p->hopcount + 1, target_p->id,
+			   IsHidden(target_p) ? "(H) " : "", target_p->info);
+
+		if(IsCapable(target2_p, CAP_ENCAP) && !EmptyString(target_p->serv->fullcaps))
+			sendto_one(target2_p, ":%s ENCAP * GCAP :%s",
+				   target_p->id, target_p->serv->fullcaps);
+	}
 
 	sendto_realops_flags(UMODE_EXTERNAL, L_ALL,
 			     "Server %s being introduced by %s", target_p->name, source_p->name);
@@ -1257,16 +1287,23 @@ server_estab(struct Client *client_p)
 		if(target_p == client_p)
 			continue;
 
+		if(match(ServerConfMask(target_p->localClient->att_sconf, me.name), client_p->name))
+		{
+			sendto_one(target_p, ":%s SMASK %s %s",
+				   me.id, client_p->id,
+				   IRCNET_FAKESTRING);
+			continue;
+		}
 #ifdef COMPAT_211
 		if (IsCapable(target_p, CAP_211))
 		{
 			sendto_one(target_p, ":%s SERVER %s 2 %s %10s :%s",
-				me.id, ServerConfMask(server_p, client_p->name), client_p->id, IRCNET_FAKESTRING, client_p->info);
+				me.id, client_p->name, client_p->id, IRCNET_FAKESTRING, client_p->info);
 		}
 		else
 #endif
 		sendto_one(target_p, ":%s SID %s 2 %s :%s%s",
-			   me.id, ServerConfMask(server_p, client_p->name), client_p->id,
+			   me.id, client_p->name, client_p->id,
 			   IsHidden(client_p) ? "(H) " : "", client_p->info);
 
 		if(IsCapable(target_p, CAP_ENCAP) && !EmptyString(client_p->serv->fullcaps))
@@ -1300,7 +1337,9 @@ server_estab(struct Client *client_p)
 		if(IsMe(target_p) || target_p->from == client_p)
 			continue;
 
-		if(target_p->name == target_p->servptr->name)
+		if(target_p->name == target_p->servptr->name ||
+				match(ServerConfMask(server_p, me.name),
+					target_p->name))
 		{
 			sendto_one(client_p, ":%s SMASK %s %s",
 				   target_p->servptr->id, target_p->id,
