@@ -251,7 +251,7 @@ single_whois(struct Client *source_p, struct Client *target_p, int operspy)
 			   target_p->name, target_p->username, target_p->host, target_p->info);
 
 	cur_len = mlen = rb_sprintf(buf, form_str(RPL_WHOISCHANNELS),
-				    get_id(&me, source_p), get_id(source_p, source_p),
+				    me.name, get_id(source_p, source_p),
 				    target_p->name);
 	/* Make sure it won't overflow when sending it to the client
 	 * in full names; note that serverhiding may require more space
@@ -261,7 +261,6 @@ single_whois(struct Client *source_p, struct Client *target_p, int operspy)
 		extra_space = strlen(source_p->name) - 9;
 		if(extra_space < 0)
 			extra_space = 0;
-		extra_space += strlen(me.name) - 2;	/* make sure >= 0 */
 		cur_len += extra_space;
 	}
 
