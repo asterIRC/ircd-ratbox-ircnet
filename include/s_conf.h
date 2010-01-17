@@ -48,7 +48,6 @@ struct ConfItem
 		const char *oper;
 	} info;
 
-	//char *mask;		/* masked server name */
 	char *host;		/* host part of user@host */
 	char *passwd;		/* doubles as kline reason *ugh* */
 	char *spasswd;		/* Password to send. */
