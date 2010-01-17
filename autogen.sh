@@ -12,7 +12,7 @@ run() {
 
 # OS X's retarded.
 libtoolize="libtoolize"
-[[ "$(uname)" == "Darwin" ]] && libtoolize="glibtoolize"
+[ "x$(uname)" = "xDarwin" ] && libtoolize="glibtoolize"
 
 run ${libtoolize} --copy --force --automake
 run aclocal
