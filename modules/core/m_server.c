@@ -449,14 +449,9 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 			     "Server %s being introduced by %s", target_p->name, source_p->name);
 
 	/* quick, dirty EOB.  you know you love it. */
-#ifdef COMPAT_211
-	if(IsCapable(target_p->from, CAP_211))
+	if(!IsCapable(target_p->from, CAP_IRCNET))
 		sendto_one(target_p, ":%s PING %s %s",
-			   get_id(&me, target_p), me.name, target_p->name);
-	else
-#endif
-	sendto_one(target_p, ":%s PING %s %s",
-		   get_id(&me, target_p), me.name, get_id(target_p, target_p));
+			   get_id(&me, target_p), me.name, get_id(target_p, target_p));
 
 	hdata.client = source_p;
 	hdata.target = target_p;
@@ -514,16 +509,6 @@ ms_smask(struct Client *client_p, struct Client *source_p, int parc, const char 
 	sendto_server(client_p, NULL, CAP_TS6, NOCAPS,
 		      ":%s SMASK %s %s",
 		      source_p->id, target_p->id, parv[2]);
-
-	/* quick, dirty EOB.  you know you love it. */
-#ifdef COMPAT_211
-	if(IsCapable(target_p->from, CAP_211))
-		sendto_one(target_p, ":%s PING %s %s",
-			   get_id(&me, target_p), me.name, target_p->name);
-	else
-#endif
-	sendto_one(target_p, ":%s PING %s %s",
-		   get_id(&me, target_p), me.name, get_id(target_p, target_p));
 
 	hdata.client = source_p;
 	hdata.target = target_p;
@@ -1370,8 +1355,14 @@ server_estab(struct Client *client_p)
 	}
 
 #ifdef COMPAT_211
-	if (IsCapable(client_p, CAP_211)) {
+	if (IsCapable(client_p, CAP_211))
 		burst_211(client_p);
+	else
+#endif
+	burst_TS6(client_p);
+
+	if(IsCapable(client_p, CAP_IRCNET))
+	{
 		/* spit out EOBs */
 		cnt = 0;
 		RB_DLINK_FOREACH(ptr, global_serv_list.head)
@@ -1388,12 +1379,11 @@ server_estab(struct Client *client_p)
 		}
 		if (!cnt)
 			sendto_one(client_p, ":%s EOB", me.id);
-	} else
-#endif
-	burst_TS6(client_p);
-
+	}
 	/* Always send a PING after connect burst is done */
-	sendto_one(client_p, "PING :%s", me.name);
+	/* For IRCNET, EOB/EOBACK take care of this */
+	else
+		sendto_one(client_p, "PING :%s", me.name);
 
 	ClearCork(client_p);
 	send_pop_queue(client_p);

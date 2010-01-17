@@ -40,6 +40,7 @@ m_cmessage_la_LDFLAGS =  -module $(MODULE_FLAGS)
 m_connect_la_LDFLAGS =  -module $(MODULE_FLAGS)  
 m_dline_la_LDFLAGS =  -module $(MODULE_FLAGS)  
 m_encap_la_LDFLAGS =  -module $(MODULE_FLAGS)  
+m_eob_la_LDFLAGS =  -module $(MODULE_FLAGS)  
 m_gline_la_LDFLAGS =  -module $(MODULE_FLAGS)  
 m_gungline_la_LDFLAGS =  -module $(MODULE_FLAGS)  
 m_help_la_LDFLAGS =  -module $(MODULE_FLAGS)  
@@ -95,6 +96,7 @@ m_cmessage_la_SOURCES =	m_cmessage.c
 m_connect_la_SOURCES =	m_connect.c
 m_dline_la_SOURCES =	m_dline.c
 m_encap_la_SOURCES =	m_encap.c
+m_eob_la_SOURCES =	m_eob.c
 m_gline_la_SOURCES =	m_gline.c
 m_gungline_la_SOURCES =	m_gungline.c
 m_help_la_SOURCES =	m_help.c
@@ -150,7 +152,7 @@ m_close_la_LIBADD = $(MODULE_LIBS)
 m_cmessage_la_LIBADD = $(MODULE_LIBS)     
 m_connect_la_LIBADD = $(MODULE_LIBS)     
 m_dline_la_LIBADD = $(MODULE_LIBS)     
-m_encap_la_LIBADD = $(MODULE_LIBS)     
+m_eob_la_LIBADD = $(MODULE_LIBS)     
 m_gline_la_LIBADD = $(MODULE_LIBS)     
 m_gungline_la_LIBADD = $(MODULE_LIBS)     
 m_help_la_LIBADD = $(MODULE_LIBS)     
@@ -235,6 +237,7 @@ m_cmessage.la	\
 m_connect.la	\
 m_dline.la	\
 m_encap.la	\
+m_eob.la	\
 m_gline.la	\
 m_gungline.la	\
 m_help.la	\
@@ -357,6 +360,7 @@ m_cmessage.c	\
 m_connect.c	\
 m_dline.c	\
 m_encap.c	\
+m_eob.c		\
 m_gline.c	\
 m_gungline.c	\
 m_help.c	\

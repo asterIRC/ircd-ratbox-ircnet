@@ -97,7 +97,7 @@ ms_pong(struct Client *client_p, struct Client *source_p, int parc, const char *
 					     source_p->name,
 					     (signed int)(rb_current_time() -
 							  source_p->localClient->firsttime));
-		sendto_server(client_p, NULL, CAP_211, NOCAPS, ":%s EOB :%s",
+		sendto_server(client_p, NULL, CAP_IRCNET, NOCAPS, ":%s EOB :%s",
 				me.id, source_p->id);
 		SetEob(source_p);
 		eob_count++;
