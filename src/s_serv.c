@@ -130,7 +130,15 @@ hunt_server(struct Client *client_p, struct Client *source_p,
 	 * non-matching lookups.
 	 */
 	if(MyClient(source_p))
+	{
 		target_p = find_named_client(new);
+		if(target_p == NULL)
+		{
+			target_p = find_id(new);
+			if (target_p != NULL && !IsServer(target_p))
+				target_p = NULL;
+		}
+	}
 	else
 		target_p = find_client(new);
 
@@ -192,7 +200,8 @@ hunt_server(struct Client *client_p, struct Client *source_p,
 			parv[server] = target_p->name;
 		else
 #endif
-		parv[server] = get_id(target_p, target_p);
+		if (!strchr(parv[server], '.'))
+			parv[server] = get_id(target_p, target_p);
 
 		sendto_one(target_p, command, get_id(source_p, target_p),
 			   parv[1], parv[2], parv[3], parv[4], parv[5], parv[6], parv[7], parv[8]);
