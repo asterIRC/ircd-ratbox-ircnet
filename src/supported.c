@@ -270,7 +270,7 @@ init_isupport(void)
 	static int nicklen = NICKLEN - 1;
 	static int channellen = LOC_CHANNELLEN;
 
-	add_isupport("CHANTYPES", isupport_string, "&#!");
+	add_isupport("CHANTYPES", isupport_string, "#&!+");
 	add_isupport("EXCEPTS", isupport_boolean, &ConfigChannel.use_except);
 	add_isupport("INVEX", isupport_boolean, &ConfigChannel.use_invex);
 	add_isupport("IDCHAN", isupport_idchan, NULL);
