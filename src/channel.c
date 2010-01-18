@@ -88,7 +88,7 @@ allocate_channel(const char *chname)
 	chptr = rb_bh_alloc(channel_heap);
 	chptr->chname = rb_strndup(chname, CHANNELLEN);
 	if (*chname == '+')
-		chptr->mode.mode |= MODE_NOPRIVMSGS;
+		chptr->mode.mode |= MODE_TOPICLIMIT;
 	return (chptr);
 }
 
