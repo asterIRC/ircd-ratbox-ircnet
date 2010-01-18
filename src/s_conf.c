@@ -747,7 +747,7 @@ set_default_conf(void)
 	ConfigFileEntry.max_nick_changes = 5;
 	ConfigFileEntry.max_accept = 20;
 	ConfigFileEntry.max_monitor = 60;
-	ConfigFileEntry.nick_delay = 900;	/* 15 minutes */
+	ConfigFileEntry.nick_delay = 1800;	/* 15 minutes */
 	ConfigFileEntry.target_change = YES;
 	ConfigFileEntry.collision_fnc = NO;
 	ConfigFileEntry.anti_spam_exit_message_time = 0;
@@ -769,7 +769,7 @@ set_default_conf(void)
 	ConfigFileEntry.stats_h_oper_only = NO;
 	ConfigFileEntry.map_oper_only = YES;
 	ConfigFileEntry.operspy_admin_only = NO;
-	ConfigFileEntry.pace_wait = 10;
+	ConfigFileEntry.pace_wait = 1;
 	ConfigFileEntry.caller_id_wait = 60;
 	ConfigFileEntry.pace_wait_simple = 1;
 	ConfigFileEntry.short_motd = NO;
@@ -815,10 +815,13 @@ set_default_conf(void)
 	ConfigChannel.burst_topicwho = YES;
 	ConfigChannel.invite_ops_only = YES;
 
-	ConfigChannel.default_split_user_count = 15000;
-	ConfigChannel.default_split_server_count = 10;
+	ConfigChannel.default_split_user_count = 50000;
+	ConfigChannel.default_split_server_count = 65;
 	ConfigChannel.no_join_on_split = NO;
-	ConfigChannel.no_create_on_split = YES;
+	ConfigChannel.no_create_on_split = NO;
+	ConfigChannel.no_ops_on_split = YES;
+	ConfigChannel.delay = 1800;
+	ConfigChannel.reop = 5400;
 	ConfigChannel.topiclen = DEFAULT_TOPICLEN;
 	ConfigChannel.resv_forcepart = YES;
 

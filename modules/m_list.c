@@ -275,7 +275,30 @@ list_named_channel(struct Client *source_p, const char *name)
 
 	if(chptr == NULL)
 	{
-		sendto_one_numeric(source_p, ERR_NOSUCHNICK, form_str(ERR_NOSUCHNICK), n);
+		rb_dlink_node *lp;
+
+		/* this means the user was using shortname */
+		if (*n == '!' && (lp = find_channels(n + 1))) {
+			struct Channel *chptr;
+			int showit;
+
+			RB_DLINK_FOREACH(lp, lp) {
+				chptr = lp->data;
+
+				if ((chptr->chname[0] != '!') ||
+				     irccmp(n + 1, chptr->chname + 1 + CHIDLEN))
+					continue;
+
+				showit = ShowChannel(source_p, chptr);
+
+				sendto_one(source_p, form_str(RPL_LIST),
+				   me.name, source_p->name, chptr->chname,
+				   showit?rb_dlink_list_length(&chptr->members):0,
+				   showit?(chptr->topic == NULL ? "" : chptr->topic->topic):"");
+			}
+		} else
+			sendto_one_numeric(source_p, ERR_NOSUCHNICK, form_str(ERR_NOSUCHNICK), n);
+
 		ClearCork(source_p);
 		sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
 		return;

@@ -340,7 +340,7 @@ initialize_global_set_options(void)
 	split_users = ConfigChannel.default_split_user_count;
 
 	if(split_users && split_servers
-	   && (ConfigChannel.no_create_on_split || ConfigChannel.no_join_on_split))
+	   && (ConfigChannel.no_create_on_split || ConfigChannel.no_join_on_split || ConfigChannel.no_ops_on_split))
 	{
 		splitmode = 1;
 		splitchecking = 1;
