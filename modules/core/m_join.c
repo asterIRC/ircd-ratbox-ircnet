@@ -301,6 +301,9 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		   ConfigChannel.no_ops_on_split)
 			flags = 0;
 
+		if (*name == '+')
+			flags = 0;
+
 		if(chptr == NULL)	/* If I already have a chptr, no point doing this */
 		{
 			chptr = get_or_create_channel(source_p, name, NULL);

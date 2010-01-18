@@ -181,8 +181,8 @@ struct ChCapCombo
 #define IsMember(who, chan) ((who && who->user && \
 		find_channel_membership(chan, who)) ? 1 : 0)
 
-#define IsChannelName(name) ((name) && (*(name) == '#' || *(name) == '&' || *(name) == '!'))
-#define IsRemoteChannel(name) ((name) && (*(name) == '#' || *(name) == '!'))
+#define IsChannelName(name) ((name) && IsChanPrefix(*name))
+#define IsRemoteChannel(name) (IsChannelName(name) && *(name) != '&')
 #define HasHistory(chptr) (chptr->opquit + ConfigChannel.delay >= rb_current_time())
 #define IsLocked(chptr) (HasHistory(chptr) && (rb_dlink_list_length(&chptr->members) == 0))
 
