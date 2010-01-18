@@ -176,6 +176,8 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	for (p = channel_tok(name); name;key = (key) ? rb_strtok_r(NULL, ",", &p2) : NULL,
 		 name = p, p = name?channel_tok(name):NULL)
 	{
+		int needcap = strchr(name, ',')?CAP_JAPANESE:0;
+
 		/* JOIN 0 simply parts all channels the user is in */
 		if(*name == '0' && !atoi(name))
 		{
@@ -369,19 +371,19 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 			/* non-ircnet TS6 servers only (no means of +O/!channels) */
 			if(*chptr->chname == '#')
 			{
-				sendto_server(client_p, chptr, CAP_TS6, CAP_IRCNET|CAP_211,
+				sendto_server(client_p, chptr, CAP_TS6|needcap, CAP_IRCNET|CAP_211,
 					      ":%s SJOIN %ld %s +%s :@%s",
  					      me.id, (long)chptr->channelts,
 					      chptr->chname, mstr, source_p->id);
 			}
 			/* ircnet TS6/non-TS6 servers */
 			if (*chptr->chname == '#' || *chptr->chname == '!') {
-				sendto_server(client_p, chptr, CAP_TS6|CAP_IRCNET, CAP_211,
+				sendto_server(client_p, chptr, needcap|CAP_TS6|CAP_IRCNET, CAP_211,
 					      ":%s SJOIN %ld %s +%s :@%s%s",
 					      me.id, (long)chptr->channelts,
 					      chptr->chname, mstr, (flags & CHFL_UNIQOP)?"@":"", source_p->id);
 #ifdef COMPAT_211
-				sendto_server(client_p, chptr, CAP_TS6|CAP_211, NOCAPS,
+				sendto_server(client_p, chptr, needcap|CAP_TS6|CAP_211, NOCAPS,
 					      ":%s NJOIN %s :@%s%s",
 					      me.id,
 					      chptr->chname, (flags & CHFL_UNIQOP)?"@":"", source_p->id);
@@ -391,11 +393,11 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		}
 		else
 		{
-			sendto_server(client_p, chptr, CAP_TS6, CAP_211,
+			sendto_server(client_p, chptr, needcap|CAP_TS6, CAP_211,
 				      ":%s JOIN %ld %s +",
 				      source_p->id, (long)chptr->channelts, chptr->chname);
 #ifdef COMPAT_211
-			sendto_server(client_p, chptr, CAP_TS6|CAP_211, NOCAPS,
+			sendto_server(client_p, chptr, needcap|CAP_TS6|CAP_211, NOCAPS,
 				      ":%s NJOIN %s :%s",
 				      me.id, chptr->chname, source_p->id);
 #endif
