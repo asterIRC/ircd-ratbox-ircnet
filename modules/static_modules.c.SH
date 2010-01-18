@@ -41,7 +41,13 @@ done >> static_modules.c
 
 echo const struct mapi_header_av2 *static_mapi_headers[] = { >> static_modules.c 
 for x in $SYMS; do 
+	if [ "$x" = "m_services" ]; then
+		echo "#ifdef ENABLE_SERVICES"
+	fi
 	echo "	&$x"_mheader,
+	if [ "$x" = "m_services" ]; then
+		echo "#endif"
+	fi
 done >> static_modules.c
 
 echo "	NULL" >> static_modules.c

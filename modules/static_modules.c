@@ -63,7 +63,6 @@ extern struct mapi_header_av2 m_post_mheader;
 extern struct mapi_header_av2 m_rehash_mheader;
 extern struct mapi_header_av2 m_restart_mheader;
 extern struct mapi_header_av2 m_resv_mheader;
-extern struct mapi_header_av2 m_services_mheader;
 extern struct mapi_header_av2 m_set_mheader;
 extern struct mapi_header_av2 m_stats_mheader;
 extern struct mapi_header_av2 m_svinfo_mheader;
@@ -94,6 +93,7 @@ extern struct mapi_header_av2 m_part_mheader;
 extern struct mapi_header_av2 m_quit_mheader;
 extern struct mapi_header_av2 m_server_mheader;
 extern struct mapi_header_av2 m_squit_mheader;
+extern struct mapi_header_av2 m_services_mheader;
 const struct mapi_header_av2 *static_mapi_headers[] = {
 	&m_accept_mheader,
 	&m_admin_mheader,
@@ -132,7 +132,6 @@ const struct mapi_header_av2 *static_mapi_headers[] = {
 	&m_rehash_mheader,
 	&m_restart_mheader,
 	&m_resv_mheader,
-	&m_services_mheader,
 	&m_set_mheader,
 	&m_stats_mheader,
 	&m_svinfo_mheader,
@@ -163,5 +162,8 @@ const struct mapi_header_av2 *static_mapi_headers[] = {
 	&m_quit_mheader,
 	&m_server_mheader,
 	&m_squit_mheader,
+#ifdef ENABLE_SERVICES
+	&m_services_mheader,
+#endif
 	NULL
 };
