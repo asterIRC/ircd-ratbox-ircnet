@@ -828,9 +828,11 @@ burst_TS6(struct Client *client_p)
 		s_assert(rb_dlink_list_length(&chptr->members) > 0);
 		*/
 
-		if(*chptr->chname != '#' && (IsCapable(client_p, CAP_IRCNET) && *chptr->chname != '!'))
+		if (!IsRemoteChannel(chptr->chname) || (!IsCapable(client_p, CAP_IRCNET) && *chptr->chname == '!'))
 			continue;
 
+		if (!IsCapable(client_p, CAP_JAPANESE) && strchr(chptr->chname, ','))
+			continue;
 
 		cur_len = mlen = rb_sprintf(buf, ":%s SJOIN %ld %s %s :", me.id,
 					    (long)chptr->channelts, chptr->chname,
