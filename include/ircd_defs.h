@@ -37,7 +37,7 @@
 #define INCLUDED_ircd_defs_h
 
 /* a password string used by ircnet servers (fake version: 2.11.3p199) */
-#define IRCNET_FAKESTRING "0211030199 IRC|aCDEFHJKMQRTu P"
+#define IRCNET_FAKESTRING "0211030199 IRC|aCDEFHJKMQRTu Pj"
 
 /* For those unfamiliar with GNU format attributes, a is the 1 based
  * argument number of the format string, and b is the 1 based argument

@@ -79,6 +79,7 @@ struct Capability captab[] = {
 	{"SAVETS_100", CAP_SAVETS_100},
 	{"IRCNET", CAP_IRCNET},
 	{"211", CAP_211 },
+	{"JAPANESE", CAP_JAPANESE },
 	{0, 0}
 };
 

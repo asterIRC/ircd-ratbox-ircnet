@@ -78,14 +78,16 @@ mr_pass(struct Client *client_p, struct Client *source_p, int parc, const char *
 				 /* so they'll have same caps as we do. */
 				client_p->localClient->caps |= (CAP_TS6|CAP_MASK) & ~(CAP_TB|CAP_ZIP);
 				/* we couldn't use CAPAB, so let's play the IRCNet way */
-				if (strchr(parv[4], 'Z'))
-					client_p->localClient->caps |= CAP_ZIP;
-				if (strchr(parv[4], 'T'))
-					client_p->localClient->caps |= CAP_TB;
 			} else {
 				/* legacy 2.11 */
 				client_p->localClient->caps |= CAP_211+CAPS_IRCNET;
 			}
+			if (strchr(parv[4], 'Z'))
+				client_p->localClient->caps |= CAP_ZIP;
+			if (strchr(parv[4], 'T'))
+				client_p->localClient->caps |= CAP_TB;
+			if (strchr(parv[4], 'j'))
+				client_p->localClient->caps |= CAP_JAPANESE;
 			return 0;
 		}
 #endif

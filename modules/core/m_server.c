@@ -1008,9 +1008,12 @@ burst_211(struct Client *client_p)
 	{
 		chptr = ptr->data;
 
-		if(*chptr->chname != '#' && (IsCapable(client_p, CAP_IRCNET) && *chptr->chname != '!'))
+		if (!IsRemoteChannel(chptr->chname))
 			continue;
 
+		/* a ',' in channel name means JIS-encoded channel. */
+		if (!IsCapable(client_p, CAP_JAPANESE) && strchr(chptr->chname, ','))
+			continue;
 
 		cur_len = mlen = rb_sprintf(buf, ":%s NJOIN %s :", me.id, chptr->chname);
 		t = buf + mlen;

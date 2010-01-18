@@ -68,6 +68,7 @@ struct Capability
 #define CAP_SAVETS_100	0x80000	/* supports SAVE at TS 100 */
 #define CAP_IRCNET	0x100000 /* IRCNet support - !channels, +rR */
 #define CAP_211		0x200000 /* we're talking 2.11 IRCNet protocol */
+#define CAP_JAPANESE	0x400000 /* allow character ',' in case of JIS-encoded channel names */
 
 #define CAPS_IRCNET	(CAP_QS|CAP_EX|CAP_IE|CAP_TS6|CAP_RSFNC|CAP_ENCAP|CAP_SAVE|CAP_SAVETS_100|CAP_IRCNET)
 
@@ -75,7 +76,7 @@ struct Capability
 			 CAP_IE  | CAP_SERVICE |\
 			 CAP_GLN | CAP_ENCAP | \
 			 CAP_ZIP  | CAP_KNOCK  | \
-			 CAP_RSFNC | CAP_SAVE | CAP_SAVETS_100 | CAP_IRCNET)
+			 CAP_RSFNC | CAP_SAVE | CAP_SAVETS_100 | CAP_IRCNET | CAP_JAPANESE)
 /*
  * Capability macros.
  */
