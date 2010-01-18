@@ -87,6 +87,8 @@ allocate_channel(const char *chname)
 	struct Channel *chptr;
 	chptr = rb_bh_alloc(channel_heap);
 	chptr->chname = rb_strndup(chname, CHANNELLEN);
+	if (*chname == '+')
+		chptr->mode.mode |= MODE_NOPRIVMSGS;
 	return (chptr);
 }
 
@@ -801,6 +803,9 @@ channel_modes(struct Channel *chptr, struct Client *client_p)
 {
 	static char buf[BUFSIZE];
 	char *mbuf = buf;
+
+	if (*chptr->chname == '+')
+		return "+";
 
 	*mbuf++ = '+';
 

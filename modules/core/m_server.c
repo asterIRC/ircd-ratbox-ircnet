@@ -1055,6 +1055,9 @@ burst_211(struct Client *client_p)
 		*(t - 1) = '\0';
 		sendto_one_buffer(client_p, buf);
 
+		if (*chptr->chname == '+')
+			continue;
+
 		sendto_one(client_p, ":%s MODE %s %s",
 			me.id, chptr->chname, channel_modes(chptr, client_p));
 
