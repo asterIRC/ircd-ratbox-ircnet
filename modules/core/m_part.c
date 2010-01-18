@@ -62,14 +62,12 @@ static void part_one_client(struct Client *client_p,
 static int
 m_part(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	char *p, *name;
+	char *p;
 	char *reason = NULL;
-	char *s = LOCAL_COPY(parv[1]);
+	char *name = LOCAL_COPY(parv[1]);
 
 	if(parc > 2)
 		reason = LOCAL_COPY_N(parv[2], REASONLEN);
-
-	name = rb_strtok_r(s, ",", &p);
 
 	/* Finish the flood grace period... */
 	if(MyClient(source_p) && !IsFloodDone(source_p))
@@ -77,8 +75,9 @@ m_part(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 	while(name)
 	{
+		p = channel_tok(name);
 		part_one_client(client_p, source_p, name, reason);
-		name = rb_strtok_r(NULL, ",", &p);
+		name = p;
 	}
 	return 0;
 }

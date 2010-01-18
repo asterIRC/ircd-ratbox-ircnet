@@ -319,6 +319,56 @@ invalidate_bancache_user(struct Client *client_p)
 	}
 }
 
+/* get_channelmask()
+ *
+ * input	- channel name
+ * output	- mask string ptr, or NULL if not masked
+ * side effects -
+ */
+const char	*get_channelmask(const char *chname)
+{
+	char	*mask;
+
+	mask = rindex(chname, ':');
+	if (!mask || index(mask, '\033'))
+	{
+		/* If '\033' is in the mask, well, it's not a real mask,
+		** but a JIS encoded channel name. --Beeth */
+		return NULL;
+	}
+	return mask+1;
+}
+
+/* channel_tok()
+ *
+ * input	- comma separated channel list
+ * output	- pointer to next channel, or NULL in case of last channel
+ * side effects - channel name in the input will be zero-terminated at place of separator
+ */
+char *channel_tok(char *name)
+{
+	int flag = 1;
+	for(; *name && (!(*name == ',' && flag)); ++name)
+	{
+		/* \e$B start of JIS (flag=0) ending in the middle is an error),
+		 * \e$(B end of JIS (flag=1) */
+		if (*name == '\033' &&
+			(name[1] == '$' || name[1] == '(') &&
+			name[2] == 'B')
+		{
+			flag = (name[1] == '$') ? 0 : 1;
+			name += 2;
+		}
+	}
+
+	if (*name) {
+		*name++ = 0;
+		return name;
+	}
+	return NULL;
+}
+
+
 /* check_channel_name()
  *
  * input	- channel name
@@ -328,17 +378,34 @@ invalidate_bancache_user(struct Client *client_p)
 int
 check_channel_name(const char *name)
 {
+	int flag = 1;
+	const char *mask;
+
 	s_assert(name != NULL);
 	if(name == NULL)
 		return 0;
 
+	mask = get_channelmask(name);
+
 	for(; *name; ++name)
 	{
-		if(!IsChanChar(*name))
+		if(!IsChanChar(*name) && (flag && *name == ','))
 			return 0;
+		/* \e$B start of JIS (flag=0) ending in the middle is an error),
+		 * \e$(B end of JIS (flag=1) */
+		if (*name == '\033' &&
+			(name[1] == '$' || name[1] == '(') &&
+			name[2] == 'B')
+		{
+			flag = (name[1] == '$') ? 0 : 1;
+			name += 2;
+		}
 	}
 
-	return 1;
+	if (mask && (!*mask || !match(mask, me.name)))
+		return 0;
+
+	return flag;
 }
 
 /* free_channel_list()

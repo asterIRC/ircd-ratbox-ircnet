@@ -212,6 +212,7 @@ void invalidate_bancache_user(struct Client *);
 void free_channel_list(rb_dlink_list *);
 
 int check_channel_name(const char *name);
+char *channel_tok(char *name);
 
 void channel_member_names(struct Channel *chptr, struct Client *, int show_eon);
 
