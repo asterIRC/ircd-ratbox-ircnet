@@ -183,7 +183,7 @@ struct ChCapCombo
 
 #define IsChannelName(name) ((name) && IsChanPrefix(*name))
 #define IsRemoteChannel(name) (IsChannelName(name) && *(name) != '&')
-#define HasHistory(chptr) (chptr->opquit + ConfigChannel.delay >= rb_current_time())
+#define HasHistory(chptr) (chptr->opquit + ConfigChannel.delay + (chptr->chname[0]=='!')*2 >= rb_current_time())
 #define IsLocked(chptr) (HasHistory(chptr) && (rb_dlink_list_length(&chptr->members) == 0))
 
 
