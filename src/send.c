@@ -470,6 +470,10 @@ sendto_server(struct Client *one, struct Channel *chptr, unsigned long caps,
 	if(chptr != NULL && (!IsRemoteChannel(chptr->chname)))
 		return;
 
+	/* masked channels must match this server name */
+	if (chptr && !check_channelmask(one, chptr))
+		return;
+
 	rb_linebuf_newbuf(&linebuf);
 	va_start(args, format);
 	rb_linebuf_putmsg(&linebuf, format, &args, NULL);

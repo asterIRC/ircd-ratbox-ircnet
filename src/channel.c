@@ -339,6 +339,22 @@ const char	*get_channelmask(const char *chname)
 	return mask+1;
 }
 
+/* check_channel_mask()
+ *
+ * input	- server to check against and channel name possibly including mask
+ * output	- 1 if its ok to send (server is matching channel mask), 0 if not
+ * side effects -
+ */
+int check_channelmask(struct Client *client_p, struct Channel *chptr)
+{
+	const char *mask = get_channelmask(chptr->chname);
+
+	/* no mask, its ok to send. */
+	if (!mask)
+		return 1;
+	return match(mask, client_p->name);
+}
+
 /* channel_tok()
  *
  * input	- comma separated channel list
@@ -361,8 +377,10 @@ char *channel_tok(char *name)
 		}
 	}
 
-	if (*name) {
+	if (*name == ',') {
 		*name++ = 0;
+		/* ignore empty tokens */
+		if (!*name) return NULL;
 		return name;
 	}
 	return NULL;

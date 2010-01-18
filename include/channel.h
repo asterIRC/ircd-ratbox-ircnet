@@ -213,6 +213,8 @@ void free_channel_list(rb_dlink_list *);
 
 int check_channel_name(const char *name);
 char *channel_tok(char *name);
+int check_channelmask(struct Client *client_p, struct Channel *chptr);
+const char	*get_channelmask(const char *chname);
 
 void channel_member_names(struct Channel *chptr, struct Client *, int show_eon);
 

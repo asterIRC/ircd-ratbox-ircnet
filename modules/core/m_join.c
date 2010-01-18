@@ -173,7 +173,7 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	}
 	name = jbuf;
 
-	for (p = channel_tok(name); name;key = (key) ? rb_strtok_r(NULL, ",", &p2) : NULL,
+	for (p = channel_tok(name); name && *name; key = (key) ? rb_strtok_r(NULL, ",", &p2) : NULL,
 		 name = p, p = name?channel_tok(name):NULL)
 	{
 		int needcap = strchr(name, ',')?CAP_JAPANESE:0;

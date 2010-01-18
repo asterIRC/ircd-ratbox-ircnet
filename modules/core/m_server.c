@@ -831,6 +831,9 @@ burst_TS6(struct Client *client_p)
 		if (!IsRemoteChannel(chptr->chname) || (!IsCapable(client_p, CAP_IRCNET) && *chptr->chname == '!'))
 			continue;
 
+		if (!check_channelmask(client_p, chptr))
+			continue;
+
 		if (!IsCapable(client_p, CAP_JAPANESE) && strchr(chptr->chname, ','))
 			continue;
 
@@ -1011,6 +1014,9 @@ burst_211(struct Client *client_p)
 		chptr = ptr->data;
 
 		if (!IsRemoteChannel(chptr->chname))
+			continue;
+
+		if (!check_channelmask(client_p, chptr))
 			continue;
 
 		/* a ',' in channel name means JIS-encoded channel. */
