@@ -1,0 +1,13 @@
+# define paths to your daemons
+
+rb=../../../ircd-ratbox-ircnet/ircd
+in=../../../irc2.11.2p2/x86_64-unknown-linux-gnu/ircd
+
+# name used for oper
+OPERNAME="sd"
+# oper/link password
+PASS="nasrat"
+# first 2 chars of sid (the suffix is derived from port)
+SIDBASE="42"
+
+
