@@ -339,20 +339,57 @@ const char	*get_channelmask(const char *chname)
 	return mask+1;
 }
 
-/* check_channel_mask()
+/* channel_cacheflags()
+ *
+ * Cache the fact that the channel is masked and/or in JIS encoding
+ *
+ * input	- chptr
+ * output	- 
+ * side effects - mode.mode updated as appropiate
+ */
+void channel_cacheflags(struct Channel *chptr)
+{
+	const char *mask = get_channelmask(chptr->chname);
+	char *p;
+
+	/* broken mask -> its a JIS encoded channel */
+	if (!mask && rindex(chptr->chname, ':'))
+		chptr->info |= CHINFO_JIS;
+
+	if ((p = strstr(chptr->chname, "\033$B")) && (strstr(p+3, "\033(B")))
+		chptr->info |= CHINFO_JIS;
+	if (mask)
+		chptr->info |= CHINFO_MASKED;
+}
+
+/* check_channel_burst()
+ *
+ * Check if it's ok to burst the channel to a particular server.
  *
  * input	- server to check against and channel name possibly including mask
  * output	- 1 if its ok to send (server is matching channel mask), 0 if not
  * side effects -
  */
-int check_channelmask(struct Client *client_p, struct Channel *chptr)
+int check_channel_burst(struct Client *client_p, struct Channel *chptr)
 {
-	const char *mask = get_channelmask(chptr->chname);
+	const char *mask;
 
-	/* no mask, its ok to send. */
-	if (!mask)
-		return 1;
-	return match(mask, client_p->name);
+	/* do not bother with local channels */
+	if (!IsRemoteChannel(chptr->chname))
+		return 0;
+
+	/* channel in JIS encoding, yet the target is not capable of handling it */
+	if (IsJISChannel(chptr) && NotCapable(client_p, CAP_JAPANESE))
+		return 0;
+
+	if (IsMaskedChannel(chptr)) {
+		mask  = get_channelmask(chptr->chname);
+		/* no mask, its ok to send. */
+		if (!mask)
+			return 1;
+		return match(mask, client_p->name);
+	}
+	return 1;
 }
 
 /* channel_tok()
@@ -367,7 +404,7 @@ char *channel_tok(char *name)
 	for(; *name && (!(*name == ',' && flag)); ++name)
 	{
 		/* \e$B start of JIS (flag=0) ending in the middle is an error),
-		 * \e$(B end of JIS (flag=1) */
+		 * \e(B end of JIS (flag=1) */
 		if (*name == '\033' &&
 			(name[1] == '$' || name[1] == '(') &&
 			name[2] == 'B')
@@ -388,6 +425,8 @@ char *channel_tok(char *name)
 
 
 /* check_channel_name()
+ *
+ * Check if a client is allowed to create such a channel.
  *
  * input	- channel name
  * output	- 1 if valid channel name, else 0

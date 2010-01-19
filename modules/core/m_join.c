@@ -176,8 +176,6 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	for (p = channel_tok(name); name && *name; key = (key) ? rb_strtok_r(NULL, ",", &p2) : NULL,
 		 name = p, p = name?channel_tok(name):NULL)
 	{
-		int needcap = strchr(name, ',')?CAP_JAPANESE:0;
-
 		/* JOIN 0 simply parts all channels the user is in */
 		if(*name == '0' && !atoi(name))
 		{
@@ -371,19 +369,19 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 			/* non-ircnet TS6 servers only (no means of +O/!channels) */
 			if(*chptr->chname == '#')
 			{
-				sendto_server(client_p, chptr, CAP_TS6|needcap, CAP_IRCNET|CAP_211,
+				sendto_server(client_p, chptr, CAP_TS6, CAP_IRCNET|CAP_211,
 					      ":%s SJOIN %ld %s +%s :@%s",
  					      me.id, (long)chptr->channelts,
 					      chptr->chname, mstr, source_p->id);
 			}
 			/* ircnet TS6/non-TS6 servers */
 			if (*chptr->chname == '#' || *chptr->chname == '!') {
-				sendto_server(client_p, chptr, needcap|CAP_TS6|CAP_IRCNET, CAP_211,
+				sendto_server(client_p, chptr, CAP_TS6|CAP_IRCNET, CAP_211,
 					      ":%s SJOIN %ld %s +%s :@%s%s",
 					      me.id, (long)chptr->channelts,
 					      chptr->chname, mstr, (flags & CHFL_UNIQOP)?"@":"", source_p->id);
 #ifdef COMPAT_211
-				sendto_server(client_p, chptr, needcap|CAP_TS6|CAP_211, NOCAPS,
+				sendto_server(client_p, chptr, CAP_TS6|CAP_211, NOCAPS,
 					      ":%s NJOIN %s :@%s%s",
 					      me.id,
 					      chptr->chname, (flags & CHFL_UNIQOP)?"@":"", source_p->id);
@@ -393,11 +391,11 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		}
 		else
 		{
-			sendto_server(client_p, chptr, needcap|CAP_TS6, CAP_211,
+			sendto_server(client_p, chptr, CAP_TS6, CAP_211,
 				      ":%s JOIN %ld %s +",
 				      source_p->id, (long)chptr->channelts, chptr->chname);
 #ifdef COMPAT_211
-			sendto_server(client_p, chptr, needcap|CAP_TS6|CAP_211, NOCAPS,
+			sendto_server(client_p, chptr, CAP_TS6|CAP_211, NOCAPS,
 				      ":%s NJOIN %s :%s",
 				      me.id, chptr->chname, source_p->id);
 #endif
@@ -556,7 +554,7 @@ static void sjoin_211(struct Client *source_p, struct Client *client_p, struct C
 {
 	char *p;
 	for (p = buf; *p; p++) if (*p == ' ') *p = ',';
-	sendto_server(client_p->from, NULL, CAP_211, NOCAPS, ":%s NJOIN %s :%s",
+	sendto_server(client_p->from, chptr, CAP_211, NOCAPS, ":%s NJOIN %s :%s",
 		source_p->id, chptr->chname, buf);
 }
 #endif
@@ -794,7 +792,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 		if((mlen_uid + len_uid + MAXIDLEN + 3) > (BUFSIZE - 3))
 		{
 			*(ptr_uid - 1) = '\0';
-			sendto_server(client_p->from, NULL, CAP_TS6, CAP_211, "%s", buf_uid);
+			sendto_server(client_p->from, chptr, CAP_TS6, CAP_211, "%s", buf_uid);
 #ifdef COMPAT_211
 			sjoin_211(source_p, client_p, chptr, buf_uid + mlen_uid);
 #endif
@@ -942,12 +940,12 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 	}
 	*(ptr_uid - 1) = '\0';
 
-	sendto_server(client_p->from, NULL, CAP_TS6, CAP_211, "%s", buf_uid);
+	sendto_server(client_p->from, chptr, CAP_TS6, CAP_211, "%s", buf_uid);
 #ifdef COMPAT_211
 	sjoin_211(source_p, client_p, chptr, buf_uid + mlen_uid);
 	/* set the modes */
 	if (modes != empty_modes)
-		sendto_server(client_p->from, NULL, CAP_211, NOCAPS, ":%s MODE %s %s",
+		sendto_server(client_p->from, chptr, CAP_211, NOCAPS, ":%s MODE %s %s",
 			source_p->name, chptr->chname, modes);
 #endif
 

@@ -440,6 +440,8 @@ sendto_one_numeric(struct Client *target_p, int numeric, const char *pattern, ..
  * side effects - Send a message to all connected servers, except the
  *                client 'one' (if non-NULL), as long as the servers
  *                support ALL capabs in 'caps', and NO capabs in 'nocaps'.
+ *		  In case the channel is masked, send to only servers of given mask.
+ *		  JIS encoded channels are sent only to CAP_JAPANESE servers.
  *            
  * This function was written in an attempt to merge together the other
  * billion sendto_*serv*() functions, which sprung up with capabs, uids etc
@@ -451,6 +453,7 @@ sendto_server(struct Client *one, struct Channel *chptr, unsigned long caps,
 {
 	va_list args;
 	struct Client *target_p;
+	const char *mask = NULL;
 	rb_dlink_node *ptr;
 	rb_dlink_node *next_ptr;
 	buf_head_t linebuf;
@@ -467,12 +470,14 @@ sendto_server(struct Client *one, struct Channel *chptr, unsigned long caps,
 	if(rb_dlink_list_length(&serv_list) == 0)
 		return;
 
-	if(chptr != NULL && (!IsRemoteChannel(chptr->chname)))
-		return;
-
-	/* masked channels must match this server name */
-	if (chptr && !check_channelmask(one, chptr))
-		return;
+	if(chptr != NULL) {
+		if (!IsRemoteChannel(chptr->chname))
+			return;
+		if (IsMaskedChannel(chptr))
+			mask = get_channelmask(chptr->chname);
+		if (IsJISChannel(chptr))
+			caps |= CAP_JAPANESE;
+	}
 
 	rb_linebuf_newbuf(&linebuf);
 	va_start(args, format);
@@ -493,6 +498,10 @@ sendto_server(struct Client *one, struct Channel *chptr, unsigned long caps,
 
 		/* check we don't have any forbidden capabs */
 		if(!NotCapable(target_p, nocaps))
+			continue;
+
+		/* Masked channel does not match the server; skip it */
+		if (mask && !match(mask, target_p->name))
 			continue;
 
 		send_linebuf(target_p, &linebuf);

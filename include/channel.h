@@ -70,7 +70,7 @@ struct Channel
 
 	time_t first_received_message_time;	/* channel flood control */
 	int received_number_of_privmsgs;
-	int flood_noticed;
+	int info;				/* arbitrary info (see CHINFO_ */
 
 	uint32_t ban_serial;
 	time_t channelts;
@@ -156,15 +156,27 @@ struct ChCapCombo
 #define MODE_REOP	0x0040
 #define MODE_SSLONLY	0x0080
 #define MODE_ANONYMOUS	0x0100
+
 #define CHFL_BAN        0x0200	/* ban channel flag */
 #define CHFL_EXCEPTION  0x0400	/* exception to ban channel flag */
 #define CHFL_INVEX      0x0800
 #define CHFL_REOP	0x1000  /* consider these hostmask for reopping */
 
+#define CHINFO_FLOODED	0x0001 /* previously flood_noticed */
+#define CHINFO_JIS	0x0002 /* the channel shoud be sent only to CAP_JAPANESE servers */
+#define CHINFO_MASKED	0x0004 /* cache the fact the channel is masked */
+
 /* mode flags for direction indication */
 #define MODE_QUERY     0
 #define MODE_ADD       1
 #define MODE_DEL       -1
+
+#define IsMaskedChannel(x)	((x) && ((x)->info & CHINFO_MASKED))
+#define IsJISChannel(x)		((x) && ((x)->info & CHINFO_JIS))
+
+#define IsChannelFlooded(x)	((x) && ((x)->info & CHINFO_FLOODED))
+#define SetChannelFlooded(x)	if (x) { (x)->info |= CHINFO_FLOODED; }
+#define SetChannelUnflooded(x)	if (x) { (x)->info &= ~CHINFO_FLOODED; }
 
 #define IsAnonymous(x)          ((x) && ((x)->mode.mode & MODE_ANONYMOUS))
 #define Anon(x)	(IsAnonymous(chptr)?"anonymous":(x))
@@ -215,6 +227,9 @@ int check_channel_name(const char *name);
 char *channel_tok(char *name);
 int check_channelmask(struct Client *client_p, struct Channel *chptr);
 const char	*get_channelmask(const char *chname);
+void channel_cacheflags(struct Channel *chptr);
+int check_channel_burst(struct Client *client_p, struct Channel *chptr);
+
 
 void channel_member_names(struct Channel *chptr, struct Client *, int show_eon);
 

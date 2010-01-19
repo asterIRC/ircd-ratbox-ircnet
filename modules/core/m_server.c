@@ -828,13 +828,7 @@ burst_TS6(struct Client *client_p)
 		s_assert(rb_dlink_list_length(&chptr->members) > 0);
 		*/
 
-		if (!IsRemoteChannel(chptr->chname) || (!IsCapable(client_p, CAP_IRCNET) && *chptr->chname == '!'))
-			continue;
-
-		if (!check_channelmask(client_p, chptr))
-			continue;
-
-		if (!IsCapable(client_p, CAP_JAPANESE) && strchr(chptr->chname, ','))
+		if (!check_channel_burst(client_p, chptr))
 			continue;
 
 		cur_len = mlen = rb_sprintf(buf, ":%s SJOIN %ld %s %s :", me.id,
@@ -1013,14 +1007,7 @@ burst_211(struct Client *client_p)
 	{
 		chptr = ptr->data;
 
-		if (!IsRemoteChannel(chptr->chname))
-			continue;
-
-		if (!check_channelmask(client_p, chptr))
-			continue;
-
-		/* a ',' in channel name means JIS-encoded channel. */
-		if (!IsCapable(client_p, CAP_JAPANESE) && strchr(chptr->chname, ','))
+		if (!check_channel_burst(client_p, chptr))
 			continue;
 
 		cur_len = mlen = rb_sprintf(buf, ":%s NJOIN %s :", me.id, chptr->chname);
