@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: m_nick.c 26596 2009-06-13 16:54:32Z jilles $
+ *  $Id$
  */
 
 #include "stdinc.h"
@@ -92,7 +92,7 @@ mapi_clist_av2 nick_clist[] = { &nick_msgtab, &uid_msgtab, &save_msgtab,
 #endif
  NULL };
 
-DECLARE_MODULE_AV2(nick, NULL, NULL, nick_clist, NULL, NULL, "$Revision: 26596 $");
+DECLARE_MODULE_AV2(nick, NULL, NULL, nick_clist, NULL, NULL, "$Revision$");
 
 static int change_remote_nick(struct Client *, struct Client *, time_t, const char *, int);
 
@@ -472,7 +472,7 @@ ms_save(struct Client *client_p, struct Client *source_p, int parc, const char *
 		sendto_realops_flags(UMODE_DEBUG, L_ALL,
 				     "Ignored noop SAVE message for %s from %s",
 				     target_p->name, source_p->name);
-	else if(target_p->tsinfo == atol(parv[2]))
+	else if((IsCapable(client_p, CAP_211)) || target_p->tsinfo == atol(parv[2]))
 		save_user(client_p, source_p, target_p);
 	else
 		sendto_realops_flags(UMODE_SKILL, L_ALL,
