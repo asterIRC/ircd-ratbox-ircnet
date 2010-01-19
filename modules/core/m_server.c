@@ -391,6 +391,14 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	target_p = make_client(client_p);
 	make_server(target_p);
 
+
+#ifdef COMPAT_211
+	if (IsCapable(client_p, CAP_211))
+	/* in case we're fed this link via 2.11 server, just fake the caps somehow
+           as we're never going to get CAPAB for it. */
+		target_p->serv->caps = CAP_MASK;
+#endif
+
 	target_p->name = scache_add(parv[1]);
 
 	target_p->hopcount = atoi(parv[2]);
