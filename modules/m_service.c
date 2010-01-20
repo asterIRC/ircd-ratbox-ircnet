@@ -185,22 +185,35 @@ static int	ms_service(struct Client *client_p, struct Client *source_p, int parc
 	/* Reintroducing the same service is fine, as their name always contain their server.
            This way it is possible to change it's type/info/distmask without ever quitting.
            Note that 2.11 will just go ahead and happily register the same service fullname again */
-	svc = find_client(name);
+	svc = find_any_client(name);
 
 	/* Services are just clients as not much info is needed to keep about them */
 	if (!svc)
 	{
 		svc = make_client(source_p);
+
 		svc->name = rb_strdup(name);
+		svc->servptr = source_p;
+		svc->from = client_p;
+		svc->hopcount = source_p->hopcount;
+
 		add_to_hash(HASH_CLIENT, svc->name, svc);
-		rb_dlinkAddAlloc(svc, &svc_list);
+
+		rb_dlinkAdd(svc, &svc->lnode, &svc->servptr->serv->users);
+		rb_dlinkAdd(svc, &svc->node, &svc_list);
+
 		ServerStats.is_services++;
 		SetService(svc);
+	} else if (svc->servptr != source_p) {
+		/* got the same service name from somewhere else, this cant be good. */
+		sendto_server(NULL, NULL, CAP_IRCNET, NOCAPS,
+			":%s KILL %s :Service %s collision (old from %s [%s], new from %s [%s])",
+			me.id, svc->name, svc->servptr->name, svc->servptr->id, source_p->name, source_p->id);
+		exit_client(NULL, svc, source_p, "Service name collision");
+		return 0;
 	}
 
 	/* Looks good, set the info */
-	svc->hopcount = source_p->hopcount;
-	svc->servptr = source_p;
 	rb_strlcpy(svc->host, dist, HOSTLEN);
 	rb_strlcpy(svc->info, info, sizeof(svc->info));
 	svc->tsinfo = type;

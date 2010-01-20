@@ -84,7 +84,8 @@ mo_kill(struct Client *client_p, struct Client *source_p, int parc, const char *
 	else
 		reason = "<No reason given>";
 
-	if((target_p = find_named_person(user)) == NULL)
+	/* XXX allow opers to kill services? */
+	if((target_p = find_any_client(user)) && !IsSService(target_p) && (target_p = find_named_person(user)) == NULL)
 	{
 		/*
 		 ** If the user has recently changed nick, automatically
@@ -194,7 +195,8 @@ ms_kill(struct Client *client_p, struct Client *source_p, int parc, const char *
 		path = s;
 	}
 
-	if((target_p = find_person(user)) == NULL)
+
+	if((target_p = find_any_client(user)) && !IsSService(target_p) && (target_p = find_person(user)) == NULL)
 	{
 		/*
 		 * If the user has recently changed nick, but only if its 

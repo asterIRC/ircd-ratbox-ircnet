@@ -393,8 +393,12 @@ find_client(const char *name)
 	{
 		target_p = ptr->data;
 
-		if(irccmp(name, target_p->name) == 0)
+		if(irccmp(name, target_p->name) == 0) {
+			/* this should return only clients/servers */
+			if (IsSService(target_p))
+				return NULL;
 			return target_p;
+		}
 	}
 
 	return NULL;
