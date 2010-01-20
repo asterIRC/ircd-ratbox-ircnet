@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: listener.c 26662 2009-09-13 21:17:44Z jilles $
+ *  $Id$
  */
 
 #include "stdinc.h"

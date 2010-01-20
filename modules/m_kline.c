@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: m_kline.c 26377 2009-01-05 18:51:12Z androsyn $
+ *  $Id$
  */
 
 #include "stdinc.h"
@@ -64,7 +64,7 @@ struct Message unkline_msgtab = {
 
 mapi_clist_av2 kline_clist[] = { &kline_msgtab, &unkline_msgtab, &adminkline_msgtab, NULL };
 
-DECLARE_MODULE_AV2(kline, NULL, NULL, kline_clist, NULL, NULL, "$Revision: 26377 $");
+DECLARE_MODULE_AV2(kline, NULL, NULL, kline_clist, NULL, NULL, "$Revision$");
 
 /* Local function prototypes */
 static int find_user_host(struct Client *source_p, const char *userhost, char *user, char *host);

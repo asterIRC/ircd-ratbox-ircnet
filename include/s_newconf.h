@@ -29,7 +29,7 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id: s_newconf.h 26443 2009-02-05 23:14:55Z jilles $
+ * $Id$
  */
 
 #ifndef INCLUDED_s_newconf_h

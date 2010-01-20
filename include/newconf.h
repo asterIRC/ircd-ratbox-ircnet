@@ -1,6 +1,6 @@
 /* This code is in the public domain.
  * $Nightmare: nightmare/include/config.h,v 1.32.2.2.2.2 2002/07/02 03:41:28 ejb Exp $
- * $Id: newconf.h 26094 2008-09-19 15:33:46Z androsyn $
+ * $Id$
  */
 
 #ifndef _NEWCONF_H_INCLUDED

@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: m_squit.c 26574 2009-05-28 14:30:34Z androsyn $
+ *  $Id$
  */
 
 #include "stdinc.h"
@@ -48,7 +48,7 @@ struct Message squit_msgtab = {
 
 mapi_clist_av2 squit_clist[] = { &squit_msgtab, NULL };
 
-DECLARE_MODULE_AV2(squit, NULL, NULL, squit_clist, NULL, NULL, "$Revision: 26574 $");
+DECLARE_MODULE_AV2(squit, NULL, NULL, squit_clist, NULL, NULL, "$Revision$");
 
 struct squit_parms
 {

@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: m_lusers.c 26421 2009-01-18 17:38:16Z jilles $
+ *  $Id$
  */
 
 #include "stdinc.h"
@@ -51,7 +51,7 @@ struct Message users_msgtab = {
 
 mapi_clist_av2 lusers_clist[] = { &lusers_msgtab, &users_msgtab, NULL };
 
-DECLARE_MODULE_AV2(lusers, NULL, NULL, lusers_clist, NULL, NULL, "$Revision: 26421 $");
+DECLARE_MODULE_AV2(lusers, NULL, NULL, lusers_clist, NULL, NULL, "$Revision$");
 
 /*
  * m_lusers - LUSERS message handler

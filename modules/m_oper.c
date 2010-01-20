@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: m_oper.c 26555 2009-05-20 21:16:01Z androsyn $
+ *  $Id$
  */
 
 #include "stdinc.h"
@@ -75,7 +75,7 @@ struct Message challenge_msgtab = {
 
 mapi_clist_av2 oper_clist[] = { &oper_msgtab, &challenge_msgtab, NULL };
 
-DECLARE_MODULE_AV2(oper, NULL, NULL, oper_clist, NULL, NULL, "$Revision: 26555 $");
+DECLARE_MODULE_AV2(oper, NULL, NULL, oper_clist, NULL, NULL, "$Revision$");
 
 
 /*

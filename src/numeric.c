@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: numeric.c 25379 2008-05-16 16:12:43Z androsyn $
+ *  $Id$
  */
 
 #include "stdinc.h"

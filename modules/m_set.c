@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: m_set.c 26381 2009-01-09 15:16:14Z jilles $
+ *  $Id$
  */
 
 /* rewritten by jdc */
@@ -49,7 +49,7 @@ struct Message set_msgtab = {
 
 mapi_clist_av2 set_clist[] = { &set_msgtab, NULL };
 
-DECLARE_MODULE_AV2(set, NULL, NULL, set_clist, NULL, NULL, "$Revision: 26381 $");
+DECLARE_MODULE_AV2(set, NULL, NULL, set_clist, NULL, NULL, "$Revision$");
 
 /* Structure used for the SET table itself */
 struct SetStruct

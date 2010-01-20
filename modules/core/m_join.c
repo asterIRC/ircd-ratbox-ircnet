@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: m_join.c 26586 2009-05-28 19:20:14Z jilles $
+ *  $Id$
  */
 
 #include "stdinc.h"
@@ -68,7 +68,7 @@ mapi_clist_av2 join_clist[] = { &join_msgtab, &sjoin_msgtab,
 #endif
  NULL };
 
-DECLARE_MODULE_AV2(join, NULL, NULL, join_clist, NULL, NULL, "$Revision: 26586 $");
+DECLARE_MODULE_AV2(join, NULL, NULL, join_clist, NULL, NULL, "$Revision$");
 
 static void do_join_0(struct Client *client_p, struct Client *source_p);
 static int check_channel_name_loc(struct Client *source_p, const char *name);

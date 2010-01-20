@@ -20,7 +20,7 @@
  *  USA
  *
  *  from charybdis eccfecde11fa
- *  $Id: blacklist.h 26700 2009-10-18 19:53:24Z jilles $
+ *  $Id$
  */
 
 #ifndef _BLACKLIST_H_

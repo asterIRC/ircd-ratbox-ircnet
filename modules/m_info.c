@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: m_info.c 26662 2009-09-13 21:17:44Z jilles $
+ *  $Id$
  */
 
 #include "stdinc.h"
@@ -60,7 +60,7 @@ mapi_hlist_av2 info_hlist[] = {
 	{NULL, NULL}
 };
 
-DECLARE_MODULE_AV2(info, NULL, NULL, info_clist, info_hlist, NULL, "$Revision: 26662 $");
+DECLARE_MODULE_AV2(info, NULL, NULL, info_clist, info_hlist, NULL, "$Revision$");
 
 /*
  * jdc -- Structure for our configuration value table

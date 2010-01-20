@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: m_close.c 26377 2009-01-05 18:51:12Z androsyn $
+ *  $Id$
  */
 
 #include "stdinc.h"
@@ -42,7 +42,7 @@ struct Message close_msgtab = {
 
 mapi_clist_av2 close_clist[] = { &close_msgtab, NULL };
 
-DECLARE_MODULE_AV2(close, NULL, NULL, close_clist, NULL, NULL, "$Revision: 26377 $");
+DECLARE_MODULE_AV2(close, NULL, NULL, close_clist, NULL, NULL, "$Revision$");
 
 /*
  * mo_close - CLOSE message handler

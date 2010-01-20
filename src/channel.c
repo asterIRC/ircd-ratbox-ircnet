@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: channel.c 26582 2009-05-28 19:12:21Z jilles $
+ *  $Id$
  */
 
 #include "stdinc.h"

@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: parse.h 26421 2009-01-18 17:38:16Z jilles $
+ *  $Id$
  */
 
 #ifndef INCLUDED_parse_h_h

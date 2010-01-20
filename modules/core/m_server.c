@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: m_server.c 26588 2009-05-28 19:24:52Z jilles $
+ *  $Id$
  */
 
 #include "stdinc.h"
@@ -69,7 +69,7 @@ struct Message smask_msgtab = {
 
 mapi_clist_av2 server_clist[] = { &server_msgtab, &sid_msgtab, &smask_msgtab, NULL };
 
-DECLARE_MODULE_AV2(server, NULL, NULL, server_clist, NULL, NULL, "$Revision: 26588 $");
+DECLARE_MODULE_AV2(server, NULL, NULL, server_clist, NULL, NULL, "$Revision$");
 
 static struct Client *server_exists(const char *);
 static int set_server_gecos(struct Client *, const char *);

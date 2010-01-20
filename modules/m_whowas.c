@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: m_whowas.c 26421 2009-01-18 17:38:16Z jilles $
+ *  $Id$
  */
 
 #include "stdinc.h"
@@ -46,7 +46,7 @@ struct Message whowas_msgtab = {
 
 mapi_clist_av2 whowas_clist[] = { &whowas_msgtab, NULL };
 
-DECLARE_MODULE_AV2(whowas, NULL, NULL, whowas_clist, NULL, NULL, "$Revision: 26421 $");
+DECLARE_MODULE_AV2(whowas, NULL, NULL, whowas_clist, NULL, NULL, "$Revision$");
 
 /*
 ** m_whowas

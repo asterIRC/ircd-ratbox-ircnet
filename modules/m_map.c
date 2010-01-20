@@ -19,7 +19,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: m_map.c 26574 2009-05-28 14:30:34Z androsyn $
+ *  $Id$
  */
 
 #include "stdinc.h"
@@ -45,7 +45,7 @@ struct Message map_msgtab = {
 
 mapi_clist_av2 map_clist[] = { &map_msgtab, NULL };
 
-DECLARE_MODULE_AV2(map, NULL, NULL, map_clist, NULL, NULL, "$Revision: 26574 $");
+DECLARE_MODULE_AV2(map, NULL, NULL, map_clist, NULL, NULL, "$Revision$");
 
 static void dump_map(struct Client *client_p, struct Client *root, char *pbuf);
 

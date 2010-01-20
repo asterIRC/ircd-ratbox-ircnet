@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: restart.h 23020 2006-09-01 18:20:19Z androsyn $
+ *  $Id$
  */
 
 #ifndef INCLUDED_restart_h

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: m_resv.c 26660 2009-09-13 21:11:40Z jilles $
+ *  $Id$
  */
 
 #include "stdinc.h"
@@ -64,7 +64,7 @@ struct Message unresv_msgtab = {
 
 mapi_clist_av2 resv_clist[] = { &resv_msgtab, &adminresv_msgtab, &unresv_msgtab, NULL };
 
-DECLARE_MODULE_AV2(resv, NULL, NULL, resv_clist, NULL, NULL, "$Revision: 26660 $");
+DECLARE_MODULE_AV2(resv, NULL, NULL, resv_clist, NULL, NULL, "$Revision$");
 
 static void parse_resv(struct Client *source_p, const char *name,
 		       const char *reason, int temp_time, int perm);

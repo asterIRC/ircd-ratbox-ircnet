@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: m_pass.c 26453 2009-02-15 22:52:33Z jilles $
+ *  $Id$
  */
 
 #include "stdinc.h"
@@ -45,7 +45,7 @@ struct Message pass_msgtab = {
 
 mapi_clist_av2 pass_clist[] = { &pass_msgtab, NULL };
 
-DECLARE_MODULE_AV2(pass, NULL, NULL, pass_clist, NULL, NULL, "$Revision: 26453 $");
+DECLARE_MODULE_AV2(pass, NULL, NULL, pass_clist, NULL, NULL, "$Revision$");
 
 /*
  * m_pass() - Added Sat, 4 March 1989

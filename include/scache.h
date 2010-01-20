@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: scache.h 24639 2007-11-29 16:02:34Z androsyn $
+ *  $Id$
  */
 
 #ifndef INCLUDED_scache_h

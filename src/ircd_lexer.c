@@ -520,7 +520,7 @@ char *yytext;
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
  *
- * $Id: ircd_lexer.c 26608 2009-06-22 03:34:08Z androsyn $
+ * $Id$
  */
 #line 25 "ircd_lexer.l"
 

@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: m_stats.c 26700 2009-10-18 19:53:24Z jilles $
+ *  $Id$
  */
 
 #include "stdinc.h"
@@ -71,7 +71,7 @@ mapi_hlist_av2 stats_hlist[] = {
 	{NULL, NULL}
 };
 
-DECLARE_MODULE_AV2(stats, NULL, NULL, stats_clist, stats_hlist, NULL, "$Revision: 26700 $");
+DECLARE_MODULE_AV2(stats, NULL, NULL, stats_clist, stats_hlist, NULL, "$Revision$");
 
 
 static void stats_l_list(struct Client *s, const char *, int, int, rb_dlink_list *, char);

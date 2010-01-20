@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: m_mode.c 26574 2009-05-28 14:30:34Z androsyn $
+ *  $Id$
  */
 
 #include "stdinc.h"
@@ -63,7 +63,7 @@ struct Message bmask_msgtab = {
 
 mapi_clist_av2 mode_clist[] = { &mode_msgtab, &tmode_msgtab, &bmask_msgtab, NULL };
 
-DECLARE_MODULE_AV2(mode, NULL, NULL, mode_clist, NULL, NULL, "$Revision: 26574 $");
+DECLARE_MODULE_AV2(mode, NULL, NULL, mode_clist, NULL, NULL, "$Revision$");
 
 /* bitmasks for error returns, so we send once per call */
 #define SM_ERR_NOTS             0x00000001	/* No TS on channel */

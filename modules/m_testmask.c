@@ -29,7 +29,7 @@
  *  IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- *  $Id: m_testmask.c 26377 2009-01-05 18:51:12Z androsyn $
+ *  $Id$
  *
  */
 
@@ -54,7 +54,7 @@ struct Message testmask_msgtab = {
 
 mapi_clist_av2 testmask_clist[] = { &testmask_msgtab, NULL };
 
-DECLARE_MODULE_AV2(testmask, NULL, NULL, testmask_clist, NULL, NULL, "$Revision: 26377 $");
+DECLARE_MODULE_AV2(testmask, NULL, NULL, testmask_clist, NULL, NULL, "$Revision$");
 
 static const char *empty_sockhost = "255.255.255.255";
 static const char *spoofed_sockhost = "0";

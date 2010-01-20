@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: m_ping.c 26421 2009-01-18 17:38:16Z jilles $
+ *  $Id$
  */
 
 #include "stdinc.h"
@@ -47,7 +47,7 @@ struct Message ping_msgtab = {
 
 mapi_clist_av2 ping_clist[] = { &ping_msgtab, NULL };
 
-DECLARE_MODULE_AV2(ping, NULL, NULL, ping_clist, NULL, NULL, "$Revision: 26421 $");
+DECLARE_MODULE_AV2(ping, NULL, NULL, ping_clist, NULL, NULL, "$Revision$");
 
 /*
 ** m_ping

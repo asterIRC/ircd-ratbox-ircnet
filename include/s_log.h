@@ -28,7 +28,7 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id: s_log.h 26128 2008-10-03 18:07:46Z androsyn $
+ * $Id$
  */
 
 #ifndef INCLUDED_s_log_h

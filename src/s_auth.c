@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: s_auth.c 26690 2009-10-09 23:14:04Z jilles $ */
+ *  $Id$ */
 
 /*
  * Changes:

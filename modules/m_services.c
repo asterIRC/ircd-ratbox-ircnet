@@ -26,7 +26,7 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id: m_services.c 26576 2009-05-28 15:26:34Z androsyn $
+ * $Id$
  */
 
 #include "stdinc.h"
@@ -86,7 +86,7 @@ mapi_hfn_list_av2 services_hfnlist[] = {
 };
 
 DECLARE_MODULE_AV2(services, NULL, NULL, services_clist, NULL, services_hfnlist,
-		   "$Revision: 26576 $");
+		   "$Revision$");
 
 static int
 me_su(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])

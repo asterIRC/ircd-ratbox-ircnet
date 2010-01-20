@@ -34,7 +34,7 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id: hook.c 26104 2008-09-20 02:24:38Z androsyn $
+ * $Id$
  */
 #include "stdinc.h"
 #include "ratbox_lib.h"

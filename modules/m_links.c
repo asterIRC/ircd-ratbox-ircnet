@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: m_links.c 26421 2009-01-18 17:38:16Z jilles $
+ *  $Id$
  */
 
 #include "stdinc.h"
@@ -58,7 +58,7 @@ mapi_hlist_av2 links_hlist[] = {
 	{NULL, NULL}
 };
 
-DECLARE_MODULE_AV2(links, NULL, NULL, links_clist, links_hlist, NULL, "$Revision: 26421 $");
+DECLARE_MODULE_AV2(links, NULL, NULL, links_clist, links_hlist, NULL, "$Revision$");
 
 static void send_links_cache(struct Client *source_p);
 

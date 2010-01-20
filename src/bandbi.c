@@ -28,7 +28,7 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id: bandbi.c 26606 2009-06-22 03:32:44Z androsyn $
+ * $Id$
  */
 #include "stdinc.h"
 #include "ratbox_lib.h"

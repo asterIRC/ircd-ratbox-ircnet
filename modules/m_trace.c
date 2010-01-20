@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: m_trace.c 26648 2009-07-28 21:31:08Z jilles $
+ *  $Id$
  */
 
 #include "stdinc.h"
@@ -89,7 +89,7 @@ mapi_hlist_av2 trace_hlist[] = {
 	{NULL, NULL}
 };
 
-DECLARE_MODULE_AV2(trace, NULL, NULL, trace_clist, trace_hlist, NULL, "$Revision: 26648 $");
+DECLARE_MODULE_AV2(trace, NULL, NULL, trace_clist, trace_hlist, NULL, "$Revision$");
 
 
 /*

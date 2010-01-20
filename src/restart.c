@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: restart.c 26098 2008-09-20 01:08:38Z androsyn $
+ *  $Id$
  */
 
 #include "stdinc.h"

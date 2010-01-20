@@ -27,7 +27,7 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id: m_xline.c 26377 2009-01-05 18:51:12Z androsyn $
+ * $Id$
  */
 
 #include "stdinc.h"
@@ -74,7 +74,7 @@ struct Message unxline_msgtab = {
 
 mapi_clist_av2 xline_clist[] = { &xline_msgtab, &unxline_msgtab, NULL };
 
-DECLARE_MODULE_AV2(xline, NULL, NULL, xline_clist, NULL, NULL, "$Revision: 26377 $");
+DECLARE_MODULE_AV2(xline, NULL, NULL, xline_clist, NULL, NULL, "$Revision$");
 
 static int valid_xline(struct Client *, const char *, const char *, int temp);
 static void apply_xline(struct Client *client_p, const char *name,

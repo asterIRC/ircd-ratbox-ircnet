@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: m_gline.c 26576 2009-05-28 15:26:34Z androsyn $
+ *  $Id$
  */
 
 #include "stdinc.h"
@@ -63,7 +63,7 @@ struct Message ungline_msgtab = {
 
 mapi_clist_av2 gline_clist[] = { &gline_msgtab, &ungline_msgtab, NULL };
 
-DECLARE_MODULE_AV2(gline, modinit, moddeinit, gline_clist, NULL, NULL, "$Revision: 26576 $");
+DECLARE_MODULE_AV2(gline, modinit, moddeinit, gline_clist, NULL, NULL, "$Revision$");
 
 static int majority_gline(struct Client *source_p, const char *user,
 			  const char *host, const char *reason);

@@ -17,7 +17,7 @@
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: ircd_signal.c 26094 2008-09-19 15:33:46Z androsyn $
+ * $Id$
  */
 
 #include "stdinc.h"

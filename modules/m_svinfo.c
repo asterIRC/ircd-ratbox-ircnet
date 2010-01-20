@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: m_svinfo.c 26443 2009-02-05 23:14:55Z jilles $
+ *  $Id$
  */
 #include "stdinc.h"
 #include "struct.h"
@@ -44,7 +44,7 @@ struct Message svinfo_msgtab = {
 
 mapi_clist_av2 svinfo_clist[] = { &svinfo_msgtab, NULL };
 
-DECLARE_MODULE_AV2(svinfo, NULL, NULL, svinfo_clist, NULL, NULL, "$Revision: 26443 $");
+DECLARE_MODULE_AV2(svinfo, NULL, NULL, svinfo_clist, NULL, NULL, "$Revision$");
 
 /*
  * ms_svinfo - SVINFO message handler

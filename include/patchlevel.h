@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: patchlevel.h 26375 2009-01-05 18:49:44Z androsyn $
+ *  $Id$
  */
 
 #ifndef PATCHLEVEL

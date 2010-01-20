@@ -27,7 +27,7 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id: m_tb.c 26576 2009-05-28 15:26:34Z androsyn $
+ * $Id$
  */
 
 #include "stdinc.h"
@@ -52,7 +52,7 @@ struct Message tb_msgtab = {
 
 mapi_clist_av2 tb_clist[] = { &tb_msgtab, NULL };
 
-DECLARE_MODULE_AV2(tb, NULL, NULL, tb_clist, NULL, NULL, "$Revision: 26576 $");
+DECLARE_MODULE_AV2(tb, NULL, NULL, tb_clist, NULL, NULL, "$Revision$");
 
 /* m_tb()
  *

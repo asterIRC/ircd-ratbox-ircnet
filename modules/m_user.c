@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: m_user.c 26700 2009-10-18 19:53:24Z jilles $
+ *  $Id$
  */
 
 #include "ratbox_lib.h"
@@ -46,7 +46,7 @@ struct Message user_msgtab = {
 
 mapi_clist_av2 user_clist[] = { &user_msgtab, NULL };
 
-DECLARE_MODULE_AV2(user, NULL, NULL, user_clist, NULL, NULL, "$Revision: 26700 $");
+DECLARE_MODULE_AV2(user, NULL, NULL, user_clist, NULL, NULL, "$Revision$");
 
 static int do_local_user(struct Client *client_p, struct Client *source_p,
 			 const char *username, const char *realname);

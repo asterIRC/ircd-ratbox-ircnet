@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: m_die.c 26377 2009-01-05 18:51:12Z androsyn $
+ *  $Id$
  */
 
 #include "stdinc.h"
@@ -46,7 +46,7 @@ static struct Message die_msgtab = {
 
 mapi_clist_av2 die_clist[] = { &die_msgtab, NULL };
 
-DECLARE_MODULE_AV2(die, NULL, NULL, die_clist, NULL, NULL, "$Revision: 26377 $");
+DECLARE_MODULE_AV2(die, NULL, NULL, die_clist, NULL, NULL, "$Revision$");
 
 /*
  * mo_die - DIE command handler

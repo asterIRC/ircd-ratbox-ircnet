@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: m_capab.c 26421 2009-01-18 17:38:16Z jilles $
+ *  $Id$
  */
 
 #include "stdinc.h"
@@ -47,7 +47,7 @@ struct Message gcap_msgtab = {
 
 mapi_clist_av2 capab_clist[] = { &capab_msgtab, &gcap_msgtab, NULL };
 
-DECLARE_MODULE_AV2(capab, NULL, NULL, capab_clist, NULL, NULL, "$Revision: 26421 $");
+DECLARE_MODULE_AV2(capab, NULL, NULL, capab_clist, NULL, NULL, "$Revision$");
 
 /*
  * mr_capab - CAPAB message handler

@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: m_topic.c 26576 2009-05-28 15:26:34Z androsyn $
+ *  $Id$
  */
 
 #include "stdinc.h"
@@ -46,7 +46,7 @@ struct Message topic_msgtab = {
 
 mapi_clist_av2 topic_clist[] = { &topic_msgtab, NULL };
 
-DECLARE_MODULE_AV2(topic, NULL, NULL, topic_clist, NULL, NULL, "$Revision: 26576 $");
+DECLARE_MODULE_AV2(topic, NULL, NULL, topic_clist, NULL, NULL, "$Revision$");
 
 /*
  * m_topic

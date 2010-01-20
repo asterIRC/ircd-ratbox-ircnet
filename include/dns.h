@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: dns.h 26094 2008-09-19 15:33:46Z androsyn $
+ *  $Id$
  */
 
 #ifndef _DNS_H_INCLUDED

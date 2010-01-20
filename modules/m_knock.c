@@ -20,7 +20,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: m_knock.c 26576 2009-05-28 15:26:34Z androsyn $
+ *  $Id$
  */
 
 #include "stdinc.h"
@@ -46,7 +46,7 @@ struct Message knock_msgtab = {
 
 mapi_clist_av2 knock_clist[] = { &knock_msgtab, NULL };
 
-DECLARE_MODULE_AV2(knock, NULL, NULL, knock_clist, NULL, NULL, "$Revision: 26576 $");
+DECLARE_MODULE_AV2(knock, NULL, NULL, knock_clist, NULL, NULL, "$Revision$");
 
 /* m_knock
  *    parv[0] = sender prefix

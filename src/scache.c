@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: scache.c 26094 2008-09-19 15:33:46Z androsyn $
+ *  $Id$
  */
 #include "stdinc.h"
 #include "ratbox_lib.h"

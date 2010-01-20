@@ -29,7 +29,7 @@
  *  IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- *  $Id: supported.h 25135 2008-03-17 12:58:27Z androsyn $
+ *  $Id$
  */
 
 #ifndef INCLUDED_supported_h

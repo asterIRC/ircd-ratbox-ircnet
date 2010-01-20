@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: s_auth.h 25845 2008-08-05 02:02:08Z androsyn $
+ *  $Id$
  */
 
 #ifndef INCLUDED_s_auth_h

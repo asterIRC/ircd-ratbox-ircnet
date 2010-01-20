@@ -20,7 +20,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: reject.c 26594 2009-06-12 15:38:09Z androsyn $
+ *  $Id$
  */
 
 #include "stdinc.h"

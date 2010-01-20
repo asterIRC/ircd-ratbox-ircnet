@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: m_connect.c 26574 2009-05-28 14:30:34Z androsyn $
+ *  $Id$
  */
 
 #include "stdinc.h"
@@ -49,7 +49,7 @@ struct Message connect_msgtab = {
 
 mapi_clist_av2 connect_clist[] = { &connect_msgtab, NULL };
 
-DECLARE_MODULE_AV2(connect, NULL, NULL, connect_clist, NULL, NULL, "$Revision: 26574 $");
+DECLARE_MODULE_AV2(connect, NULL, NULL, connect_clist, NULL, NULL, "$Revision$");
 
 /*
  * mo_connect - CONNECT command handler

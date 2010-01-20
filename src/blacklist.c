@@ -31,7 +31,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * from charybdis 3f816713904c
- * $Id: blacklist.c 26700 2009-10-18 19:53:24Z jilles $
+ * $Id$
  */
 
 #include "stdinc.h"

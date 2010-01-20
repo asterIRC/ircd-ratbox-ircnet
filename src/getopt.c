@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: getopt.c 26142 2008-10-07 18:34:35Z androsyn $
+ *  $Id$
  */
 #include <stdlib.h>
 #include "stdinc.h"

@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: m_pong.c 26411 2009-01-16 23:00:29Z jilles $
+ *  $Id$
  */
 
 #include "stdinc.h"
@@ -48,7 +48,7 @@ struct Message pong_msgtab = {
 
 mapi_clist_av2 pong_clist[] = { &pong_msgtab, NULL };
 
-DECLARE_MODULE_AV2(pong, NULL, NULL, pong_clist, NULL, NULL, "$Revision: 26411 $");
+DECLARE_MODULE_AV2(pong, NULL, NULL, pong_clist, NULL, NULL, "$Revision$");
 
 static int
 ms_pong(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])

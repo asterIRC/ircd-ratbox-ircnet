@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: m_version.c 26421 2009-01-18 17:38:16Z jilles $
+ *  $Id$
  */
 
 #include "stdinc.h"
@@ -48,7 +48,7 @@ struct Message version_msgtab = {
 
 mapi_clist_av2 version_clist[] = { &version_msgtab, NULL };
 
-DECLARE_MODULE_AV2(version, NULL, NULL, version_clist, NULL, NULL, "$Revision: 26421 $");
+DECLARE_MODULE_AV2(version, NULL, NULL, version_clist, NULL, NULL, "$Revision$");
 
 /*
  * m_version - VERSION command handler

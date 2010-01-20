@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: s_serv.c 26610 2009-06-29 15:16:24Z androsyn $
+ *  $Id$
  */
 
 #include "stdinc.h"

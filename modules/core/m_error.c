@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: m_error.c 26421 2009-01-18 17:38:16Z jilles $
+ *  $Id$
  */
 
 #include "stdinc.h"
@@ -47,7 +47,7 @@ mapi_clist_av2 error_clist[] = {
 	&error_msgtab, NULL
 };
 
-DECLARE_MODULE_AV2(error, NULL, NULL, error_clist, NULL, NULL, "$Revision: 26421 $");
+DECLARE_MODULE_AV2(error, NULL, NULL, error_clist, NULL, NULL, "$Revision$");
 
 /* Determine whether an ERROR message is safe to show (no IP address in it) */
 static int

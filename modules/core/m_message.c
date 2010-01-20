@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: m_message.c 26403 2009-01-16 21:26:29Z jilles $
+ *  $Id$
  */
 
 #include "stdinc.h"
@@ -70,7 +70,7 @@ struct Message notice_msgtab = {
 
 mapi_clist_av2 message_clist[] = { &privmsg_msgtab, &notice_msgtab, NULL };
 
-DECLARE_MODULE_AV2(message, modinit, moddeinit, message_clist, NULL, NULL, "$Revision: 26403 $");
+DECLARE_MODULE_AV2(message, modinit, moddeinit, message_clist, NULL, NULL, "$Revision$");
 
 struct entity
 {

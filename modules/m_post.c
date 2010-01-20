@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: m_post.c 26421 2009-01-18 17:38:16Z jilles $
+ *  $Id$
  */
 
 #include "stdinc.h"
@@ -54,7 +54,7 @@ mapi_clist_av2 post_clist[] = {
 	&post_msgtab, &get_msgtab, &put_msgtab, NULL
 };
 
-DECLARE_MODULE_AV2(post, NULL, NULL, post_clist, NULL, NULL, "$Revision: 26421 $");
+DECLARE_MODULE_AV2(post, NULL, NULL, post_clist, NULL, NULL, "$Revision$");
 
 
 /*

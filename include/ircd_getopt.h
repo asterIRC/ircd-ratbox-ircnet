@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: ircd_getopt.h 26074 2008-09-10 01:49:06Z androsyn $
+ *  $Id$
  */
 
 #ifndef __GETOPT_H_INCLUDED__
