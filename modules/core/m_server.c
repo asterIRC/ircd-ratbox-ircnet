@@ -1274,7 +1274,7 @@ server_estab(struct Client *client_p)
 	 ** need to send different names to different servers
 	 ** (domain name matching) Send new server to other servers.
 	 */
-	RB_DLINK_FOREACH(ptr, serv_list.head)
+	if (!ServerConfService(server_p)) RB_DLINK_FOREACH(ptr, serv_list.head)
 	{
 		target_p = ptr->data;
 
@@ -1363,6 +1363,7 @@ server_estab(struct Client *client_p)
 				   get_id(target_p, client_p), target_p->serv->fullcaps);
 	}
 
+	if (ServerConfBurst(server_p))
 #ifdef COMPAT_211
 	if (IsCapable(client_p, CAP_211))
 		burst_211(client_p);
