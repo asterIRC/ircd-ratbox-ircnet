@@ -214,6 +214,7 @@ const char *form_str(int);
 #define ERR_TOOMANYCHANNELS  405
 #define ERR_WASNOSUCHNICK    406
 #define ERR_TOOMANYTARGETS   407
+#define ERR_NOSUCHSERVICE    408
 #define ERR_NOORIGIN         409
 
 #define ERR_INVALIDCAPCMD    410

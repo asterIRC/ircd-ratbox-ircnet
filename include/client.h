@@ -53,6 +53,7 @@ struct LocalUser;
 #define STAT_REJECT		0x10
 #define STAT_SERVER             0x20
 #define STAT_CLIENT             0x40
+#define STAT_SERVICE		0x80
 
 
 #define IsRegisteredUser(x)     ((x)->status == STAT_CLIENT)
@@ -62,6 +63,7 @@ struct LocalUser;
 #define IsMe(x)                 ((x)->status == STAT_ME)
 #define IsUnknown(x)            ((x)->status == STAT_UNKNOWN)
 #define IsServer(x)             ((x)->status == STAT_SERVER)
+#define IsSService(x)           ((x)->status == STAT_SERVICE)
 #define IsClient(x)             ((x)->status == STAT_CLIENT)
 #define IsReject(x)		((x)->status == STAT_REJECT)
 
@@ -87,6 +89,9 @@ struct LocalUser;
 
 #define SetServer(x)            {(x)->status = STAT_SERVER; \
 				 (x)->handler = SERVER_HANDLER; }
+
+#define SetService(x)           {(x)->status = STAT_SERVICE; \
+				 (x)->handler = RCLIENT_HANDLER; }
 
 #define SetClient(x)            {(x)->status = STAT_CLIENT; \
 				 (x)->handler = IsOper((x)) ? \

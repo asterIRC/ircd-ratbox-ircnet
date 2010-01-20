@@ -632,6 +632,11 @@ msg_client(int p_or_n, const char *command,
 
 	if(MyClient(target_p))
 	{
+		if (IsSService(source_p)) {
+			sendto_one(target_p, ":%s %s %s :%s",
+				source_p->name, command, target_p->name, text);
+			return;
+		}
 		/* XXX Controversial? allow opers always to send through a +g */
 		if(!IsServer(source_p) && IsSetCallerId(target_p))
 		{

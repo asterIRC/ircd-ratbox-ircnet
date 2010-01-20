@@ -279,7 +279,6 @@ list_named_channel(struct Client *source_p, const char *name)
 
 		/* this means the user was using shortname */
 		if (*n == '!' && (lp = find_channels(n + 1))) {
-			struct Channel *chptr;
 			int showit;
 
 			RB_DLINK_FOREACH(lp, lp) {

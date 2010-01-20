@@ -62,6 +62,7 @@ static void check_unknowns_list(rb_dlink_list *list);
 static void free_exited_clients(void *unused);
 static void exit_aborted_clients(void *unused);
 
+static int exit_remote_service(struct Client *svc);
 static int exit_remote_client(struct Client *, struct Client *, struct Client *, const char *);
 static int exit_remote_server(struct Client *, struct Client *, struct Client *, const char *);
 static int exit_local_client(struct Client *, struct Client *, struct Client *, const char *);
@@ -1146,6 +1147,17 @@ exit_generic_client(struct Client *source_p, const char *comment)
 	remove_client_from_list(source_p);
 }
 
+
+static int exit_remote_service(struct Client *svc)
+{
+	rb_free(svc->name);
+	rb_dlinkFindDestroy(svc, &svc_list);
+	del_from_hash(HASH_CLIENT, svc->name, svc);
+	free_client(svc);
+	return 0;
+}
+
+
 /* 
  * Assumes IsClient(source_p) && !MyConnect(source_p)
  */
@@ -1536,6 +1548,8 @@ exit_client(struct Client *client_p,	/* The local client originating the
 			return exit_remote_client(client_p, source_p, from, comment);
 		else if(IsServer(source_p))
 			return exit_remote_server(client_p, source_p, from, comment);
+		else if(IsSService(source_p))
+			return exit_remote_service(source_p);
 	}
 
 	return -1;
