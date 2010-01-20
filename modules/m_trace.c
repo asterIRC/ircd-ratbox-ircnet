@@ -132,9 +132,12 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 			{
 				struct Client *ac2ptr;
 
+#if 0
+				/* always allow uids in here */
 				if(MyClient(source_p))
 					ac2ptr = find_named_client(tname);
 				else
+#endif
 					ac2ptr = find_client(tname);
 
 				if(ac2ptr == NULL)
