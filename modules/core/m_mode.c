@@ -176,6 +176,7 @@ static int
 ms_mode(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Channel *chptr;
+	struct membership *msptr;
 
 	chptr = find_channel(parv[1]);
 
@@ -186,7 +187,19 @@ ms_mode(struct Client *client_p, struct Client *source_p, int parc, const char *
 		return 0;
 	}
 
-	set_channel_mode(client_p, source_p, chptr, find_channel_membership(chptr, source_p), parc - 2, parv + 2);
+	if(IsServer(source_p))
+		msptr = NULL;
+	else
+	{
+		msptr = find_channel_membership(chptr, source_p);
+		if(msptr == NULL || !is_chanop(msptr))
+		{
+			/* For consistency with 2.11, drop it if no ops. */
+			if(IsCapable(client_p, CAP_211))
+				return;
+		}
+	}
+	set_channel_mode(client_p, source_p, chptr, msptr, parc - 2, parv + 2);
 
 	return 0;
 }
@@ -1405,8 +1418,7 @@ static struct ChannelMode ModeTable[255] =
 static int
 get_channel_access(struct Client *source_p, struct membership *msptr)
 {
-	if (!msptr) return CHFL_PEON;
-	if(!MyClient(source_p) && IsCapable(source_p->from, CAP_211))
+	if(!MyClient(source_p))
 		return CHFL_CHANOP|CHFL_UNIQOP;
 	return msptr->flags & (CHFL_CHANOP|CHFL_UNIQOP);
 }
