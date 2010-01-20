@@ -356,7 +356,7 @@ void channel_cacheflags(struct Channel *chptr)
 	if (!mask && rindex(chptr->chname, ':'))
 		chptr->info |= CHINFO_JIS;
 
-	if ((p = strstr(chptr->chname, "\033$B")) && (strstr(p+3, "\033(B")))
+	if ((p = strchr(chptr->chname, ',')))
 		chptr->info |= CHINFO_JIS;
 	if (mask)
 		chptr->info |= CHINFO_MASKED;
