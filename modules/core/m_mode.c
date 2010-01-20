@@ -1467,9 +1467,6 @@ set_channel_mode(struct Client *client_p, struct Client *source_p,
 		}
 	}
 
-	if (errors & SM_ERR_NOOPS && IsCapable(client_p, CAP_211))
-		return;
-
 	/* bail out if we have nothing to do... */
 	if(!mode_count)
 		return;
