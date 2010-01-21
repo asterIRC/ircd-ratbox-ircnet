@@ -208,7 +208,7 @@ static int	ms_service(struct Client *client_p, struct Client *source_p, int parc
 		/* got the same service name from somewhere else, this cant be good. */
 		sendto_server(NULL, NULL, CAP_IRCNET, NOCAPS,
 			":%s KILL %s :Service %s collision (old from %s [%s], new from %s [%s])",
-			me.id, svc->name, svc->servptr->name, svc->servptr->id, source_p->name, source_p->id);
+			me.id, svc->name, svc->name, svc->servptr->name, svc->servptr->id, source_p->name, source_p->id);
 		exit_client(NULL, svc, source_p, "Service name collision");
 		return 0;
 	}

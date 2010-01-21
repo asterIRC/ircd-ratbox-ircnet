@@ -1260,7 +1260,7 @@ exit_remote_server(struct Client *client_p, struct Client *source_p, struct Clie
 	/* 2.11 uses unconnect semantics, confirm the SQUIT here on behalf
 	 * of the removed server's uplink.
 	 */
-	if(IsServer(client_p) && IsCapable(client_p, CAP_211) &&
+	if(client_p && IsServer(client_p) && IsCapable(client_p, CAP_211) &&
 			source_p->from != client_p)
 	{
 		/* If this is a split within a mask, send the quit message
