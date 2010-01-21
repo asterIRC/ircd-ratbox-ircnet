@@ -522,17 +522,21 @@ clean_nick(const char *nick, int loc_client)
 static int
 clean_username(const char *username)
 {
-	int len = 0;
+	int len = 1;
+	int alnum = 1;
 
-	for(; *username; username++)
+	if(!IsUserChar(*username))
+		return 0;
+
+	while (*++username) 
 	{
 		len++;
-
-		if(!IsUserChar(*username))
-			return 0;
+		alnum += IsAlNum(*username) != 0;
 	}
 
-	if(len > USERLEN)
+	/* IRCNet madness: people are allowed to have two
+         * non alnum chars in username. */
+	if (len - alnum > 2 || !alnum)
 		return 0;
 
 	return 1;
