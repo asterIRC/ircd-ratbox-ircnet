@@ -410,10 +410,12 @@ ms_uid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	if(!clean_username(parv[5]) || !clean_host(parv[6]))
 	{
 		ServerStats.is_kill++;
-		sendto_realops_flags(UMODE_DEBUG, L_ALL,
-				     "Bad user@host: %s@%s From: %s(via %s)",
+		sendto_realops_flags(UMODE_ALL, L_ALL,
+				     "Bad user@host: %s@%s From: %s(via %s, dropping link)",
 				     parv[5], parv[6], source_p->name, client_p->name);
-		sendto_one(client_p, ":%s KILL %s :%s (Bad user@host)", me.id, parv[8], me.name);
+		ilog(L_SERVER, "Bad user@host %s@%s for command 'UID' from %s.",
+					parv[5], parv[6], parc, client_p->name);
+		exit_client(client_p, client_p, client_p, "Bad user@host");
 		return 0;
 	}
 
