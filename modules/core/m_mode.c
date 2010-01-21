@@ -196,7 +196,11 @@ ms_mode(struct Client *client_p, struct Client *source_p, int parc, const char *
 		{
 			/* For consistency with 2.11, drop it if no ops. */
 			if(IsCapable(client_p, CAP_211))
-				return;
+			{
+				sendto_realops_flags(UMODE_DEBUG, L_ALL, "Fake: %s MODE %s %s",
+				    source_p->name, chptr->chname, parv[2]);
+				return 0;
+			}
 		}
 	}
 	set_channel_mode(client_p, source_p, chptr, msptr, parc - 2, parv + 2);
