@@ -210,7 +210,7 @@ struct server_conf
 #define SERVER_AUTOCONN		0x0020
 #define SERVER_SSL		0x0040
 #define SERVER_SVC		0x0080
-#define SERVER_SVCBURST		0x0080
+#define SERVER_SVCBURST		0x0100
 
 #define ServerConfIllegal(x)	((x)->flags & SERVER_ILLEGAL)
 #define ServerConfVhosted(x)	((x)->flags & SERVER_VHOSTED)
@@ -220,7 +220,7 @@ struct server_conf
 #define ServerConfAutoconn(x)	((x)->flags & SERVER_AUTOCONN)
 #define ServerConfSSL(x)	((x)->flags & SERVER_SSL)
 #define ServerConfService(x)	((x)->flags & SERVER_SVC)
-#define ServerConfBurst(x)	(((x)->flags & SERVER_SVC == 0) || (x)->flags & SERVER_SVCBURST)
+#define ServerConfBurst(x)	((((x)->flags & SERVER_SVC) == 0) || ((x)->flags & SERVER_SVCBURST))
 #define ServerConfMask(x,name)	((x)->mask ? (match((x)->mask, (name))?(x)->mask:(name)):(name))
 
 

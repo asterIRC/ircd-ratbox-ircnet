@@ -821,7 +821,20 @@ user_mode(struct Client *client_p, struct Client *source_p, int parc, const char
 			case '\r':
 			case '\t':
 				break;
-
+#ifdef COMPAT_211
+			case 'a':
+				if (IsCapable(client_p, CAP_211)) {
+					sendto_server(client_p, NULL, CAP_TS6, CAP_211,
+					      ":%s AWAY%s", source_p->id, what==MODE_ADD?" :":"");
+					sendto_server(client_p, NULL, CAP_211, NOCAPS,
+					      ":%s MODE %s :%ca", source_p->id, source_p->name, what==MODE_ADD?'+':'-');
+					if (source_p->user->away && what == MODE_DEL)
+						free_away(source_p);
+					else if (!source_p->user->away && what == MODE_ADD)
+						allocate_away(source_p);
+					break;
+				}
+#endif
 			default:
 				if((flag = UserModeBitmask(*pm)))
 				{

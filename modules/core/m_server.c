@@ -1363,13 +1363,14 @@ server_estab(struct Client *client_p)
 				   get_id(target_p, client_p), target_p->serv->fullcaps);
 	}
 
-	if (ServerConfBurst(server_p))
+	if (ServerConfBurst(server_p)) {
 #ifdef COMPAT_211
-	if (IsCapable(client_p, CAP_211))
-		burst_211(client_p);
-	else
+		if (IsCapable(client_p, CAP_211))
+			burst_211(client_p);
+		else
 #endif
-	burst_TS6(client_p);
+			burst_TS6(client_p);
+	}
 
 	if(IsCapable(client_p, CAP_IRCNET))
 	{

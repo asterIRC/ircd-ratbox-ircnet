@@ -1777,6 +1777,17 @@ free_away(struct Client *client_p)
 	}
 }
 
+char *get_away(struct Client *client_p)
+{
+	static char buf[AWAYLEN+1];
+
+	if (client_p->user->away && !*client_p->user->away) {
+		rb_snprintf(buf, sizeof(buf), "Gone, for more info use WHOIS %s %s",
+				client_p->name, client_p->name);
+		return buf;
+	}
+	return client_p->user->away;
+}
 
 /*
  * close_connection

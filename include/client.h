@@ -379,6 +379,7 @@ void close_connection(struct Client *);
 void flood_endgrace(struct Client *);
 void allocate_away(struct Client *);
 void free_away(struct Client *);
+char *get_away(struct Client *);
 
 
 #endif /* INCLUDED_client_h */

@@ -1052,6 +1052,14 @@ register_client(struct Client *client_p, struct Client *server,
 	m = &parv[4][1];
 	while(*m)
 	{
+#ifdef COMPAT_211
+		if (IsCapable(client_p, CAP_211) && *m == 'a') {
+			allocate_away(source_p);
+			m++;
+			continue;
+		}
+#endif
+
 		flag = UserModeBitmask(*m);
 
 #ifdef ENABLE_SERVICES
