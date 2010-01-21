@@ -143,11 +143,9 @@ m_invite(struct Client *client_p, struct Client *source_p, int parc, const char 
 			return 0;
 		}
 
+		if(chptr->mode.mode & MODE_INVITEONLY)
+			store_invite = 1;
 	}
-
-	/* this should mimic 2.11 behaviour */
-	if (is_chanop(msptr))
-		store_invite = 1;
 
 	if(MyConnect(source_p))
 	{
