@@ -185,7 +185,7 @@ static int	ms_service(struct Client *client_p, struct Client *source_p, int parc
 	/* Reintroducing the same service is fine, as their name always contain their server.
            This way it is possible to change it's type/info/distmask without ever quitting.
            Note that 2.11 will just go ahead and happily register the same service fullname again */
-	svc = find_any_client(name);
+	svc = find_service(name);
 
 	/* Services are just clients as not much info is needed to keep about them */
 	if (!svc)

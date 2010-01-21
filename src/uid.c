@@ -39,8 +39,9 @@ int check_anid(const char *anid)
 		return 0;
 
 	while (*++anid) {
-		if (!IsIdChar(*anid))
+		if (!IsIdChar(*anid)) {
 			return -1;
+		}
 		len++;
 	}
 	return len;

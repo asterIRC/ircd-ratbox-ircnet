@@ -37,6 +37,7 @@
 #include "cache.h"
 #include "s_newconf.h"
 #include "s_log.h"
+#include "uid.h"
 
 #define hash_nick(x) (fnv_hash_upper((const unsigned char *)(x), U_MAX_BITS, 0))
 #define hash_id(x) (fnv_hash((const unsigned char *)(x), U_MAX_BITS, 0))
@@ -403,6 +404,39 @@ find_client(const char *name)
 
 	return NULL;
 }
+
+/* find_service()
+ *
+ * finds a service entry from the client hash table
+ */
+struct Client *
+find_service(const char *name)
+{
+	struct Client *target_p;
+	rb_dlink_node *ptr;
+	unsigned int hashv;
+
+	s_assert(name != NULL);
+	if(EmptyString(name))
+		return NULL;
+
+	hashv = hash_nick(name);
+
+	RB_DLINK_FOREACH(ptr, clientTable[hashv].head)
+	{
+		target_p = ptr->data;
+
+		if(irccmp(name, target_p->name) == 0) {
+			/* this should return only clients/servers */
+			if (!IsSService(target_p))
+				return NULL;
+			return target_p;
+		}
+	}
+
+	return NULL;
+}
+
 
 /* find_named_client()
  *
