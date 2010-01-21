@@ -1060,30 +1060,6 @@ can_join(struct Client *source_p, struct Channel *chptr, char *key)
 
 	s_assert(source_p->localClient != NULL);
 
-	if(ConfigChannel.use_sslonly && chptr->mode.mode & MODE_SSLONLY && !IsSSL(source_p))
-		return ERR_SSLONLYCHAN;
-
-	/* if the channel is opless and the client matches a reop mask,
-         * override everything, but ONLY in case there is noone else
-         * matching already on the channel. --sd */
-	if (chptr->reop && match_ban(&chptr->reoplist, source_p, NULL, 0)) {
-		int opseen = 0;
-		RB_DLINK_FOREACH(lp, chptr->members.head) {
-			struct membership *m = lp->data;
-			if (is_chanop(m)) {
-				chptr->reop = 0;
-				opseen++;
-				break;
-			}
-			if (match_ban(&chptr->reoplist, m->client_p, NULL, 0)) {
-				opseen++;
-				break;
-			}
-		}
-		/* nobody else seen, get in */
-		if (!opseen)
-			return 0;
-	}
 
 	if((is_banned(chptr, source_p, NULL)) == CHFL_BAN)
 		return (ERR_BANNEDFROMCHAN);
@@ -1108,13 +1084,36 @@ can_join(struct Client *source_p, struct Channel *chptr, char *key)
 		return (ERR_BADCHANNELKEY);
 
 	if(chptr->mode.limit &&
-	   rb_dlink_list_length(&chptr->members) >= (unsigned long)chptr->mode.limit)
-		return (ERR_CHANNELISFULL);
+	   rb_dlink_list_length(&chptr->members) >= (unsigned long)chptr->mode.limit) {
+		/* if the channel is opless and the client matches a reop mask,
+		 * override +l limit. */
+		if (match_ban(&chptr->reoplist, source_p, NULL, 0))
+		{
+			RB_DLINK_FOREACH(lp, chptr->members.head)
+			{
+				struct membership *m = lp->data;
+
+				chptr->reop = 0;
+				if (is_chanop(m))
+					return (ERR_CHANNELISFULL);
+
+				chptr->reop = rb_current_time();
+				if (match_ban(&chptr->reoplist, m->client_p, NULL, 0))
+					return (ERR_CHANNELISFULL);
+			}
+
+			chptr->reop = rb_current_time();
+			return 0;
+		}
+	}
 
 #ifdef ENABLE_SERVICES
 	if(chptr->mode.mode & MODE_REGONLY && EmptyString(source_p->user->suser))
 		return ERR_NEEDREGGEDNICK;
 #endif
+
+	if(ConfigChannel.use_sslonly && chptr->mode.mode & MODE_SSLONLY && !IsSSL(source_p))
+		return ERR_SSLONLYCHAN;
 
 	return 0;
 }
