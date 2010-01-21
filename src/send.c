@@ -539,7 +539,7 @@ sendto_channel_flags(struct Client *one, int type, struct Client *source_p,
 	rb_vsnprintf(buf, sizeof(buf), pattern, args);
 	va_end(args);
 
-	if(IsServer(source_p))
+	if(IsServer(source_p) || IsMe(source_p))
 		rb_linebuf_putmsg(&rb_linebuf_local, NULL, NULL, ":%s %s", source_p->name, buf);
 	else
 		rb_linebuf_putmsg(&rb_linebuf_local, NULL, NULL,
@@ -753,7 +753,7 @@ sendto_match_butone(struct Client *one, struct Client *source_p,
 	rb_vsnprintf(buf, sizeof(buf), pattern, args);
 	va_end(args);
 
-	if(IsServer(source_p))
+	if(IsServer(source_p) || IsMe(source_p))
 		rb_linebuf_putmsg(&rb_linebuf_local, NULL, NULL, ":%s %s", source_p->name, buf);
 	else
 		rb_linebuf_putmsg(&rb_linebuf_local, NULL, NULL,

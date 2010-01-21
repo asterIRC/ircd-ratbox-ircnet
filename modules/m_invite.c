@@ -62,6 +62,9 @@ m_invite(struct Client *client_p, struct Client *source_p, int parc, const char 
 	struct Channel *chptr;
 	struct membership *msptr;
 	int store_invite = 0;
+	int banned;
+	int over_limit;
+
 
 	if(MyClient(source_p) && !IsFloodDone(source_p))
 		flood_endgrace(source_p);
@@ -132,8 +135,12 @@ m_invite(struct Client *client_p, struct Client *source_p, int parc, const char 
 		return 0;
 	}
 
+	/* check if target is crossing +b or +l via an invite */
+	banned = is_banned(chptr, target_p, NULL) == CHFL_BAN;
+	over_limit = chptr->mode.limit && rb_dlink_list_length(&chptr->members) >= (unsigned long)chptr->mode.limit;
+
 	/* only store invites for +i channels */
-	if(ConfigChannel.invite_ops_only || (chptr->mode.mode & MODE_INVITEONLY))
+	if(ConfigChannel.invite_ops_only || (chptr->mode.mode & MODE_INVITEONLY) || banned || over_limit)
 	{
 		/* treat remote clients as chanops */
 		if(MyClient(source_p) && !is_chanop(msptr))
@@ -143,7 +150,7 @@ m_invite(struct Client *client_p, struct Client *source_p, int parc, const char 
 			return 0;
 		}
 
-		if(chptr->mode.mode & MODE_INVITEONLY)
+		if((chptr->mode.mode & MODE_INVITEONLY) || banned || over_limit)
 			store_invite = 1;
 	}
 
@@ -169,8 +176,16 @@ m_invite(struct Client *client_p, struct Client *source_p, int parc, const char 
 			   source_p->name, source_p->username, source_p->host,
 			   target_p->name, chptr->chname);
 
-		if(store_invite)
+		if(store_invite) {
 			add_invite(chptr, target_p);
+
+			if (banned || over_limit) {
+				sendto_channel_flags(NULL, 0, &me, chptr,
+				"NOTICE %s :%s carries an invitation from %s overriding +%s mode.",
+				chptr->chname, target_p->name, source_p->name,
+				((over_limit&&!banned)?"l":((banned&&!over_limit)?"b":"bl")));
+			}
+		}
 	}
 	else if(target_p->from != client_p)
 	{

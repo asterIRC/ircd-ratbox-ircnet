@@ -1057,37 +1057,45 @@ static int
 can_join(struct Client *source_p, struct Channel *chptr, char *key)
 {
 	rb_dlink_node *lp;
+	int banned;
+	int over_limit;
+	int invite_only;
 
 	s_assert(source_p->localClient != NULL);
 
+	banned = is_banned(chptr, source_p, NULL) == CHFL_BAN;
+	over_limit = chptr->mode.limit && rb_dlink_list_length(&chptr->members) >= (unsigned long)chptr->mode.limit;
+	invite_only = chptr->mode.mode & MODE_INVITEONLY;
 
-	if((is_banned(chptr, source_p, NULL)) == CHFL_BAN)
-		return (ERR_BANNEDFROMCHAN);
-
-	if(chptr->mode.mode & MODE_INVITEONLY)
+	if(invite_only || banned || over_limit)
 	{
 		RB_DLINK_FOREACH(lp, source_p->localClient->invited.head)
 		{
 			if(lp->data == chptr)
 				break;
 		}
-		if(lp == NULL)
+		if(lp == NULL && invite_only)
 		{
 			if(!ConfigChannel.use_invex)
 				return (ERR_INVITEONLYCHAN);
-			if (!match_ban(&chptr->invexlist, source_p, NULL, 0)) /* cached by is_banned */
+			if (!match_ban(&chptr->invexlist, source_p, NULL, 0))
 				return ERR_INVITEONLYCHAN;
 		}
 	}
 
+	if (banned && !lp) 
+		return (ERR_BANNEDFROMCHAN);
+
 	if(*chptr->mode.key && (EmptyString(key) || irccmp(chptr->mode.key, key)))
 		return (ERR_BADCHANNELKEY);
 
-	if(chptr->mode.limit &&
-	   rb_dlink_list_length(&chptr->members) >= (unsigned long)chptr->mode.limit) {
+	if(ConfigChannel.use_sslonly && chptr->mode.mode & MODE_SSLONLY && !IsSSL(source_p))
+		return ERR_SSLONLYCHAN;
+
+	if(over_limit) {
 		/* if the channel is opless and the client matches a reop mask,
 		 * override +l limit. */
-		if (match_ban(&chptr->reoplist, source_p, NULL, 0))
+		if (!lp && match_ban(&chptr->reoplist, source_p, NULL, 0))
 		{
 			RB_DLINK_FOREACH(lp, chptr->members.head)
 			{
@@ -1105,6 +1113,8 @@ can_join(struct Client *source_p, struct Channel *chptr, char *key)
 			chptr->reop = rb_current_time();
 			return 0;
 		}
+		if (!lp)
+			return (ERR_CHANNELISFULL);
 	}
 
 #ifdef ENABLE_SERVICES
@@ -1112,8 +1122,6 @@ can_join(struct Client *source_p, struct Channel *chptr, char *key)
 		return ERR_NEEDREGGEDNICK;
 #endif
 
-	if(ConfigChannel.use_sslonly && chptr->mode.mode & MODE_SSLONLY && !IsSSL(source_p))
-		return ERR_SSLONLYCHAN;
 
 	return 0;
 }
