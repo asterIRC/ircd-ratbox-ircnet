@@ -989,29 +989,22 @@ recurse_remove_clients(struct Client *source_p, const char *comment)
 	if(source_p->serv == NULL)	/* oooops. uh this is actually a major bug */
 		return;
 
-	/* this is very ugly, but it saves cpu :P */
-	if(ConfigFileEntry.nick_delay > 0)
+	RB_DLINK_FOREACH_SAFE(ptr, ptr_next, source_p->serv->users.head)
 	{
-		RB_DLINK_FOREACH_SAFE(ptr, ptr_next, source_p->serv->users.head)
-		{
-			target_p = ptr->data;
-			target_p->flags |= FLAGS_KILLED;
+		target_p = ptr->data;
+
+		if (IsSService(target_p)) {
+			exit_remote_service(target_p, comment);
+			continue;
+		}
+
+		target_p->flags |= FLAGS_KILLED;
+
+		if(ConfigFileEntry.nick_delay > 0)
 			add_nd_entry(target_p->name);
 
-			if(!IsDead(target_p) && !IsClosing(target_p))
-				exit_remote_client(NULL, target_p, &me, comment);
-		}
-	}
-	else
-	{
-		RB_DLINK_FOREACH_SAFE(ptr, ptr_next, source_p->serv->users.head)
-		{
-			target_p = ptr->data;
-			target_p->flags |= FLAGS_KILLED;
-
-			if(!IsDead(target_p) && !IsClosing(target_p))
-				exit_remote_client(NULL, target_p, &me, comment);
-		}
+		if(!IsDead(target_p) && !IsClosing(target_p))
+			exit_remote_client(NULL, target_p, &me, comment);
 	}
 
 	RB_DLINK_FOREACH_SAFE(ptr, ptr_next, source_p->serv->servers.head)
@@ -1153,7 +1146,7 @@ static int exit_remote_service(struct Client *svc, const char *comment)
 	/* if its a local service, drop it as it might be too dumb to reissue SERVICE again */
 	if (MyConnect(svc->from) && ServerConfService(svc->from))
 		exit_client(NULL, svc->from, &me, comment);
-	rb_free(svc->name);
+	rb_free((void*)svc->name);
 	rb_dlinkDelete(&svc->node, &svc_list);
 	rb_dlinkDelete(&svc->lnode, &svc->servptr->serv->users);
 	del_from_hash(HASH_CLIENT, svc->name, svc);
