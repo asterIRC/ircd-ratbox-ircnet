@@ -182,7 +182,7 @@ show_lusers(struct Client *source_p)
 	SetCork(source_p);
 	sendto_one_numeric(source_p, RPL_LUSERCLIENT, form_str(RPL_LUSERCLIENT),
 			   (Count.total - Count.invisi),
-			   Count.invisi, rb_dlink_list_length(&global_serv_list));
+			   Count.invisi, ServerStats.is_services, rb_dlink_list_length(&global_serv_list));
 
 	if(Count.oper > 0)
 		sendto_one_numeric(source_p, RPL_LUSEROP, form_str(RPL_LUSEROP), Count.oper);
