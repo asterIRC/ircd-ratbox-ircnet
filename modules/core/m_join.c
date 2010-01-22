@@ -48,7 +48,7 @@ static void sjoin_211(struct Client *source_p, struct Client *client_p, struct C
 static int ms_njoin(struct Client *, struct Client *, int, const char **);
 struct Message njoin_msgtab = {
 	"NJOIN", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_ignore, mg_ignore, {ms_njoin, 0}, mg_ignore, mg_ignore}
+	{mg_unreg, mg_ignore, mg_ignore, {ms_njoin, 3}, mg_ignore, mg_ignore}
 };
 #endif
 
@@ -538,12 +538,13 @@ ms_join(struct Client *client_p, struct Client *source_p, int parc, const char *
 static int
 ms_njoin(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	const char *fakeparv[5];
+	const char *fakeparv[6];
 	fakeparv[0] = parv[0];
 	fakeparv[1] = "0";
 	fakeparv[2] = parv[1];
 	fakeparv[3] = "+";
 	fakeparv[4] = parv[2];
+	fakeparv[5] = NULL;
 	return ms_sjoin(client_p, source_p, 5, fakeparv);
 }
 
@@ -601,6 +602,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 	char *p;
 	int i;
 	int pargs;
+	char sep = ' ';
 
 	/* I dont trust servers *not* to end up sending us a blank sjoin, so
 	 * its better not to make a big deal about it. --fl
@@ -754,10 +756,15 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 	 * first space to \0, so s is just the first nick, and point p to the
 	 * second nick
 	 */
+#ifdef COMPAT_211
+	if (IsCapable(client_p, CAP_211))
+		sep = ',';
+#endif
 
-	for (p = s; ((*p && *p != ' ') && (*p != ',')); p++);
-	if (*p)
-		*p++ = 0;
+	if((p = strchr(s, sep)) != NULL)
+	{
+		*p++ = '\0';
+	}
 
 	while(s)
 	{
@@ -905,10 +912,9 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 		 * we cant check it for spaces.. if there are no spaces, then when
 		 * we next get here, s will be NULL
 		 */
-
-		if (s) {
-			for (p = s; ((*p && *p != ' ') && (*p != ',')); p++);
-			*p++ = 0;
+		if(s && ((p = strchr(s, sep)) != NULL))
+		{
+			*p++ = '\0';
 		}
 	}
 

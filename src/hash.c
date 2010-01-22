@@ -164,7 +164,7 @@ uint32_t
 fnv_hash_channel(const unsigned char *s, unsigned bits, unsigned int len)
 {
 	int l = strlen((const char*)s);
-	if (s[0] == '!' && l > CHIDLEN+1)
+	if ((s[0] == '!') && (l > CHIDLEN+1))
 		return fnv_hash_upper_len(s + CHIDLEN + 1, bits, len);
 	return fnv_hash_upper_len(s, bits, len);
 }
