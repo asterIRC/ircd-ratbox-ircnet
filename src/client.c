@@ -1143,15 +1143,23 @@ exit_generic_client(struct Client *source_p, const char *comment)
 
 static int exit_remote_service(struct Client *svc, const char *comment)
 {
-	/* if its a local service, drop it as it might be too dumb to reissue SERVICE again */
-	if (MyConnect(svc->from) && ServerConfService(svc->from))
-		exit_client(NULL, svc->from, &me, comment);
-	rb_free((void*)svc->name);
+	struct Client *from = svc->from;
+
 	rb_dlinkDelete(&svc->node, &svc_list);
 	rb_dlinkDelete(&svc->lnode, &svc->servptr->serv->users);
+
 	del_from_hash(HASH_CLIENT, svc->name, svc);
+
+	rb_free((void*)svc->name);
+
 	free_client(svc);
+
 	ServerStats.is_services--;
+
+	/* if it was a local service, drop it as it might be too dumb to reissue SERVICE again */
+	if (MyConnect(from) && ServerConfService(svc->from))
+		exit_client(NULL, from, &me, comment);
+
 	return 0;
 }
 
