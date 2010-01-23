@@ -166,7 +166,8 @@ m_mode(struct Client *client_p, struct Client *source_p, int parc, const char *p
 			sendto_realops_flags(UMODE_DEBUG, L_ALL, "Fake: %s MODE %s %s",
 			    source_p->name, chptr->chname, array_to_string(&parv[2], parc-2));
 
-			sendto_server(client_p, chptr, CAP_TS6|CAP_211, NOCAPS, ":%s MODE %s", source_p->id, array_to_string(&parv[2], parc-2));
+			sendto_server(client_p, chptr, CAP_TS6, NOCAPS, ":%s MODE %s %s", source_p->id,
+					chptr->chname, array_to_string(&parv[2], parc-2));
 			return 0;
 		}
 
