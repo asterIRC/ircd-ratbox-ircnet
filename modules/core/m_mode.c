@@ -309,6 +309,8 @@ ms_bmask(struct Client *client_p, struct Client *source_p, int parc, const char 
 		mode_type = CHFL_REOP;
 		needcap = CAP_IRCNET;
 		mems = ONLY_CHANOPS;
+		break;
+
 		/* maybe we should just blindly propagate this? */
 	default:
 		return 0;
