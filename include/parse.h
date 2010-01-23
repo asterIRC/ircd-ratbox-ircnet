@@ -88,7 +88,7 @@ struct MessageHash
 extern struct MessageHash *msg_hash_table[];
 void parse(struct Client *, char *, char *);
 int string_to_array(char *string, char *parv[]);
-char *array_to_string(const char *parv[], int parc);
+char *array_to_string(const char *parv[], int parc, int uid2nick);
 void handle_encap(struct Client *, struct Client *, const char *, int, const char *parv[]);
 void clear_hash_parse(void);
 void mod_add_cmd(struct Message *msg);

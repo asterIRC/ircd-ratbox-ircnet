@@ -66,7 +66,7 @@ ms_operspy(struct Client *client_p, struct Client *source_p, int parc, const cha
 	/* buffer all remaining into one param */
 	else
 	{
-		report_operspy(source_p, parv[1], array_to_string(&parv[2], parc-2));
+		report_operspy(source_p, parv[1], array_to_string(&parv[2], parc-2, 0));
 	}
 
 	return 0;
@@ -85,7 +85,7 @@ mo_operspy(struct Client *client_p, struct Client *source_p, int parc, const cha
 		return 0;
 
 	operspy = 1;
-	pbuf = array_to_string(&parv[1], parc-1);
+	pbuf = array_to_string(&parv[1], parc-1, 0);
 	parse(client_p, pbuf, pbuf + strlen(pbuf));
 	operspy = 0;
 	return 0;

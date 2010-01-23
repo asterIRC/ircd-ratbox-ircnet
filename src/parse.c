@@ -114,7 +114,7 @@ string_to_array(char *string, char **parv)
 	return x;
 }
 
-char *array_to_string(const char *parv[], int parc)
+char *array_to_string(const char *parv[], int parc, int uid2nick)
 {
 	static char buf[BUFSIZE];
 	char *ptr;
@@ -126,12 +126,20 @@ char *array_to_string(const char *parv[], int parc)
 	buf[0] = 0;
 	for(i = 0; i < parc; i++)
 	{
-		len = strlen(parv[i]) + 1;
+		const char *s = parv[i];
+		len = strlen(s) + 1;
 
 		if((size_t)(cur_len + len) >= sizeof(buf))
 			return 0;
 
-		rb_snprintf(ptr, sizeof(buf) - cur_len, "%s ", parv[i]);
+		if (uid2nick)
+		{
+			struct Client *client_p = find_id(s);
+			if (client_p)
+				s = client_p->name;
+		}
+
+		rb_snprintf(ptr, sizeof(buf) - cur_len, "%s ", s);
 		ptr += len;
 		cur_len += len;
 	}

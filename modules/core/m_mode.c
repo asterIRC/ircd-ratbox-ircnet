@@ -160,14 +160,14 @@ m_mode(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		if(is_deop(msptr))
 			return 0;
 
-		if(!is_chanop(msptr))
+		if(!is_chanop(msptr) && !MyClient(source_p) && parc > 2)
 		{
 			/* For consistency with 2.11, drop it if no ops. */
-			sendto_realops_flags(UMODE_DEBUG, L_ALL, "Fake: %s MODE %s %s",
-			    source_p->name, chptr->chname, array_to_string(&parv[2], parc-2));
+			sendto_realops_flags(UMODE_DEBUG, L_ALL, "Fake: %s MODE %s %s %s",
+			    source_p->name, chptr->chname, parv[2], array_to_string(&parv[3], parc-3, 1));
 
 			sendto_server(client_p, chptr, CAP_TS6, NOCAPS, ":%s MODE %s %s", source_p->id,
-					chptr->chname, array_to_string(&parv[2], parc-2));
+					chptr->chname, array_to_string(&parv[2], parc-2, 0));
 			return 0;
 		}
 
