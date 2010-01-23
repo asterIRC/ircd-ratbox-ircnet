@@ -414,7 +414,7 @@ ms_uid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 				     "Bad user@host: %s@%s From: %s(via %s, dropping link)",
 				     parv[5], parv[6], source_p->name, client_p->name);
 		ilog(L_SERVER, "Bad user@host %s@%s for command 'UID' from %s.",
-					parv[5], parv[6], parc, client_p->name);
+					parv[5], parv[6], client_p->name);
 		exit_client(client_p, client_p, client_p, "Bad user@host");
 		return 0;
 	}
