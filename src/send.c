@@ -939,17 +939,16 @@ sendto_ops_hook(int flags, const char *pattern, va_list args)
 	hook_data_int hdata;
 
 	static int inhook = 0;
-	if (!inhook)
-	{
-		/* Yes, looping is possible under certain circumstances */
-		inhook = 1;
-		rb_vsnprintf(buf, sizeof(buf), pattern, args);
+	/* Yes, looping is possible under certain circumstances */
 
-		hdata.arg1 = buf;
-		hdata.arg2 = flags;
+	if (inhook) return;
+	inhook = 1;
+	rb_vsnprintf(buf, sizeof(buf), pattern, args);
 
-		call_hook(h_schan_notice, &hdata);
-	}
+	hdata.arg1 = buf;
+	hdata.arg2 = flags;
+
+	call_hook(h_schan_notice, &hdata);
 	inhook = 0;
 }
 
@@ -971,11 +970,14 @@ sendto_realops_flags(int flags, int level, const char *pattern, ...)
 	if(EmptyString(me.name))
 		return;
 
+	va_start(args, pattern);
+	sendto_ops_hook(flags, pattern, args);
+	va_end(args);
+
 	rb_linebuf_newbuf(&linebuf);
 
 	va_start(args, pattern);
 	rb_linebuf_putmsg(&linebuf, pattern, &args, ":%s NOTICE * :*** Notice -- ", me.name);
-	sendto_ops_hook(flags, pattern, args);
 	va_end(args);
 
 	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, oper_list.head)
@@ -1024,10 +1026,15 @@ sendto_wallops_flags(int flags, struct Client *source_p, const char *pattern, ..
 				  source_p->username, source_p->host);
 	else {
 		rb_linebuf_putmsg(&linebuf, pattern, &args, ":%s WALLOPS :", source_p->name);
-		sendto_ops_hook(flags, pattern, args);
 	}
 
 	va_end(args);
+
+	if (!IsClient(source_p)) {
+		va_start(args, pattern);
+		sendto_ops_hook(flags, pattern, args);
+		va_end(args);
+	}
 
 	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, oper_list.head)
 	{
