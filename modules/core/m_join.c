@@ -852,8 +852,6 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 		if(fl & CHFL_CHANOP)
 		{
 			*mbuf++ = 'o';
-			pargs++;
-			
 			pbuf += rb_sprintf(pbuf, " %s", Anon(target_p->name));
 			pargs++;
 
@@ -878,6 +876,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 				*mbuf++ = 'v';
 				pbuf += rb_sprintf(pbuf, " %s", Anon(target_p->name));
+				pargs++;
 			}
 		}
 		else if(fl & CHFL_VOICE)
