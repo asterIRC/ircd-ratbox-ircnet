@@ -1064,7 +1064,7 @@ check_channel_name_loc(struct Client *source_p, const char *name)
 static int
 can_join(struct Client *source_p, struct Channel *chptr, char *key)
 {
-	rb_dlink_node *lp;
+	rb_dlink_node *lp = NULL;
 	int banned;
 	int over_limit;
 	int invite_only;
