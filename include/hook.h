@@ -23,6 +23,9 @@ extern int h_burst_client;
 extern int h_burst_channel;
 extern int h_burst_finished;
 extern int h_server_introduced;
+extern int h_schan_notice;
+extern int h_schan_clean;
+extern int h_schan_add;
 
 void init_hook(void);
 int register_hook(const char *name);
@@ -55,5 +58,15 @@ typedef struct
 	struct Client *client;
 	struct Channel *chptr;
 } hook_data_channel;
+
+typedef struct
+{
+	char name[CHANNELLEN];
+	char topic[MAX_TOPICLEN];
+	char pattern[BUFSIZE];
+	int flags;
+	int operonly;
+	int pass;
+} hook_data_schan;
 
 #endif

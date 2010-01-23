@@ -63,6 +63,7 @@ extern struct mapi_header_av2 m_post_mheader;
 extern struct mapi_header_av2 m_rehash_mheader;
 extern struct mapi_header_av2 m_restart_mheader;
 extern struct mapi_header_av2 m_resv_mheader;
+extern struct mapi_header_av2 m_schan_mheader;
 extern struct mapi_header_av2 m_service_mheader;
 extern struct mapi_header_av2 m_services_mheader;
 extern struct mapi_header_av2 m_set_mheader;
@@ -133,6 +134,7 @@ const struct mapi_header_av2 *static_mapi_headers[] = {
 	&m_rehash_mheader,
 	&m_restart_mheader,
 	&m_resv_mheader,
+	&m_schan_mheader,
 	&m_service_mheader,
 #ifdef ENABLE_SERVICES
 	&m_services_mheader,

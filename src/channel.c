@@ -509,6 +509,9 @@ destroy_channel(struct Channel *chptr)
 	free_channel_list(&chptr->exceptlist);
 	free_channel_list(&chptr->invexlist);
 
+	if (IsSCH(chptr))
+		return;
+
 	/* Free the topic */
 	free_topic(chptr);
 

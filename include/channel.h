@@ -165,6 +165,7 @@ struct ChCapCombo
 #define CHINFO_FLOODED	0x0001 /* previously flood_noticed */
 #define CHINFO_JIS	0x0002 /* the channel shoud be sent only to CAP_JAPANESE servers */
 #define CHINFO_MASKED	0x0004 /* cache the fact the channel is masked */
+#define CHINFO_SCH	0x0008 /* service channel; do NOT destroy (and for &channels, +i is overriden by opers) */
 
 /* mode flags for direction indication */
 #define MODE_QUERY     0
@@ -173,6 +174,10 @@ struct ChCapCombo
 
 #define IsMaskedChannel(x)	((x) && ((x)->info & CHINFO_MASKED))
 #define IsJISChannel(x)		((x) && ((x)->info & CHINFO_JIS))
+
+#define IsSCH(x)		((x) && ((x)->info & CHINFO_SCH))
+#define SetChannelSCH(x)	if (x) { (x)->info |= CHINFO_SCH; }
+#define UnSetChannelSCH(x)	if (x) { (x)->info &= ~CHINFO_SCH; }
 
 #define IsChannelFlooded(x)	((x) && ((x)->info & CHINFO_FLOODED))
 #define SetChannelFlooded(x)	if (x) { (x)->info |= CHINFO_FLOODED; }

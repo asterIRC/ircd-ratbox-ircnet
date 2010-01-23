@@ -92,6 +92,7 @@ rb_dlink_list serv_list;	/* local servers to this server ONLY */
 rb_dlink_list global_serv_list;	/* global servers on the network */
 rb_dlink_list oper_list;	/* our opers, duplicated in lclient_list */
 rb_dlink_list svc_list;		/* list of services available */
+rb_dlink_list schan_list;	/* list of service channels */
 
 static unsigned long initialVMTop = 0;	/* top of virtual memory at init */
 const char *logFileName = LPATH;

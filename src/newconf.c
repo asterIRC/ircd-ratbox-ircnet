@@ -54,6 +54,7 @@
 #include "sslproc.h"
 #include "blacklist.h"
 #include "uid.h"
+#include "hook.h"
 
 #define CF_TYPE(x) ((x) & CF_MTYPE)
 
@@ -1366,6 +1367,7 @@ conf_set_auth_class(confentry_t * entry, conf_t * conf, struct conf_items *item)
 	t_aconf_class = rb_strdup(entry->string);
 }
 
+
 static struct oper_conf *t_oper;
 static rb_dlink_list t_oper_list;
 
@@ -1734,6 +1736,69 @@ conf_set_general_havent_read_conf(confentry_t * entry, conf_t * conf, struct con
 		if(!testing_conf)
 			exit(0);
 	}
+}
+
+static hook_data_schan t_schan;
+
+static void
+conf_set_start_schan(conf_t * conf)
+{
+	memset(&t_schan, 0, sizeof(t_schan));
+	rb_strlcpy(t_schan.name, conf->subname, sizeof t_schan.name);
+}
+
+static void
+conf_set_end_schan(conf_t * conf)
+{
+	if (!check_channel_name(t_schan.name))
+	{
+		conf_report_warning_nl("Ignoring schan block at %s:%d -- invalid channel name",
+				       conf->filename, conf->line);
+		return;
+	}
+
+	if (EmptyString(t_schan.pattern))
+	{
+		conf_report_warning_nl("Ignoring schan block at %s:%d -- missing pattern",
+				       conf->filename, conf->line);
+		return;
+	}
+
+
+	if (!t_schan.flags)
+	{
+		conf_report_warning_nl("Ignoring schan block at %s:%d -- missing flags",
+				       conf->filename, conf->line);
+		return;
+	}
+
+	if (t_schan.operonly && IsRemoteChannel(t_schan.name))
+	{
+		conf_report_warning_nl("Ignoring operonly in schan block at %s:%d -- this mode is supported only for &channels",
+				       conf->filename, conf->line);
+		t_schan.operonly = 0;
+	}
+
+	if (!EmptyString(t_schan.topic) && IsRemoteChannel(t_schan.name))
+	{
+		conf_report_warning_nl("Ignoring topic in schan block at %s:%d -- this is supported only for &channels",
+				       conf->filename, conf->line);
+		t_schan.topic[0] = 0;
+	}
+
+	call_hook(h_schan_add, &t_schan);
+}
+
+static void
+conf_set_schan_flags(confentry_t * entry, conf_t * conf, struct conf_items *item)
+{
+	set_modes_from_table(&t_schan.flags, "umode", umode_table, entry);
+}
+
+static void
+conf_set_strcpy(confentry_t * entry, conf_t * conf, struct conf_items *item)
+{
+	rb_strlcpy(item->data, entry->string, item->len);
 }
 
 static struct server_conf *t_server;
@@ -2521,6 +2586,16 @@ static struct conf_items conf_blacklist_table[] =
 	{ "\0",	0, NULL, 0, NULL }
 };
 
+static struct conf_items conf_schan_table[] =
+{
+	{ "flags",   CF_STRING | CF_FLIST, conf_set_schan_flags,  0, NULL },
+	{ "pattern", CF_QSTRING,           conf_set_strcpy,      BUFSIZE, &t_schan.pattern },
+	{ "topic",   CF_QSTRING,           conf_set_strcpy, MAX_TOPICLEN, &t_schan.topic },
+	{ "operonly",CF_YESNO,             NULL,                  0, &t_schan.operonly},
+	{ "pass",    CF_YESNO,             NULL,                  0, &t_schan.pass},
+	{ "\0",	0, NULL, 0, NULL }
+};
+
 #ifdef ENABLE_SERVICES
 static struct conf_items conf_service_table[] =
 {
@@ -2556,6 +2631,7 @@ static struct top_conf_table_t top_conf_table[] =
 	{ "shared",	conf_set_shared_cleanup, conf_set_shared_cleanup,conf_shared_table,	0},
 	{ "cluster",	conf_set_cluster_cleanup,conf_set_cluster_cleanup,conf_cluster_table,	0},
 	{ "blacklist",	conf_set_blacklist_cleanup, conf_set_blacklist_cleanup, conf_blacklist_table,	0},
+	{ "schan", 	conf_set_start_schan,	 conf_set_end_schan,	conf_schan_table, 	1},
 #ifdef ENABLE_SERVICES
 	{ "service",	conf_set_service_start,  NULL,			conf_service_table,	0},
 #endif

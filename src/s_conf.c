@@ -1154,6 +1154,9 @@ clear_out_old_conf(void)
 	clear_out_address_conf();
 	clear_s_newconf();
 
+	/* kill all previous service channels */
+	call_hook(h_schan_clean, NULL);
+
 	/* clean out module paths */
 #ifndef STATIC_MODULES
 	mod_clear_paths();

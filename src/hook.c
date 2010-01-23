@@ -64,6 +64,9 @@ int h_burst_client;
 int h_burst_channel;
 int h_burst_finished;
 int h_server_introduced;
+int h_schan_notice;
+int h_schan_clean;
+int h_schan_add;
 
 void
 init_hook(void)
@@ -80,6 +83,9 @@ init_hook(void)
 	h_burst_channel = register_hook("burst_channel");
 	h_burst_finished = register_hook("burst_finished");
 	h_server_introduced = register_hook("server_introduced");
+	h_schan_notice = register_hook("schan_notice");
+	h_schan_clean = register_hook("schan_clean");
+	h_schan_add = register_hook("schan_add");
 }
 
 /* grow_hooktable()

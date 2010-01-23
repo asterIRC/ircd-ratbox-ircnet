@@ -14,6 +14,7 @@ A:NFX tech workgroup:tech@nfx.cz:Client Server::IRCnet:
 P::::$2::
 Y:222:90:5:10:200000000::
 Y:12:90::9999:2048000:2.4:0.8:
+S:127.0.0.1:secret:alis:0xD000:12
 O:*@127.0.0.1:$PASS:$OPERNAME::12:ApP&:
 I:*@*::::12::
 _eof

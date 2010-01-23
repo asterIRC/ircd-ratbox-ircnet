@@ -87,6 +87,7 @@ clear_s_newconf(void)
 	rb_dlink_node *ptr;
 	rb_dlink_node *next_ptr;
 
+
 	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, shared_conf_list.head)
 	{
 		/* ptr here is ptr->data->node */

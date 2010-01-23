@@ -940,14 +940,32 @@ sendto_anywhere(struct Client *target_p, struct Client *source_p,
 void
 sendto_realops_flags(int flags, int level, const char *pattern, ...)
 {
+	static char buf[BUFSIZE];
+	hook_data_int hdata;
 	struct Client *client_p;
 	rb_dlink_node *ptr;
 	rb_dlink_node *next_ptr;
 	va_list args;
 	buf_head_t linebuf;
+	static int inhook = 0;
 
 	if(EmptyString(me.name))
 		return;
+
+	if (!inhook)
+	{
+		/* Yes, looping is possible under certain circumstances */
+		inhook = 1;
+		va_start(args, pattern);
+		rb_vsnprintf(buf, sizeof(buf), pattern, args);
+		va_end(args);
+
+		hdata.arg1 = buf;
+		hdata.arg2 = flags;
+
+		call_hook(h_schan_notice, &hdata);
+	}
+	inhook = 0;
 
 	rb_linebuf_newbuf(&linebuf);
 

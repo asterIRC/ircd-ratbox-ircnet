@@ -319,6 +319,9 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 			}
 		}
 
+		if (IsSCH(chptr) && !IsRemoteChannel(name))
+			flags = 0;
+
 		if (IsLocked(chptr))
 		{
 			if(successful_join_count > 0)
@@ -1068,6 +1071,9 @@ can_join(struct Client *source_p, struct Channel *chptr, char *key)
 	int invite_only;
 
 	s_assert(source_p->localClient != NULL);
+
+	if (IsSCH(chptr) && IsOper(source_p))
+		return 0;
 
 	banned = is_banned(chptr, source_p, NULL) == CHFL_BAN;
 	over_limit = chptr->mode.limit && rb_dlink_list_length(&chptr->members) >= (unsigned long)chptr->mode.limit;
