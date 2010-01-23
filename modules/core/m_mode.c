@@ -155,9 +155,20 @@ m_mode(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	else
 	{
 		msptr = find_channel_membership(chptr, source_p);
+		if (!msptr) return 0;
 
 		if(is_deop(msptr))
 			return 0;
+
+		if(!is_chanop(msptr))
+		{
+			/* For consistency with 2.11, drop it if no ops. */
+			sendto_realops_flags(UMODE_DEBUG, L_ALL, "Fake: %s MODE %s %s",
+			    source_p->name, chptr->chname, array_to_string(&parv[2], parc-2));
+
+			sendto_server(client_p, chptr, CAP_TS6|CAP_211, NOCAPS, ":%s MODE %s", source_p->id, array_to_string(&parv[2], parc-2));
+			return 0;
+		}
 
 		/* Finish the flood grace period... */
 		if(MyClient(source_p) && !IsFloodDone(source_p))
@@ -176,7 +187,6 @@ static int
 ms_mode(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Channel *chptr;
-	struct membership *msptr;
 
 	chptr = find_channel(parv[1]);
 
@@ -187,27 +197,7 @@ ms_mode(struct Client *client_p, struct Client *source_p, int parc, const char *
 		return 0;
 	}
 
-	if(IsServer(source_p))
-		msptr = NULL;
-	else
-	{
-		msptr = find_channel_membership(chptr, source_p);
-		if(msptr == NULL || !is_chanop(msptr))
-		{
-			/* For consistency with 2.11, drop it if no ops. */
-			if(IsCapable(client_p, CAP_211))
-			{
-				sendto_realops_flags(UMODE_DEBUG, L_ALL, "Fake: %s MODE %s %s",
-				    source_p->name, chptr->chname, array_to_string(&parv[2], parc-2));
-
-				sendto_server(&me, NULL, CAP_TS6|CAP_211, NOCAPS, ":%s WALLOPS :Fake: %s MODE %s %s",
-				    me.name, source_p->name, chptr->chname, array_to_string(&parv[2], parc-2));
-
-				return 0;
-			}
-		}
-	}
-	set_channel_mode(client_p, source_p, chptr, msptr, parc - 2, parv + 2);
+	set_channel_mode(client_p, source_p, chptr, find_channel_membership(chptr, source_p), parc - 2, parv + 2);
 
 	return 0;
 }
