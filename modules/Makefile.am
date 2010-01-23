@@ -66,6 +66,8 @@ m_post_la_LDFLAGS =  -module $(MODULE_FLAGS)
 m_rehash_la_LDFLAGS =  -module $(MODULE_FLAGS)  
 m_restart_la_LDFLAGS =  -module $(MODULE_FLAGS)  
 m_resv_la_LDFLAGS =  -module $(MODULE_FLAGS)  
+m_schan_la_LDFLAGS =  -module $(MODULE_FLAGS)  
+m_service_la_LDFLAGS =  -module $(MODULE_FLAGS)  
 m_set_la_LDFLAGS =  -module $(MODULE_FLAGS)  
 m_stats_la_LDFLAGS =  -module $(MODULE_FLAGS)  
 m_svinfo_la_LDFLAGS =  -module $(MODULE_FLAGS)  
@@ -122,6 +124,8 @@ m_post_la_SOURCES =	m_post.c
 m_rehash_la_SOURCES =	m_rehash.c
 m_restart_la_SOURCES =	m_restart.c
 m_resv_la_SOURCES =	m_resv.c
+m_schan_la_SOURCES =	m_schan.c
+m_service_la_SOURCES =	m_service.c
 m_set_la_SOURCES =	m_set.c
 m_stats_la_SOURCES =	m_stats.c
 m_svinfo_la_SOURCES =	m_svinfo.c
@@ -178,6 +182,8 @@ m_post_la_LIBADD = $(MODULE_LIBS)
 m_rehash_la_LIBADD = $(MODULE_LIBS)     
 m_restart_la_LIBADD = $(MODULE_LIBS)     
 m_resv_la_LIBADD = $(MODULE_LIBS)     
+m_schan_la_LIBADD = $(MODULE_LIBS)     
+m_service_la_LIBADD = $(MODULE_LIBS)     
 m_set_la_LIBADD = $(MODULE_LIBS)     
 m_stats_la_LIBADD = $(MODULE_LIBS)     
 m_svinfo_la_LIBADD = $(MODULE_LIBS)     
@@ -263,6 +269,8 @@ m_post.la	\
 m_rehash.la	\
 m_restart.la	\
 m_resv.la	\
+m_schan.la	\
+m_service.la	\
 m_set.la	\
 m_stats.la	\
 m_svinfo.la	\
@@ -386,6 +394,8 @@ m_post.c	\
 m_rehash.c	\
 m_restart.c	\
 m_resv.c	\
+m_schan.c	\
+m_service.c	\
 m_set.c	\
 m_stats.c	\
 m_svinfo.c	\
