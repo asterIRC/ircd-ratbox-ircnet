@@ -36,13 +36,15 @@
 #include "parse.h"
 #include "modules.h"
 #include "s_log.h"
+#include "s_newconf.h"
 
 static int ms_operspy(struct Client *client_p, struct Client *source_p,
 		      int parc, const char *parv[]);
+static int mo_operspy(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
 
 struct Message operspy_msgtab = {
 	"OPERSPY", 0, 0, 0, MFLG_SLOW,
-	{mg_ignore, mg_ignore, mg_ignore, mg_ignore, {ms_operspy, 2}, mg_ignore}
+	{mg_ignore, mg_ignore, mg_ignore, mg_ignore, {ms_operspy, 2}, {mo_operspy, 2}}
 };
 
 mapi_clist_av2 operspy_clist[] = { &operspy_msgtab, NULL };
@@ -69,3 +71,23 @@ ms_operspy(struct Client *client_p, struct Client *source_p, int parc, const cha
 
 	return 0;
 }
+
+/* mo_operspy()
+ *
+ * parv[1] - operspy command
+ * parv[2] - optional params
+ */
+static int
+mo_operspy(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+{
+	char *pbuf;
+	if (!IsOperSpy(source_p) || operspy)
+		return 0;
+
+	operspy = 1;
+	pbuf = array_to_string(&parv[1], parc-1);
+	parse(client_p, pbuf, pbuf + strlen(pbuf));
+	operspy = 0;
+	return 0;
+}
+

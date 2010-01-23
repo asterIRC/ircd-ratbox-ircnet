@@ -77,7 +77,6 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 	struct Channel *chptr = NULL;
 	int server_oper = parc > 2 ? (*parv[2] == 'o') : 0;	/* Show OPERS only */
 	int member;
-	int operspy = 0;
 
 	mask = LOCAL_COPY(parv[1]);
 
@@ -101,24 +100,11 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 		return 0;
 	}
 
-	if(IsOperSpy(source_p) && *mask == '!')
-	{
-		mask++;
-		operspy = 1;
-
-		if(EmptyString(mask))
-		{
-			sendto_one(source_p, form_str(RPL_ENDOFWHO),
-				   me.name, source_p->name, parv[1]);
-			return 0;
-		}
-	}
-
 	/* '/who #some_channel' */
 	if(IsChannelName(mask))
 	{
 		/* List all users on a given channel */
-		chptr = find_channel(parv[1] + operspy);
+		chptr = find_channel(parv[1]);
 		if(chptr != NULL)
 		{
 			if(operspy)

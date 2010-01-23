@@ -181,17 +181,10 @@ do_whois(struct Client *client_p, struct Client *source_p, int parc, const char 
 	struct Client *target_p;
 	char *nick;
 	char *p = NULL;
-	int operspy = 0;
 
 	nick = LOCAL_COPY(parv[1]);
 	if((p = strchr(parv[1], ',')))
 		*p = '\0';
-
-	if(IsOperSpy(source_p) && *nick == '!')
-	{
-		operspy = 1;
-		nick++;
-	}
 
 	if(MyClient(source_p))
 		target_p = find_named_person(nick);

@@ -612,22 +612,8 @@ mo_chantrace(struct Client *client_p, struct Client *source_p, int parc, const c
 	const char *sockhost;
 	const char *name;
 	rb_dlink_node *ptr;
-	int operspy = 0;
 
 	name = parv[1];
-
-	if(IsOperSpy(source_p) && parv[1][0] == '!')
-	{
-		name++;
-		operspy = 1;
-		if(EmptyString(name))
-		{
-			sendto_one_numeric(source_p, ERR_NEEDMOREPARAMS,
-					   form_str(ERR_NEEDMOREPARAMS), me.name, source_p->name,
-					   "CHANTRACE");
-			return 0;
-		}
-	}
 
 	if((chptr = find_channel(name)) == NULL)
 	{
@@ -715,19 +701,11 @@ mo_masktrace(struct Client *client_p, struct Client *source_p, int parc, const c
 {
 	char *name, *username, *hostname, *gecos;
 	const char *mask;
-	int operspy = 0;
 
 	mask = parv[1];
 	name = LOCAL_COPY(parv[1]);
 	collapse(name);
 
-
-	if(IsOperSpy(source_p) && parv[1][0] == '!')
-	{
-		name++;
-		mask++;
-		operspy = 1;
-	}
 
 	if(parc > 2 && !EmptyString(parv[2]))
 	{
