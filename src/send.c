@@ -46,6 +46,7 @@
 uint32_t current_serial = 0L;
 static void send_queued_write(rb_fde_t *F, void *data);
 static void send_queued(struct Client *to);
+static void sendto_ops_hook(int flags, const char *pattern, va_list args);
 
 
 /* send_linebuf()
@@ -931,6 +932,27 @@ sendto_anywhere(struct Client *target_p, struct Client *source_p,
 	rb_linebuf_donebuf(&linebuf);
 }
 
+static void
+sendto_ops_hook(int flags, const char *pattern, va_list args)
+{
+	static char buf[BUFSIZE];
+	hook_data_int hdata;
+
+	static int inhook = 0;
+	if (!inhook)
+	{
+		/* Yes, looping is possible under certain circumstances */
+		inhook = 1;
+		rb_vsnprintf(buf, sizeof(buf), pattern, args);
+
+		hdata.arg1 = buf;
+		hdata.arg2 = flags;
+
+		call_hook(h_schan_notice, &hdata);
+	}
+	inhook = 0;
+}
+
 /* sendto_realops_flags()
  *
  * inputs	- umode needed, level (opers/admin), va_args
@@ -940,37 +962,20 @@ sendto_anywhere(struct Client *target_p, struct Client *source_p,
 void
 sendto_realops_flags(int flags, int level, const char *pattern, ...)
 {
-	static char buf[BUFSIZE];
-	hook_data_int hdata;
 	struct Client *client_p;
 	rb_dlink_node *ptr;
 	rb_dlink_node *next_ptr;
 	va_list args;
 	buf_head_t linebuf;
-	static int inhook = 0;
 
 	if(EmptyString(me.name))
 		return;
-
-	if (!inhook)
-	{
-		/* Yes, looping is possible under certain circumstances */
-		inhook = 1;
-		va_start(args, pattern);
-		rb_vsnprintf(buf, sizeof(buf), pattern, args);
-		va_end(args);
-
-		hdata.arg1 = buf;
-		hdata.arg2 = flags;
-
-		call_hook(h_schan_notice, &hdata);
-	}
-	inhook = 0;
 
 	rb_linebuf_newbuf(&linebuf);
 
 	va_start(args, pattern);
 	rb_linebuf_putmsg(&linebuf, pattern, &args, ":%s NOTICE * :*** Notice -- ", me.name);
+	sendto_ops_hook(flags, pattern, args);
 	va_end(args);
 
 	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, oper_list.head)
@@ -1017,8 +1022,10 @@ sendto_wallops_flags(int flags, struct Client *source_p, const char *pattern, ..
 		rb_linebuf_putmsg(&linebuf, pattern, &args,
 				  ":%s!%s@%s WALLOPS :", source_p->name,
 				  source_p->username, source_p->host);
-	else
+	else {
 		rb_linebuf_putmsg(&linebuf, pattern, &args, ":%s WALLOPS :", source_p->name);
+		sendto_ops_hook(flags, pattern, args);
+	}
 
 	va_end(args);
 

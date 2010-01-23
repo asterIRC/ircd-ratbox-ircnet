@@ -114,6 +114,31 @@ string_to_array(char *string, char **parv)
 	return x;
 }
 
+char *array_to_string(const char *parv[], int parc)
+{
+	static char buf[BUFSIZE];
+	char *ptr;
+	int len, i;
+	int cur_len = 0;
+
+	ptr = buf;
+
+	buf[0] = 0;
+	for(i = 0; i < parc; i++)
+	{
+		len = strlen(parv[i]) + 1;
+
+		if((size_t)(cur_len + len) >= sizeof(buf))
+			return 0;
+
+		rb_snprintf(ptr, sizeof(buf) - cur_len, "%s ", parv[i]);
+		ptr += len;
+		cur_len += len;
+	}
+	return buf;
+}
+
+
 /* parse()
  *
  * given a raw buffer, parses it and generates parv, parc and sender

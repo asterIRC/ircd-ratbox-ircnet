@@ -57,11 +57,6 @@ DECLARE_MODULE_AV2(operspy, NULL, NULL, operspy_clist, NULL, NULL, "$Revision$")
 static int
 ms_operspy(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	static char buffer[BUFSIZE];
-	char *ptr;
-	int cur_len = 0;
-	int len, i;
-
 	if(parc < 4)
 	{
 		report_operspy(source_p, parv[1], parc < 3 ? NULL : parv[2]);
@@ -69,22 +64,7 @@ ms_operspy(struct Client *client_p, struct Client *source_p, int parc, const cha
 	/* buffer all remaining into one param */
 	else
 	{
-		ptr = buffer;
-		cur_len = 0;
-
-		for(i = 2; i < parc; i++)
-		{
-			len = strlen(parv[i]) + 1;
-
-			if((size_t)(cur_len + len) >= sizeof(buffer))
-				return 0;
-
-			rb_snprintf(ptr, sizeof(buffer) - cur_len, "%s ", parv[i]);
-			ptr += len;
-			cur_len += len;
-		}
-
-		report_operspy(source_p, parv[1], buffer);
+		report_operspy(source_p, parv[1], array_to_string(&parv[2], parc-2));
 	}
 
 	return 0;

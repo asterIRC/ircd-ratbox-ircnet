@@ -198,7 +198,11 @@ ms_mode(struct Client *client_p, struct Client *source_p, int parc, const char *
 			if(IsCapable(client_p, CAP_211))
 			{
 				sendto_realops_flags(UMODE_DEBUG, L_ALL, "Fake: %s MODE %s %s",
-				    source_p->name, chptr->chname, parv[2]);
+				    source_p->name, chptr->chname, array_to_string(&parv[2], parc-2));
+
+				sendto_server(&me, NULL, CAP_TS6|CAP_211, NOCAPS, ":%s WALLOPS :Fake: %s MODE %s %s",
+				    me.name, source_p->name, chptr->chname, array_to_string(&parv[2], parc-2));
+
 				return 0;
 			}
 		}
