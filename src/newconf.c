@@ -2527,6 +2527,8 @@ static struct conf_items conf_channel_table[] =
 	{ "max_chans_per_user", CF_INT,   NULL, 0, &ConfigChannel.max_chans_per_user 	},
 	{ "no_create_on_split", CF_YESNO, NULL, 0, &ConfigChannel.no_create_on_split 	},
 	{ "no_join_on_split",	CF_YESNO, NULL, 0, &ConfigChannel.no_join_on_split	},
+	{ "no_opless_hack",	CF_YESNO, NULL, 0, &ConfigChannel.no_opless_hack	},
+	{ "ts_forcepart",	CF_YESNO, NULL, 0, &ConfigChannel.ts_forcepart		},
 	{ "delay",		CF_INT,   NULL, 0, &ConfigChannel.delay			},
 	{ "reop",		CF_INT,   NULL, 0, &ConfigChannel.reop			},
 	{ "no_ops_on_split",    CF_YESNO, NULL, 0, &ConfigChannel.no_ops_on_split 	},

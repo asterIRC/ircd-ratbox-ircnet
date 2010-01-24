@@ -502,6 +502,7 @@ ms_join(struct Client *client_p, struct Client *source_p, int parc, const char *
 	if(!keep_our_modes)
 	{
 		remove_our_modes(chptr);
+		
 		sendto_channel_local(ALL_MEMBERS, chptr,
 				     ":%s NOTICE %s :*** Notice -- TS for %s changed from %ld to %ld",
 				     me.name, chptr->chname, chptr->chname, (long)oldts,
@@ -931,14 +932,12 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	if(!joins)
 	{
-		/* this just triggers chandelay for !channels */
-		if (*chptr->chname == '!')
-			chptr->opquit = rb_current_time();
-		else {
-			if(isnew)
-				destroy_channel(chptr);
-			return 0;
-		}
+		/* this just triggers chandelay */
+		if (*chptr->chname != '+')
+			chptr->chlock = rb_current_time();
+		if(isnew)
+			destroy_channel(chptr);
+		return 0;
 	}
 
 	if (len_uid == 0)

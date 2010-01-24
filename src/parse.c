@@ -637,14 +637,12 @@ cancel_clients(struct Client *client_p, struct Client *source_p)
 static void
 remove_unknown(struct Client *client_p, char *lsender, char *lbuffer)
 {
-	int slen = strlen(lsender);
-
 	/* meepfoo      is a nickname (ignore)
 	 * #XXXXXXXX    is a UID (KILL)
 	 * #XX          is a SID (SQUIT)
 	 * meep.foo     is a server (SQUIT)
 	 */
-	if((IsDigit(lsender[0]) && slen == 3) || (strchr(lsender, '.') != NULL))
+	if(check_sid(lsender) || (strchr(lsender, '.') != NULL))
 	{
 		sendto_realops_flags(UMODE_DEBUG, L_ALL,
 				     "Unknown prefix (%s) from %s, Squitting %s",

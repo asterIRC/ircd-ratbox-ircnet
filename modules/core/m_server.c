@@ -455,6 +455,8 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 	sendto_realops_flags(UMODE_EXTERNAL, L_ALL,
 			     "Server %s being introduced by %s", target_p->name, source_p->name);
+	sendto_realops_flags(UMODE_ALL, L_ALL,
+			     "Received SERVER %s from %s (%d %s)", target_p->name, source_p->name, target_p->hopcount + 1, target_p->info);
 
 	/* quick, dirty EOB.  you know you love it. */
 	if(!IsCapable(target_p->from, CAP_IRCNET))
@@ -830,24 +832,25 @@ burst_TS6(struct Client *client_p)
 
 	RB_DLINK_FOREACH(ptr, global_channel_list.head)
 	{
+		int empty;
 		chptr = ptr->data;
-
-		/* this can actually happen now as we're doing chandelay
-		s_assert(rb_dlink_list_length(&chptr->members) > 0);
-		*/
+		empty = rb_dlink_list_length(&chptr->members) <= 0;
 
 		if (!check_channel_burst(client_p, chptr))
 			continue;
 
 		cur_len = mlen = rb_sprintf(buf, ":%s SJOIN %ld %s %s :", me.id,
 					    (long)chptr->channelts, chptr->chname,
-					    channel_modes(chptr, client_p));
+					    (empty && *chptr->chname != '!')?"+":channel_modes(chptr, client_p));
 		t = buf + mlen;
 
-		if (rb_dlink_list_length(&chptr->members) <= 0) {
-			if (*chptr->chname != '!')
+		if (empty) {
+			if (!ConfigChannel.delay || *chptr->chname == '+')
 				continue;
-			/* burst empty !channels, too. */
+			/* burst empty channels */
+			*t++ = '.';
+			*t++ = ' ';
+			cur_len += 2;
 		}
 
 
@@ -879,6 +882,12 @@ burst_TS6(struct Client *client_p)
 		/* remove trailing space */
 		*(t - 1) = '\0';
 		sendto_one_buffer(client_p, buf);
+
+		if (*chptr->chname == '+')
+			continue;
+
+		if (*chptr->chname != '!' && (rb_dlink_list_length(&chptr->members) <= 0))
+			continue;
 
 		if(rb_dlink_list_length(&chptr->banlist) > 0)
 			burst_modes_TS6(client_p, chptr, &chptr->banlist, 'b');
@@ -1022,9 +1031,9 @@ burst_211(struct Client *client_p)
 		t = buf + mlen;
 
 		if (rb_dlink_list_length(&chptr->members) <= 0) {
-			if (*chptr->chname != '!')
+			if (*chptr->chname == '+')
 				continue;
-			/* burst empty !channels, using the '.' hack */
+			/* burst empty channels */
 			*t++ = '.';
 			*t++ = ' ';
 			cur_len += 2;
@@ -1062,6 +1071,9 @@ burst_211(struct Client *client_p)
 		sendto_one_buffer(client_p, buf);
 
 		if (*chptr->chname == '+')
+			continue;
+
+		if (*chptr->chname != '!' && (rb_dlink_list_length(&chptr->members) <= 0))
 			continue;
 
 		sendto_one(client_p, ":%s MODE %s %s",

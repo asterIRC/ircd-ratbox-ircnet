@@ -76,7 +76,7 @@ struct Channel
 	time_t channelts;
 
 	time_t reop;	/* since when we're considering the channel to be reopped */
-	time_t opquit;	/* when some @user quitted, for chandelay */
+	time_t chlock;	/* when some @user quitted, for chandelay */
 	char *chname;
 };
 
@@ -200,8 +200,8 @@ struct ChCapCombo
 
 #define IsChannelName(name) ((name) && IsChanPrefix(*name))
 #define IsRemoteChannel(name) (IsChannelName(name) && *(name) != '&')
-#define HasHistory(chptr) (chptr->opquit + ConfigChannel.delay + (chptr->chname[0]=='!')*2 >= rb_current_time())
-#define IsLocked(chptr) (HasHistory(chptr) && (rb_dlink_list_length(&chptr->members) == 0))
+#define HasHistory(chptr) ((chptr->chlock + ConfigChannel.delay * ((chptr->chname[0]=='!')?3:1)) >= rb_current_time())
+#define IsLocked(chptr) (*chptr->chname != '+' && HasHistory(chptr) && (rb_dlink_list_length(&chptr->members) == 0))
 
 
 extern rb_dlink_list global_channel_list;

@@ -237,7 +237,9 @@ struct config_channel_entry
 	int topiclen;
 	int resv_forcepart;
 
+	int ts_forcepart;
 	int no_ops_on_split;
+	int no_opless_hack;
 	int delay;
 	int reop;
 };

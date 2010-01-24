@@ -238,10 +238,10 @@ remove_user_from_channel(struct membership *msptr)
 	client_p = msptr->client_p;
 	chptr = msptr->chptr;
 
-	if (!MyConnect(client_p) && is_chanop(msptr)) {
+	if (!MyConnect(client_p) && (is_chanop(msptr) || !ConfigChannel.no_opless_hack)) {
 		chptr->reop = rb_current_time();
 		if (client_p->flags & FLAGS_KILLED)
-			chptr->opquit = chptr->reop;
+			chptr->chlock = chptr->reop;
 	}
 
 	rb_dlinkDelete(&msptr->usernode, &client_p->user->channel);
@@ -1224,7 +1224,7 @@ static void	reop_channel(struct Channel *chptr)
 	{
 		msptr = ptr->data;
 		if (is_chanop(msptr)) {
-			chptr->opquit = chptr->reop = 0;
+			chptr->chlock = chptr->reop = 0;
 			/* no reop needed */
 			return;
 		}
@@ -1256,7 +1256,7 @@ static void	reop_channel(struct Channel *chptr)
 			me.name, chptr->chname, Anon(matched->client_p->name));
 		sendto_server(&me, chptr, CAP_TS6, NOCAPS, ":%s TMODE %ld %s +o %s",
 			me.id, (long)chptr->channelts, chptr->chname, matched->client_p->name);
-		chptr->reop = chptr->opquit = 0;
+		chptr->reop = chptr->chlock = 0;
 		return;
 	}
 	return;

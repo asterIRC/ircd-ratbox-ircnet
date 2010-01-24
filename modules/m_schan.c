@@ -126,13 +126,21 @@ hfn_schan_clean(hook_data *dummy)
 	{
 		struct schan *sch = ptr->data;
 
-		UnSetChannelSCH(sch->chptr);
-
-		if(rb_dlink_list_length(&sch->chptr->members) <= 0)
-			destroy_channel(sch->chptr);
-
 		rb_dlinkDelete(&sch->node, &schan_list);
 		rb_free(sch);
+	}
+
+	RB_DLINK_FOREACH_SAFE(ptr, next, global_channel_list.head)
+	{
+		struct Channel *chptr = ptr->data;
+
+		if (!IsSCH(chptr))
+			continue;
+
+		UnSetChannelSCH(chptr);
+
+		if(rb_dlink_list_length(&chptr->members) <= 0)
+			destroy_channel(chptr);
 	}
 
 }
