@@ -226,7 +226,7 @@ ms_tmode(struct Client *client_p, struct Client *source_p, int parc, const char 
 	}
 
 	/* TS is higher, drop it. */
-	if(atol(parv[1]) > chptr->channelts)
+	if(chptr->channelts && atol(parv[1]) > chptr->channelts)
 		return 0;
 
 	if(IsServer(source_p))
@@ -274,7 +274,7 @@ ms_bmask(struct Client *client_p, struct Client *source_p, int parc, const char 
 		return 0;
 
 	/* TS is higher, drop it. */
-	if(atol(parv[1]) > chptr->channelts)
+	if(chptr->channelts && atol(parv[1]) > chptr->channelts)
 		return 0;
 
 	switch (parv[3][0])
