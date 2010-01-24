@@ -20,9 +20,10 @@ general { throttle_count = 9999; collision_fnc = yes; burst_away = yes;
 oper_only_umodes = bots, cconn, debug, full, skill, nchange, rej, spy, external, operwall, locops, unauth;
 oper_umodes = locops, servnotice, operwall, wallop;
 };
-schan "&service" { flags = bots, cconn, cconnext, debug, full, skill, locops, nchange, rej, servnotice, unauth, wallop, external, spy, operwall, operspy; topic = "Service channel"; operonly = yes; pattern = "*"; };
 connect "service.$1" { host = "127.0.0.1"; accept_password = "secret"; send_password = "secret"; class = "server"; flags = service; };
 connect "static.irc.cz" { host = "127.0.0.1"; accept_password = "secret"; send_password = "secret"; class = "server"; hub_mask = "*"; };
+.include "`pwd`/../../doc/sch.conf"
+
 _eof
 for i in $3; do
 	host=`echo $i | cut -f 1 -d ":"`
