@@ -357,14 +357,14 @@ handle_command(struct Message *mptr, struct Client *client_p,
 	if ((IsServer(client_p) && ServerConfService(client_p->localClient->att_sconf)) || IsSService(client_p)) {
 		const char *cmd = mptr->cmd;
 		const char *goodlist[] = { "NOTICE", "PING", "PONG", NULL };
-		int i;
+		int j;
 
-		for (i = 0; goodlist[i]; i++)
-			if (!irccmp(goodlist[i], cmd))
+		for (j = 0; goodlist[j]; i++)
+			if (!irccmp(goodlist[j], cmd))
 				break;
 
 		/* It's evil, drop it silently */
-		if (!goodlist[i])
+		if (!goodlist[j])
 			return 1;
 	}
 
