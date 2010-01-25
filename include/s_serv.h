@@ -110,7 +110,7 @@ extern int refresh_user_links;
 int hunt_server(struct Client *client_pt,
 		struct Client *source_pt,
 		const char *command, int server, int parc, const char **parv);
-void send_capabilities(struct Client *, int);
+char *send_capabilities(struct Client *, int);
 const char *show_capabilities(struct Client *client);
 void try_connections(void *unused);
 

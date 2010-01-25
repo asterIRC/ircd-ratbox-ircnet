@@ -54,7 +54,7 @@ static int ms_smask(struct Client *, struct Client *, int, const char **);
 
 struct Message server_msgtab = {
 	"SERVER", 0, 0, 0, MFLG_SLOW | MFLG_UNREG,
-	{{mr_server, 4}, mg_reg, mg_ignore, {ms_server, 4}, mg_ignore, mg_reg}
+	{{mr_server, 4}, mg_reg, mg_ignore, {ms_server, 6}, mg_ignore, mg_reg}
 };
 
 struct Message sid_msgtab = {
@@ -62,17 +62,18 @@ struct Message sid_msgtab = {
 	{mg_ignore, mg_reg, mg_ignore, {ms_sid, 5}, mg_ignore, mg_reg}
 };
 
+#ifdef COMPAT_211
 struct Message smask_msgtab = {
 	"SMASK", 0, 0, 0, MFLG_SLOW,
 	{mg_ignore, mg_reg, mg_ignore, {ms_smask, 3}, mg_ignore, mg_reg}
 };
+#endif
 
 mapi_clist_av2 server_clist[] = { &server_msgtab, &sid_msgtab, &smask_msgtab, NULL };
 
 DECLARE_MODULE_AV2(server, NULL, NULL, server_clist, NULL, NULL, "$Revision$");
 
-static struct Client *server_exists(const char *);
-static int set_server_gecos(struct Client *, const char *);
+static struct Client *server_exists(struct Client *from, const char *);
 
 static int check_server(const char *name, struct Client *client_p);
 static int server_estab(struct Client *client_p);
@@ -90,7 +91,7 @@ enum
 
 
 /*
- * mr_server - SERVER message handler
+ * mr_server - SERVER message handler (ONLY during handshake)
  *      parv[0] = sender prefix
  *      parv[1] = servername
  *      parv[2] = serverinfo/hopcount
@@ -210,7 +211,7 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, const char
 		return 0;
 	}
 
-	if((target_p = server_exists(name)))
+	if((target_p = server_exists(NULL, name)))
 	{
 		/*
 		 * This link is trying feed me a server that I already have
@@ -253,7 +254,7 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, const char
 	 */
 
 	client_p->name = scache_add(name);
-	set_server_gecos(client_p, info);
+	rb_strlcpy(client_p->info, info, sizeof(client_p->info));
 	client_p->hopcount = hop;
 	server_estab(client_p);
 
@@ -261,11 +262,50 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, const char
 }
 
 /*
- * ms_server - SERVER message handler
+ * introduce_server() - introduce one server
+ *      client_p - to whom to introduce
+ *	source_p - who's introducing
+ *	server_p - the server introduced
+ */
+static void introduce_server(struct Client *client_p, struct Client *source_p, struct Client *server_p)
+{
+#ifdef COMPAT_211
+	if (IsCapable(client_p, CAP_211)) {
+		/* Is our masked name for that link hiding the one being introduced? */
+		if(match(ServerConfMask(client_p->localClient->att_sconf, me.name), server_p->name))
+		{
+			sendto_one(client_p, ":%s SMASK %s %10s",
+				   source_p->id, server_p->id,
+				   IRCNET_FAKESTRING);
+		} else {
+			/* Not masked */
+			sendto_one(client_p, ":%s SERVER %s %d %s %10s :%s",
+				source_p->id, server_p->name,
+				server_p->hopcount + 1, server_p->id,
+				IRCNET_FAKESTRING, server_p->info);
+		}
+	} else
+#endif
+	sendto_one(client_p, ":%s SID %s %d %s :%s",
+		   source_p->id, ServerConfMask(client_p->localClient->att_sconf, server_p->name),
+		   server_p->hopcount + 1, server_p->id,
+		   server_p->info);
+
+	/* This should be always sent */
+	if(IsCapable(client_p, CAP_ENCAP) && !EmptyString(server_p->serv->fullcaps))
+		sendto_one(client_p, ":%s ENCAP * GCAP :%s",
+			   server_p->id, server_p->serv->fullcaps);
+}
+
+
+/*
+ * ms_server - SERVER message handler (2.11 server being introduced)
  *      parv[0] = sender prefix
- *      parv[1] = servername
- *      parv[2] = serverinfo/hopcount
- *      parv[3] = serverinfo
+ *      parv[1] = name
+ *      parv[2] = hopcount
+ *	parv[3] = sid
+ *      parv[4] = version
+ *      parv[5] = serverinfo
  */
 static int
 ms_server(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
@@ -288,6 +328,38 @@ ms_server(struct Client *client_p, struct Client *source_p, int parc, const char
 	return 0;
 }
 
+#ifdef COMPAT_211
+/*
+ * ms_smask - SMASK message handler
+ *      parv[0] = sender prefix
+ *	parv[1] = server id
+ *      parv[2] = version
+ */
+static int
+ms_smask(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+{
+	const char *fakeparv[5];
+	char fhopcount[BUFSIZE];
+
+	rb_sprintf(fhopcount, "%d", source_p->hopcount + 1);
+
+	fakeparv[0] = parv[0];
+	fakeparv[1] = source_p->name;
+	fakeparv[2] = fhopcount;
+	fakeparv[3] = parv[1];
+	fakeparv[4] = source_p->info;
+	return ms_sid(client_p, source_p, 5, fakeparv);
+}
+#endif
+
+/*
+ * ms_sid - SID message handler (TS6 server being introduced)
+ *      parv[0] = sender prefix
+ *      parv[1] = servername (masked)
+ *      parv[2] = hopcount
+ *	parv[3] = server id
+ *      parv[4] = serverinfo
+ */
 static int
 ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
@@ -302,7 +374,7 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	hop = atoi(parv[2]);
 
 	/* collision on the name? */
-	if((target_p = server_exists(parv[1])) != NULL)
+	if((target_p = server_exists(source_p, parv[1])) != NULL)
 	{
 		sendto_one(client_p, "ERROR :Server %s already exists", parv[1]);
 		sendto_realops_flags(UMODE_ALL, L_ALL,
@@ -394,8 +466,8 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 #ifdef COMPAT_211
 	if (IsCapable(client_p, CAP_211))
-	/* in case we're fed this link via 2.11 server, just fake the caps somehow
-           as we're never going to get CAPAB for it. */
+	/* in case we're fed this one via 2.11, just fake the caps somehow
+           as we're never going to get GCAP from there. */
 		target_p->serv->caps = CAP_MASK;
 #endif
 
@@ -403,7 +475,7 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 	target_p->hopcount = atoi(parv[2]);
 	strcpy(target_p->id, parv[3]);
-	set_server_gecos(target_p, parv[4]);
+	rb_strlcpy(target_p->info, parv[4], sizeof(target_p->info));
 
 	target_p->servptr = source_p;
 	SetServer(target_p);
@@ -414,11 +486,8 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	add_to_hash(HASH_ID, target_p->id, target_p);
 	rb_dlinkAdd(target_p, &target_p->lnode, &target_p->servptr->serv->servers);
 
-	/*
-	 ** Old sendto_server() call removed because we now
-	 ** need to send different names to different servers
-	 ** (domain name matching) Send new server to other servers.
-	 */
+
+	/* tell everyone about the new server */
 	RB_DLINK_FOREACH(ptr, serv_list.head)
 	{
 		target2_p = ptr->data;
@@ -426,31 +495,7 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		if(target2_p == client_p)
 			continue;
 
-		if(match(ServerConfMask(target2_p->localClient->att_sconf, me.name), target_p->name))
-		{
-			sendto_one(target2_p, ":%s SMASK %s %s",
-				   source_p->id, target_p->id,
-				   IRCNET_FAKESTRING);
-			continue;
-		}
-#ifdef COMPAT_211
-		if (IsCapable(target2_p, CAP_211))
-		{
-			sendto_one(target2_p, ":%s SERVER %s %d %s %10s :%s",
-				source_p->id, target_p->name,
-				target_p->hopcount + 1, target_p->id,
-				IRCNET_FAKESTRING, target_p->info);
-		}
-		else
-#endif
-		sendto_one(target2_p, ":%s SID %s %d %s :%s%s",
-			   source_p->id, target_p->name,
-			   target_p->hopcount + 1, target_p->id,
-			   IsHidden(target_p) ? "(H) " : "", target_p->info);
-
-		if(IsCapable(target2_p, CAP_ENCAP) && !EmptyString(target_p->serv->fullcaps))
-			sendto_one(target2_p, ":%s ENCAP * GCAP :%s",
-				   target_p->id, target_p->serv->fullcaps);
+		introduce_server(target2_p, source_p, target_p);
 	}
 
 	sendto_realops_flags(UMODE_EXTERNAL, L_ALL,
@@ -470,134 +515,6 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	return 0;
 }
 
-static int
-ms_smask(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
-{
-	struct Client *target_p;
-	hook_data_client hdata;
-
-	/* collision on the SID? */
-	if((target_p = find_id(parv[1])) != NULL)
-	{
-		sendto_one(client_p, "ERROR :SID %s already exists", parv[1]);
-		sendto_realops_flags(UMODE_ALL, L_ALL,
-				     "Link %s cancelled, SID %s already exists",
-				     client_p->name, parv[3]);
-		ilog(L_SERVER, "Link %s cancelled, SID %s already exists", client_p->name, parv[1]);
-		exit_client(NULL, client_p, &me, "SID Exists");
-		return 0;
-	}
-
-	if (!check_sid(parv[1]))
-	{
-		sendto_one(client_p, "ERROR :Invalid SID");
-		sendto_realops_flags(UMODE_ALL, L_ALL,
-				     "Link %s cancelled, SID %s invalid", client_p->name, parv[1]);
-		ilog(L_SERVER, "Link %s cancelled, SID %s invalid", client_p->name, parv[1]);
-		exit_client(NULL, client_p, &me, "Bogus SID");
-		return 0;
-	}
-
-	/* ok, alls good */
-	target_p = make_client(client_p);
-	make_server(target_p);
-
-	target_p->name = source_p->name;
-
-	target_p->hopcount = source_p->hopcount + 1;
-	strcpy(target_p->id, parv[1]);
-	rb_strlcpy(client_p->info, "Masked Server", sizeof(client_p->info));
-
-	target_p->servptr = source_p;
-	SetServer(target_p);
-
-	rb_dlinkAddTail(target_p, &target_p->node, &global_client_list);
-	rb_dlinkAddTailAlloc(target_p, &global_serv_list);
-	add_to_hash(HASH_ID, target_p->id, target_p);
-	rb_dlinkAdd(target_p, &target_p->lnode, &target_p->servptr->serv->servers);
-
-	sendto_server(client_p, NULL, CAP_TS6, NOCAPS,
-		      ":%s SMASK %s %s",
-		      source_p->id, target_p->id, parv[2]);
-
-	hdata.client = source_p;
-	hdata.target = target_p;
-	call_hook(h_server_introduced, &hdata);
-
-	return 0;
-}
-
-/* set_server_gecos()
- *
- * input	- pointer to client
- * output	- none
- * side effects - servers gecos field is set
- */
-static int
-set_server_gecos(struct Client *client_p, const char *info)
-{
-	/* check the info for [IP] */
-	if(info[0])
-	{
-		char *p;
-		char *s;
-		char *t;
-
-		s = LOCAL_COPY(info);
-
-		/* we should only check the first word for an ip */
-		if((p = strchr(s, ' ')))
-			*p = '\0';
-
-		/* check for a ] which would symbolise an [IP] */
-		if((t = strchr(s, ']')))
-		{
-			/* set s to after the first space */
-			if(p)
-				s = ++p;
-			else
-				s = NULL;
-		}
-		/* no ], put the space back */
-		else if(p)
-			*p = ' ';
-
-		/* p may have been set to a trailing space, so check s exists and that
-		 * it isnt \0 */
-		if(s && (*s != '\0'))
-		{
-			/* a space? if not (H) could be the last part of info.. */
-			if((p = strchr(s, ' ')))
-				*p = '\0';
-
-			/* check for (H) which is a hidden server */
-			if(!strcmp(s, "(H)"))
-			{
-				SetHidden(client_p);
-
-				/* if there was no space.. theres nothing to set info to */
-				if(p)
-					s = ++p;
-				else
-					s = NULL;
-			}
-			else if(p)
-				*p = ' ';
-
-			/* if there was a trailing space, s could point to \0, so check */
-			if(s && (*s != '\0'))
-			{
-				rb_strlcpy(client_p->info, s, sizeof(client_p->info));
-				return 1;
-			}
-		}
-	}
-
-	rb_strlcpy(client_p->info, "(Unknown Location)", sizeof(client_p->info));
-
-	return 1;
-}
-
 /*
  * server_exists()
  * 
@@ -605,7 +522,7 @@ set_server_gecos(struct Client *client_p, const char *info)
  * output	- 1 if server exists, 0 if doesnt exist
  */
 static struct Client *
-server_exists(const char *servername)
+server_exists(struct Client *from, const char *servername)
 {
 	struct Client *target_p;
 	rb_dlink_node *ptr;
@@ -613,6 +530,10 @@ server_exists(const char *servername)
 	RB_DLINK_FOREACH(ptr, global_serv_list.head)
 	{
 		target_p = ptr->data;
+
+		/* if the link its coming from holds the same name, then it's alright */
+		if (from && !irccmp(from->name, servername))
+			continue;
 
 		if(match(target_p->name, servername) || match(servername, target_p->name))
 			return target_p;
@@ -1182,22 +1103,21 @@ server_estab(struct Client *client_p)
 
 		/* pass info to new server */
 #ifdef COMPAT_211
-		if (NotCapable(client_p, CAP_211))
+		if (NotCapable(client_p, CAP_211)) {
 #endif
-		send_capabilities(client_p, default_server_capabs
+			send_capabilities(client_p, default_server_capabs
 				  | (ServerConfCompressed(server_p) && zlib_ok ? CAP_ZIP : 0)
 				  | (ServerConfTb(server_p) ? CAP_TB : 0));
 
+			/* this is mr_server() for TS6.
+			 * for 2.11 it will be passed from global_serv_list (it's always first) */
+			sendto_one(client_p, "SERVER %s 1 :%s%s",
+				   ServerConfMask(server_p, me.name),
+				   ConfigServerHide.hidden ? "(H) " : "",
+				   (me.info[0]) ? (me.info) : "IRCers United");
 #ifdef COMPAT_211
-		if (IsCapable(client_p, CAP_211)) {
-			sendto_one(client_p, "SERVER %s 1 %s :%s", ServerConfMask(server_p, me.name), me.id,
-				(me.info[0]) ? (me.info) : "IRCers United");
-		} else
+		}
 #endif
-		sendto_one(client_p, "SERVER %s 1 :%s%s",
-			   ServerConfMask(server_p, me.name),
-			   ConfigServerHide.hidden ? "(H) " : "",
-			   (me.info[0]) ? (me.info) : "IRCers United");
 	}
 
 	if(!rb_set_buffers(client_p->localClient->F, READBUF_SIZE))
@@ -1281,11 +1201,8 @@ server_estab(struct Client *client_p)
 	rb_snprintf(note, sizeof(note), "Server: %s", client_p->name);
 	rb_note(client_p->localClient->F, note);
 
-	/*
-	 ** Old sendto_serv_but_one() call removed because we now
-	 ** need to send different names to different servers
-	 ** (domain name matching) Send new server to other servers.
-	 */
+
+	/* introduce the new server to my peers */
 	if (!ServerConfService(server_p)) RB_DLINK_FOREACH(ptr, serv_list.head)
 	{
 		target_p = ptr->data;
@@ -1293,48 +1210,11 @@ server_estab(struct Client *client_p)
 		if(target_p == client_p)
 			continue;
 
-		if(match(ServerConfMask(target_p->localClient->att_sconf, me.name), client_p->name))
-		{
-			sendto_one(target_p, ":%s SMASK %s %s",
-				   me.id, client_p->id,
-				   IRCNET_FAKESTRING);
-			continue;
-		}
-#ifdef COMPAT_211
-		if (IsCapable(target_p, CAP_211))
-		{
-			sendto_one(target_p, ":%s SERVER %s 2 %s %10s :%s",
-				me.id, client_p->name, client_p->id, IRCNET_FAKESTRING, client_p->info);
-		}
-		else
-#endif
-		sendto_one(target_p, ":%s SID %s 2 %s :%s%s",
-			   me.id, client_p->name, client_p->id,
-			   IsHidden(client_p) ? "(H) " : "", client_p->info);
-
-		if(IsCapable(target_p, CAP_ENCAP) && !EmptyString(client_p->serv->fullcaps))
-			sendto_one(target_p, ":%s ENCAP * GCAP :%s",
-				   client_p->id, client_p->serv->fullcaps);
+		introduce_server(target_p, &me, client_p);
 	}
 
-	/*
-	 ** Pass on my client information to the new server
-	 **
-	 ** First, pass only servers (idea is that if the link gets
-	 ** cancelled beacause the server was already there,
-	 ** there are no NICK's to be cancelled...). Of course,
-	 ** if cancellation occurs, all this info is sent anyway,
-	 ** and I guess the link dies when a read is attempted...? --msa
-	 ** 
-	 ** Note: Link cancellation to occur at this point means
-	 ** that at least two servers from my fragment are building
-	 ** up connection this other fragment at the same time, it's
-	 ** a race condition, not the normal way of operation...
-	 **
-	 ** ALSO NOTE: using the get_client_name for server names--
-	 **    see previous *WARNING*!!! (Also, original inpath
-	 **    is destroyed...)
-	 */
+	/* introduce all the servers (including me) i'm aware of to the new server,
+           (except the ones we've learned from there) */
 	RB_DLINK_FOREACH(ptr, global_serv_list.head)
 	{
 		target_p = ptr->data;
@@ -1343,36 +1223,7 @@ server_estab(struct Client *client_p)
 		if(IsMe(target_p) || target_p->from == client_p)
 			continue;
 
-		if(target_p->name == target_p->servptr->name ||
-				match(ServerConfMask(server_p, me.name),
-					target_p->name))
-		{
-			sendto_one(client_p, ":%s SMASK %s %s",
-				   target_p->servptr->id, target_p->id,
-				   IRCNET_FAKESTRING);
-			continue;
-		}
-
-		/* presumption, if target has an id, so does its uplink */
-#ifdef COMPAT_211
-		if (NotCapable(client_p, CAP_211))
-#endif
-			sendto_one(client_p, ":%s SID %s %d %s :%s%s",
-				   target_p->servptr->id, ServerConfMask(server_p, target_p->name),
-				   target_p->hopcount + 1, target_p->id,
-				   IsHidden(target_p) ? "(H) " : "", target_p->info);
-#ifdef COMPAT_211
-		if (IsCapable(client_p, CAP_211))
-		{
-			sendto_one(client_p, ":%s SERVER %s %d %s %s :%s",
-				target_p->servptr->id, ServerConfMask(server_p, target_p->name), target_p->hopcount+1,
-				target_p->id, IRCNET_FAKESTRING, target_p->info);
-		}
-#endif
-
-		if(IsCapable(client_p, CAP_ENCAP) && !EmptyString(target_p->serv->fullcaps))
-			sendto_one(client_p, ":%s ENCAP * GCAP :%s",
-				   get_id(target_p, client_p), target_p->serv->fullcaps);
+		introduce_server(client_p, target_p->servptr, target_p);
 	}
 
 	if (ServerConfBurst(server_p)) {
@@ -1384,13 +1235,15 @@ server_estab(struct Client *client_p)
 			burst_TS6(client_p);
 	}
 
+	/* send the newcomer EOBs for servers we've told it about
+         * (and which sent EOB to us already) */
 	if(IsCapable(client_p, CAP_IRCNET))
 	{
-		/* spit out EOBs */
 		cnt = 0;
 		RB_DLINK_FOREACH(ptr, global_serv_list.head)
 		{
 			target_p = ptr->data;
+
 			if(IsMe(target_p) || target_p->from == client_p)
 				continue;
 			target_p = ptr->data;
@@ -1400,6 +1253,7 @@ server_estab(struct Client *client_p)
 				cnt++;
 			}
 		}
+		/* send our EOB only when theres nobody else (EOB is accepted from prefix too) */
 		if (!cnt)
 			sendto_one(client_p, ":%s EOB", me.id);
 	}

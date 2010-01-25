@@ -312,17 +312,16 @@ try_connections(void *unused)
 /*
  * send_capabilities
  *
- * inputs	- Client pointer to send to
+ * inputs	- Client pointer to send to, or NULL if you want just the string
  *		- int flag of capabilities that this server has
- * output	- NONE
+ * output	- the string of capabilities (probably) sent
  * side effects	- send the CAPAB line to a server  -orabidoo
  *
  */
-void
-send_capabilities(struct Client *client_p, int cap_can_send)
+char *send_capabilities(struct Client *client_p, int cap_can_send)
 {
 	struct Capability *cap;
-	char msgbuf[BUFSIZE];
+	static char msgbuf[BUFSIZE];
 	char *t;
 	int tl;
 
@@ -340,7 +339,9 @@ send_capabilities(struct Client *client_p, int cap_can_send)
 	t--;
 	*t = '\0';
 
-	sendto_one(client_p, "CAPAB :%s", msgbuf);
+	if (client_p)
+		sendto_one(client_p, "CAPAB :%s", msgbuf);
+	return msgbuf;
 }
 
 /*
