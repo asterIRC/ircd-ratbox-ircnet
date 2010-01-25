@@ -463,14 +463,6 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	target_p = make_client(client_p);
 	make_server(target_p);
 
-
-#ifdef COMPAT_211
-	if (IsCapable(client_p, CAP_211))
-	/* in case we're fed this one via 2.11, just fake the caps somehow
-           as we're never going to get GCAP from there. */
-		target_p->serv->caps = CAP_MASK;
-#endif
-
 	target_p->name = scache_add(parv[1]);
 
 	target_p->hopcount = atoi(parv[2]);
@@ -1110,7 +1102,8 @@ server_estab(struct Client *client_p)
 				  | (ServerConfTb(server_p) ? CAP_TB : 0));
 
 			/* this is mr_server() for TS6.
-			 * for 2.11 it will be passed from global_serv_list (it's always first) */
+			 * for 2.11 it will be passed from global_serv_list (it's always first)
+			 * Note this will throw our GCAP capabilities in that direction as well */
 			sendto_one(client_p, "SERVER %s 1 :%s%s",
 				   ServerConfMask(server_p, me.name),
 				   ConfigServerHide.hidden ? "(H) " : "",
