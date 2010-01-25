@@ -127,20 +127,23 @@ ms_error(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	ilog(L_SERVER, "Received ERROR message from %s: %s",
 	     log_client_name(source_p, SHOW_IP), para);
-
+#if 0
 	if(is_safe_error(para))
 		hideit = 0;
 	if(hideit == 2)
 		return 0;
+#endif
 
 	if(client_p == source_p)
 	{
 		sendto_realops_flags(UMODE_ALL, hideit ? L_ADMIN : L_ALL, "ERROR :from %s -- %s",
 				     client_p->name, para);
 
-		if(!ConfigFileEntry.hide_error_messages)
+		if(!ConfigFileEntry.hide_error_messages) {
 			sendto_realops_flags(UMODE_ALL, L_OPER,
 					     "ERROR :from %s -- %s", client_p->name, para);
+		}
+		exit_client(client_p, source_p, source_p, "ERROR");
 	}
 	else
 	{

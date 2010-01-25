@@ -38,6 +38,9 @@ for i in $3; do
 		echo "port = $port;" >> $fn
 		echo "flags = autoconn;" >> $fn
 	fi
+	if [ ! -z "$mask" ]; then
+		echo "mask=\"$mask\";" >> $fn
+	fi
 	echo "hub_mask = \"*\";" >> $fn
 	echo "class = \"server\";" >> $fn
 	echo "};" >> $fn

@@ -261,6 +261,7 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, const char
 	return 0;
 }
 
+
 /*
  * introduce_server() - introduce one server
  *      client_p - to whom to introduce
@@ -269,20 +270,26 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, const char
  */
 static void introduce_server(struct Client *client_p, struct Client *source_p, struct Client *server_p)
 {
+/*	if (server_p->servptr == source_p)
+		source_p = &me; */
+
 #ifdef COMPAT_211
 	if (IsCapable(client_p, CAP_211)) {
-		/* Is our masked name for that link hiding the one being introduced? */
-		if(match(ServerConfMask(client_p->localClient->att_sconf, me.name), server_p->name))
+		/* Is our masked name for that link hiding the one being introduced?
+		   Or is the introducing server masking the one being introduced? */
+		if(match(ServerConfMask(client_p->localClient->att_sconf, me.name), server_p->name) || match(source_p->name, server_p->name))
 		{
-			sendto_one(client_p, ":%s SMASK %s %10s",
+			sendto_one(client_p, ":%s SMASK %s %s",
 				   source_p->id, server_p->id,
-				   IRCNET_FAKESTRING);
+				   IRCNET_VERSTRING);
 		} else {
+			char buf[BUFSIZE];
+			
 			/* Not masked */
-			sendto_one(client_p, ":%s SERVER %s %d %s %10s :%s",
+			sendto_one(client_p, ":%s SERVER %s %d %s %s :%s",
 				source_p->id, server_p->name,
 				server_p->hopcount + 1, server_p->id,
-				IRCNET_FAKESTRING, server_p->info);
+				IRCNET_VERSTRING, server_p->info);
 		}
 	} else
 #endif
@@ -371,6 +378,7 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	int hlined = 0;
 	int llined = 0;
 
+	sendto_realops_flags(UMODE_DEBUG, L_ALL, "Recvd SID from %s/%s: %s" , client_p->id, source_p->id, array_to_string(parv, parc, 0));
 	hop = atoi(parv[2]);
 
 	/* collision on the name? */
@@ -382,7 +390,7 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 				     client_p->name, parv[1]);
 		ilog(L_SERVER, "Link %s cancelled, server %s already exists",
 		     client_p->name, parv[1]);
-		exit_client(NULL, client_p, &me, "Server Exists");
+		exit_client(client_p, client_p, &me, "Server Exists");
 		return 0;
 	}
 
@@ -394,7 +402,7 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 				     "Link %s cancelled, SID %s already exists",
 				     client_p->name, parv[3]);
 		ilog(L_SERVER, "Link %s cancelled, SID %s already exists", client_p->name, parv[3]);
-		exit_client(NULL, client_p, &me, "SID Exists");
+		exit_client(client_p, client_p, &me, "SID Exists");
 		return 0;
 	}
 
@@ -405,7 +413,7 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 				     "Link %s cancelled, servername %s invalid",
 				     client_p->name, parv[1]);
 		ilog(L_SERVER, "Link %s cancelled, servername %s invalid", client_p->name, parv[1]);
-		exit_client(NULL, client_p, &me, "Bogus server name");
+		exit_client(client_p, client_p, &me, "Bogus server name");
 		return 0;
 	}
 
@@ -415,7 +423,7 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "Link %s cancelled, SID %s invalid", client_p->name, parv[3]);
 		ilog(L_SERVER, "Link %s cancelled, SID %s invalid", client_p->name, parv[3]);
-		exit_client(NULL, client_p, &me, "Bogus SID");
+		exit_client(client_p, client_p, &me, "Bogus SID");
 		return 0;
 	}
 
@@ -443,7 +451,7 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "Non-Hub link %s introduced %s.", client_p->name, parv[1]);
 		ilog(L_SERVER, "Non-Hub link %s introduced %s.", client_p->name, parv[1]);
-		exit_client(NULL, client_p, &me, "No matching hub_mask.");
+		exit_client(client_p, client_p, &me, "No matching hub_mask.");
 		return 0;
 	}
 
@@ -455,7 +463,7 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 				     "Link %s introduced leafed server %s.",
 				     client_p->name, parv[1]);
 		ilog(L_SERVER, "Link %s introduced leafed server %s.", client_p->name, parv[1]);
-		exit_client(NULL, client_p, &me, "Leafed Server.");
+		exit_client(client_p, client_p, &me, "Leafed Server.");
 		return 0;
 	}
 
@@ -474,7 +482,8 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 	rb_dlinkAddTail(target_p, &target_p->node, &global_client_list);
 	rb_dlinkAddTailAlloc(target_p, &global_serv_list);
-	add_to_hash(HASH_CLIENT, target_p->name, target_p);
+	if ((!find_server(source_p, target_p->name)) && (source_p->name != target_p->name))
+		add_to_hash(HASH_CLIENT, target_p->name, target_p);
 	add_to_hash(HASH_ID, target_p->id, target_p);
 	rb_dlinkAdd(target_p, &target_p->lnode, &target_p->servptr->serv->servers);
 
@@ -1085,7 +1094,7 @@ server_estab(struct Client *client_p)
 			if (IsCapable(client_p, CAP_211))
 				sendto_one(client_p, "PASS %s " IRCNET_FAKESTRING "%s%s",
 				   server_p->spasswd, ServerConfCompressed(server_p) && zlib_ok ? "Z" : "",
-					ServerConfTb(server_p) ? "T" : "");
+					ServerConfTb(server_p) ? "T" : "")
 			else
 #endif
 			sendto_one(client_p, "PASS %s TS %d :%s",
@@ -1100,15 +1109,16 @@ server_estab(struct Client *client_p)
 			send_capabilities(client_p, default_server_capabs
 				  | (ServerConfCompressed(server_p) && zlib_ok ? CAP_ZIP : 0)
 				  | (ServerConfTb(server_p) ? CAP_TB : 0));
-
-			/* this is mr_server() for TS6.
-			 * for 2.11 it will be passed from global_serv_list (it's always first)
-			 * Note this will throw our GCAP capabilities in that direction as well */
-			sendto_one(client_p, "SERVER %s 1 :%s%s",
+			/* this is mr_server() for TS6. */
+			sendto_one(client_p, "SERVER %s 1 :%s",
 				   ServerConfMask(server_p, me.name),
-				   ConfigServerHide.hidden ? "(H) " : "",
-				   (me.info[0]) ? (me.info) : "IRCers United");
+				   ((me.info[0]) ? (me.info) : "IRCers United"));
 #ifdef COMPAT_211
+		} else {
+			sendto_one(client_p, "SERVER %s 1 %s %s :%s",
+				ServerConfMask(server_p, me.name),
+				me.id,
+				IRCNET_VERSTRING, me.info);
 		}
 #endif
 	}
