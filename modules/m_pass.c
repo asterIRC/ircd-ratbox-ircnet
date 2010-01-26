@@ -80,13 +80,13 @@ mr_pass(struct Client *client_p, struct Client *source_p, int parc, const char *
 			if (strchr(parv[4], 'j'))
 				client_p->localClient->caps |= CAP_JAPANESE;
 
-			if (!memcmp(parv[2], IRCNET_FAKESTRING, 10)) {
+			if (!strcmp(parv[2], IRCNET_VERSTRING)) {
 				/* nah, it's just us pretending, we're going to receive CAPAB.
 				   Will fill the SID in server stage though. */
-				client_p->localClient->caps |= CAP_TS6;
+				client_p->localClient->caps |= CAP_TS6|CAPS_IRCNET;
 			} else {
 				/* True 2.11 */
-				client_p->localClient->caps |= CAP_211+CAPS_IRCNET;
+				client_p->localClient->caps |= CAP_211|CAPS_IRCNET;
 				/* As we're never going to receive CAPAB for this one */
 				client_p->localClient->fullcaps =	
 					rb_strdup(send_capabilities(NULL, client_p->localClient->caps));

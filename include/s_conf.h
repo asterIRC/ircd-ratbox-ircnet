@@ -246,6 +246,8 @@ struct config_channel_entry
 
 struct config_server_hide
 {
+	int umask_hack;
+	int collapse_map;
 	int flatten_links;
 	int links_delay;
 	int links_disabled;

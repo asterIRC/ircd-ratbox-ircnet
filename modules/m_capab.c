@@ -68,7 +68,7 @@ mr_capab(struct Client *client_p, struct Client *source_p, int parc, const char 
 		return 0;
 
 	/* CAP_TS6 is set in PASS, so is valid.. */
-	if((client_p->localClient->caps & ~CAP_TS6) != 0)
+	if ((client_p->localClient->caps & CAP_CAP) != 0)
 	{
 		exit_client(client_p, client_p, client_p, "CAPAB received twice");
 		return 0;
@@ -114,6 +114,7 @@ me_gcap(struct Client *client_p, struct Client *source_p, int parc, const char *
 		return 0;
 
 	source_p->serv->fullcaps = rb_strdup(parv[1]);
+	source_p->serv->caps = CAP_TS6;
 
 	for(s = rb_strtok_r(t, " ", &p); s; s = rb_strtok_r(NULL, " ", &p))
 	{

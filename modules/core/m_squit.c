@@ -74,17 +74,7 @@ mo_squit(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	if((found_squit = find_squit(client_p, source_p, parv[1])))
 	{
-		if(MyConnect(found_squit->target_p))
-		{
-			sendto_realops_flags(UMODE_ALL, L_ALL,
-					     "Received SQUIT %s from %s (%s)",
-					     found_squit->target_p->name,
-					     get_client_name(source_p, HIDE_IP), comment);
-			ilog(L_SERVER, "Received SQUIT %s from %s (%s)",
-			     found_squit->target_p->name, log_client_name(source_p, HIDE_IP),
-			     comment);
-		}
-		else if(!IsOperRemote(source_p))
+		if(!IsOperRemote(source_p))
 		{
 			sendto_one(source_p, form_str(ERR_NOPRIVS),
 				   me.name, source_p->name, "remote");

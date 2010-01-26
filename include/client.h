@@ -218,7 +218,7 @@ struct LocalUser;
 #define IsMarked(x)		((x)->flags & FLAGS_MARK)
 #define SetHidden(x)		((x)->flags |= FLAGS_HIDDEN)
 #define ClearHidden(x)		((x)->flags &= ~FLAGS_HIDDEN)
-#define IsHidden(x)		((x)->flags & FLAGS_HIDDEN)
+#define IsHidden(x)		((x)->servptr->name == (x)->name)
 #define ClearEob(x)		((x)->flags &= ~FLAGS_EOB)
 #define SetEob(x)		((x)->flags |= FLAGS_EOB)
 #define HasSentEob(x)		((x)->flags & FLAGS_EOB)
@@ -318,6 +318,8 @@ struct LocalUser;
 #define SetCork(x)		(MyConnect(x) ? (x)->localClient->cork_count++ : (x)->from->localClient->cork_count++ )
 #define ClearCork(x)		(MyConnect(x) ? (x)->localClient->cork_count-- : (x)->from->localClient->cork_count--)
 
+
+#define server_real_name(x)	((x)->serv->realname?(x)->serv->realname:(x)->name)
 
 /*
  * definitions for get_client_name

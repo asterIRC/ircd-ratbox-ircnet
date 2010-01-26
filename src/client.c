@@ -598,7 +598,7 @@ update_client_exit_stats(struct Client *client_p)
 {
 	if(IsServer(client_p))
 	{
-		if(client_p->name != client_p->servptr->name)
+		if(!IsHidden(client_p))
 			sendto_realops_flags(UMODE_EXTERNAL, L_ALL,
 					     "Server %s split from %s",
 					     client_p->name,
@@ -991,6 +991,10 @@ recurse_remove_clients(struct Client *source_p, const char *comment)
 	if(source_p->serv == NULL)	/* oooops. uh this is actually a major bug */
 		return;
 
+	if (!IsHidden(source_p))
+		sendto_realops_flags(UMODE_ALL, L_ALL,
+		     "Received SQUIT %s from %s (%s)", source_p->name, source_p->servptr->name, comment);
+
 	RB_DLINK_FOREACH_SAFE(ptr, ptr_next, source_p->serv->users.head)
 	{
 		target_p = ptr->data;
@@ -1028,6 +1032,7 @@ remove_dependents(struct Client *client_p,
 {
 	struct Client *to;
 	rb_dlink_node *ptr, *next;
+
 
 	RB_DLINK_FOREACH_SAFE(ptr, next, serv_list.head)
 	{
@@ -1236,7 +1241,7 @@ exit_remote_server(struct Client *client_p, struct Client *source_p, struct Clie
 	 * suitable message has been put into the squit reason.
 	 * If not, we have insufficient information.
 	 */
-	if(source_p->servptr->name == source_p->name)
+	if(IsHidden(source_p))
 	{
 		if(source_p->from == client_p)
 			rb_strlcpy(comment1, comment, sizeof comment1);

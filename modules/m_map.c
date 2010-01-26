@@ -33,7 +33,7 @@
 #include "ircd.h"
 #include "match.h"
 
-#define USER_COL       50	/* display | Users: %d at col 50 */
+#define USER_COL       60	/* display | Users: %d at col 50 */
 
 static int m_map(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
 static int mo_map(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
@@ -47,7 +47,10 @@ mapi_clist_av2 map_clist[] = { &map_msgtab, NULL };
 
 DECLARE_MODULE_AV2(map, NULL, NULL, map_clist, NULL, NULL, "$Revision$");
 
-static void dump_map(struct Client *client_p, struct Client *root, char *pbuf);
+static void dump_map(struct Client *client_p, struct Client *root, char *pbuf, int show);
+static int count_hidden_users(struct Client *server_p, int show);
+static int count_visible(struct Client *server_p, int show);
+static void move_under_hidden(int *pi, int cnt, struct Client *client_p, struct Client *root_p, char *pbuf);
 
 static char buf[BUFSIZE];
 
@@ -57,14 +60,13 @@ static char buf[BUFSIZE];
 static int
 m_map(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	if((!IsExemptShide(source_p) && ConfigServerHide.flatten_links) ||
-	   ConfigFileEntry.map_oper_only)
+	if(ConfigFileEntry.map_oper_only)
 	{
 		m_not_oper(client_p, source_p, parc, parv);
 		return 0;
 	}
 	SetCork(source_p);
-	dump_map(source_p, &me, buf);
+	dump_map(source_p, &me, buf, ConfigServerHide.disable_hidden && parc > 1 && parv[1] && (parv[1][0] == 's'));
 	ClearCork(source_p);
 	sendto_one(source_p, form_str(RPL_MAPEND), me.name, source_p->name);
 	return 0;
@@ -78,11 +80,77 @@ static int
 mo_map(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	SetCork(source_p);
-	dump_map(source_p, &me, buf);
+	dump_map(source_p, &me, buf, parc > 1 && parv[1] && (parv[1][0] == 's'));
 	ClearCork(source_p);
 	sendto_one(source_p, form_str(RPL_MAPEND), me.name, source_p->name);
 
 	return 0;
+}
+
+/* count number of visible lines since server server_p */
+static int count_visible(struct Client *server_p, int show)
+{
+	rb_dlink_node *ptr;
+	int count = 0;
+
+	if (show) return rb_dlink_list_length(&server_p->serv->servers);
+
+	RB_DLINK_FOREACH(ptr, server_p->serv->servers.head)
+	{
+		struct Client *sp = ptr->data;
+
+		if (IsHidden(sp))
+			count += count_visible(sp, 0);
+		else
+			count++;
+	}
+	return count;
+}
+
+/* count number of users under a masked tree */
+static int count_hidden_users(struct Client *server_p, int show)
+{
+	rb_dlink_node *ptr;
+	int count = rb_dlink_list_length(&server_p->serv->users);
+
+	if (show) return count;
+
+	RB_DLINK_FOREACH(ptr, server_p->serv->servers.head)
+	{
+		struct Client *sp = ptr->data;
+		
+		sp = ptr->data;
+		if (IsHidden(sp))
+			count += count_hidden_users(sp, 0);
+	}
+	return count;
+}
+
+
+static void move_under_hidden(int *pi, int cnt, struct Client *client_p, struct Client *root_p, char *pbuf)
+{
+	rb_dlink_node *ptr;
+	RB_DLINK_FOREACH(ptr, root_p->serv->servers.head)
+	{
+		struct Client *sp = ptr->data;
+
+		if (IsHidden(sp))
+			move_under_hidden(pi, cnt, client_p, sp, pbuf);
+		else {
+			*pbuf = ' ';
+
+			if(*pi < cnt)
+				*(pbuf + 1) = '|';
+			else
+				*(pbuf + 1) = '`';
+
+			*(pbuf + 2) = '-';
+			*(pbuf + 3) = ' ';
+
+			dump_map(client_p, sp, pbuf + 4, 0);
+			(*pi)++;
+		}
+	}
 }
 
 /*
@@ -91,19 +159,22 @@ mo_map(struct Client *client_p, struct Client *source_p, int parc, const char *p
 *    you must pop the sendq after this is done..with the MAPEND numeric
 */
 static void
-dump_map(struct Client *client_p, struct Client *root_p, char *pbuf)
+dump_map(struct Client *client_p, struct Client *root_p, char *pbuf, int show)
 {
 	int cnt = 0, i = 0, len;
+	long ucount;
 	struct Client *server_p;
 	char scratch[128];
 	rb_dlink_node *ptr;
 	*pbuf = '\0';
 
-	rb_strlcat(pbuf, root_p->name, BUFSIZE);
+	rb_strlcat(pbuf, show?server_real_name(root_p):root_p->name, BUFSIZE);
 
-	rb_strlcat(pbuf, "[", BUFSIZE);
-	rb_strlcat(pbuf, root_p->id, BUFSIZE);
-	rb_strlcat(pbuf, "]", BUFSIZE);
+	if (show) {
+		rb_strlcat(pbuf, "[", BUFSIZE);
+		rb_strlcat(pbuf, root_p->id, BUFSIZE);
+		rb_strlcat(pbuf, "]", BUFSIZE);
+	}
 
 	len = strlen(buf);
 	buf[len] = ' ';
@@ -115,18 +186,21 @@ dump_map(struct Client *client_p, struct Client *root_p, char *pbuf)
 			buf[i] = '-';
 		}
 	}
+
+	ucount = count_hidden_users(root_p, show);
+
 	sprintf(scratch, "%4.1f%%",
-		(float)100 * (float)rb_dlink_list_length(&root_p->serv->users) /
+		(float)100 * (float)ucount /
 		(float)Count.total);
 
 	rb_snprintf(buf + USER_COL, BUFSIZE - USER_COL,
-		    " | Users: %5lu (%s)", rb_dlink_list_length(&root_p->serv->users), scratch);
+		    " | %5lu (%s)", ucount, scratch);
 
 	sendto_one(client_p, form_str(RPL_MAP), me.name, client_p->name, buf);
 
 	if(root_p->serv->servers.head != NULL)
 	{
-		cnt += rb_dlink_list_length(&root_p->serv->servers);
+		cnt += count_visible(root_p, show);
 
 		if(cnt)
 		{
@@ -142,16 +216,21 @@ dump_map(struct Client *client_p, struct Client *root_p, char *pbuf)
 	RB_DLINK_FOREACH(ptr, root_p->serv->servers.head)
 	{
 		server_p = ptr->data;
-		*pbuf = ' ';
-		if(i < cnt)
-			*(pbuf + 1) = '|';
-		else
-			*(pbuf + 1) = '`';
+		if (!show && IsHidden(server_p)) {
+			move_under_hidden(&i, cnt, client_p, server_p, pbuf);
+		} else {
+			*pbuf = ' ';
 
-		*(pbuf + 2) = '-';
-		*(pbuf + 3) = ' ';
-		dump_map(client_p, server_p, pbuf + 4);
+			if(i < cnt)
+				*(pbuf + 1) = '|';
+			else
+				*(pbuf + 1) = '`';
 
-		i++;
+			*(pbuf + 2) = '-';
+			*(pbuf + 3) = ' ';
+
+			dump_map(client_p, server_p, pbuf + 4, show);
+			i++;
+		}
 	}
 }

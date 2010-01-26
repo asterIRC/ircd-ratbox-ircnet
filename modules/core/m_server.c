@@ -51,6 +51,7 @@ static int mr_server(struct Client *, struct Client *, int, const char **);
 static int ms_server(struct Client *, struct Client *, int, const char **);
 static int ms_sid(struct Client *, struct Client *, int, const char **);
 static int ms_smask(struct Client *, struct Client *, int, const char **);
+static	void	set_gecos(struct Client *server_p, const char *name);
 
 struct Message server_msgtab = {
 	"SERVER", 0, 0, 0, MFLG_SLOW | MFLG_UNREG,
@@ -76,7 +77,7 @@ DECLARE_MODULE_AV2(server, NULL, NULL, server_clist, NULL, NULL, "$Revision$");
 static struct Client *server_exists(struct Client *from, const char *);
 
 static int check_server(const char *name, struct Client *client_p);
-static int server_estab(struct Client *client_p);
+static int server_estab(struct Client *client_p, const char *name);
 
 
 /* enums for check_server */
@@ -94,8 +95,9 @@ enum
  * mr_server - SERVER message handler (ONLY during handshake)
  *      parv[0] = sender prefix
  *      parv[1] = servername
- *      parv[2] = serverinfo/hopcount
- *      parv[3] = serverinfo
+ *      parv[2] = hopcount
+ *      parv[3] = serverinfo (or SID in case of 2.11 proto)
+ *	parv[4] = info (in case of 2.11 proto)
  */
 static int
 mr_server(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
@@ -254,9 +256,8 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, const char
 	 */
 
 	client_p->name = scache_add(name);
-	rb_strlcpy(client_p->info, info, sizeof(client_p->info));
 	client_p->hopcount = hop;
-	server_estab(client_p);
+	server_estab(client_p, info);
 
 	return 0;
 }
@@ -270,9 +271,6 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, const char
  */
 static void introduce_server(struct Client *client_p, struct Client *source_p, struct Client *server_p)
 {
-/*	if (server_p->servptr == source_p)
-		source_p = &me; */
-
 #ifdef COMPAT_211
 	if (IsCapable(client_p, CAP_211)) {
 		/* Is our masked name for that link hiding the one being introduced?
@@ -283,8 +281,6 @@ static void introduce_server(struct Client *client_p, struct Client *source_p, s
 				   source_p->id, server_p->id,
 				   IRCNET_VERSTRING);
 		} else {
-			char buf[BUFSIZE];
-			
 			/* Not masked */
 			sendto_one(client_p, ":%s SERVER %s %d %s %s :%s",
 				source_p->id, server_p->name,
@@ -293,10 +289,19 @@ static void introduce_server(struct Client *client_p, struct Client *source_p, s
 		}
 	} else
 #endif
-	sendto_one(client_p, ":%s SID %s %d %s :%s",
-		   source_p->id, ServerConfMask(client_p->localClient->att_sconf, server_p->name),
-		   server_p->hopcount + 1, server_p->id,
-		   server_p->info);
+	if (server_p->serv->realname)
+	{
+		sendto_one(client_p, ":%s SID %s %d %s :[%s]%s",
+			   source_p->id, ServerConfMask(client_p->localClient->att_sconf, server_p->name),
+			   server_p->hopcount + 1, server_p->id,
+			   server_p->serv->realname,
+			   server_p->info);
+	} else {
+		sendto_one(client_p, ":%s SID %s %d %s :%s",
+			   source_p->id, ServerConfMask(client_p->localClient->att_sconf, server_p->name),
+			   server_p->hopcount + 1, server_p->id,
+			   server_p->info);
+	}
 
 	/* This should be always sent */
 	if(IsCapable(client_p, CAP_ENCAP) && !EmptyString(server_p->serv->fullcaps))
@@ -326,7 +331,7 @@ ms_server(struct Client *client_p, struct Client *source_p, int parc, const char
 		fakeparv[2] = parv[2];
 		fakeparv[3] = parv[3];
 		fakeparv[4] = parv[5]; /* this is all suspiciously equivalent :) */
-		return ms_sid(client_p, source_p, 5, fakeparv);
+		return ms_sid(client_p, source_p, -1, fakeparv);
 	}
 #endif
 	sendto_one(client_p, "ERROR :Introduced server %s is not TS6", name);
@@ -355,9 +360,25 @@ ms_smask(struct Client *client_p, struct Client *source_p, int parc, const char 
 	fakeparv[2] = fhopcount;
 	fakeparv[3] = parv[1];
 	fakeparv[4] = source_p->info;
-	return ms_sid(client_p, source_p, 5, fakeparv);
+	return ms_sid(client_p, source_p, -1, fakeparv);
 }
 #endif
+
+static	void	set_gecos(struct Client *server_p, const char *name)
+{
+	char realname[HOSTLEN+1];
+	const char *p = strchr(name, ']');
+	if (name[0] == '[' && p && (p-name) < HOSTLEN) {
+		rb_strlcpy(realname, name+1, p-name);
+		if (match(server_p->name, realname))
+			server_p->serv->realname = scache_add(realname);
+		p++;
+		while (*p == ' ') p++;
+		rb_strlcpy(server_p->info, p, sizeof(server_p->info));
+		return;
+	}
+	rb_strlcpy(server_p->info, name, sizeof(server_p->info));
+}
 
 /*
  * ms_sid - SID message handler (TS6 server being introduced)
@@ -378,7 +399,6 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	int hlined = 0;
 	int llined = 0;
 
-	sendto_realops_flags(UMODE_DEBUG, L_ALL, "Recvd SID from %s/%s: %s" , client_p->id, source_p->id, array_to_string(parv, parc, 0));
 	hop = atoi(parv[2]);
 
 	/* collision on the name? */
@@ -475,7 +495,7 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 	target_p->hopcount = atoi(parv[2]);
 	strcpy(target_p->id, parv[3]);
-	rb_strlcpy(target_p->info, parv[4], sizeof(target_p->info));
+	set_gecos(target_p, parv[4]);
 
 	target_p->servptr = source_p;
 	SetServer(target_p);
@@ -487,6 +507,7 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	add_to_hash(HASH_ID, target_p->id, target_p);
 	rb_dlinkAdd(target_p, &target_p->lnode, &target_p->servptr->serv->servers);
 
+	target_p->serv->caps = CAPS_IRCNET;
 
 	/* tell everyone about the new server */
 	RB_DLINK_FOREACH(ptr, serv_list.head)
@@ -501,7 +522,8 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 	sendto_realops_flags(UMODE_EXTERNAL, L_ALL,
 			     "Server %s being introduced by %s", target_p->name, source_p->name);
-	sendto_realops_flags(UMODE_ALL, L_ALL,
+	if (!IsHidden(target_p))
+		sendto_realops_flags(UMODE_ALL, L_ALL,
 			     "Received SERVER %s from %s (%d %s)", target_p->name, source_p->name, target_p->hopcount + 1, target_p->info);
 
 	/* quick, dirty EOB.  you know you love it. */
@@ -1031,7 +1053,7 @@ burst_211(struct Client *client_p)
  * side effects -
  */
 static int
-server_estab(struct Client *client_p)
+server_estab(struct Client *client_p, const char *name)
 {
 	struct Client *target_p;
 	struct server_conf *server_p;
@@ -1094,7 +1116,7 @@ server_estab(struct Client *client_p)
 			if (IsCapable(client_p, CAP_211))
 				sendto_one(client_p, "PASS %s " IRCNET_FAKESTRING "%s%s",
 				   server_p->spasswd, ServerConfCompressed(server_p) && zlib_ok ? "Z" : "",
-					ServerConfTb(server_p) ? "T" : "")
+					ServerConfTb(server_p) ? "T" : "");
 			else
 #endif
 			sendto_one(client_p, "PASS %s TS %d :%s",
@@ -1110,15 +1132,31 @@ server_estab(struct Client *client_p)
 				  | (ServerConfCompressed(server_p) && zlib_ok ? CAP_ZIP : 0)
 				  | (ServerConfTb(server_p) ? CAP_TB : 0));
 			/* this is mr_server() for TS6. */
-			sendto_one(client_p, "SERVER %s 1 :%s",
-				   ServerConfMask(server_p, me.name),
-				   ((me.info[0]) ? (me.info) : "IRCers United"));
+			if (ServerConfMask(server_p, me.name) != me.name && !ConfigServerHide.hidden) {
+				sendto_one(client_p, "SERVER %s 1 :[%s]%s",
+					   ServerConfMask(server_p, me.name), me.name,
+					   ((me.info[0]) ? (me.info) : "IRCers United"));
+			} else {
+				sendto_one(client_p, "SERVER %s 1 :%s",
+					   ServerConfMask(server_p, me.name),
+					   ((me.info[0]) ? (me.info) : "IRCers United"));
+			}
 #ifdef COMPAT_211
 		} else {
-			sendto_one(client_p, "SERVER %s 1 %s %s :%s",
-				ServerConfMask(server_p, me.name),
-				me.id,
-				IRCNET_VERSTRING, me.info);
+			if (ServerConfMask(server_p, me.name) != me.name && !ConfigServerHide.hidden) {
+				sendto_one(client_p, "SERVER %s 1 %s %s :[%s]%s",
+					ServerConfMask(server_p, me.name),
+					me.id,
+					IRCNET_VERSTRING, me.name, me.info);
+			} else {
+				sendto_one(client_p, "SERVER %s 1 %s %s :%s",
+					ServerConfMask(server_p, me.name),
+					me.id,
+					IRCNET_VERSTRING, me.info);
+			}
+			/* This should be always sent */
+			if(IsCapable(client_p, CAP_ENCAP))
+				sendto_one(client_p, ":%s ENCAP * GCAP :%s", me.id, send_capabilities(NULL, default_server_capabs));
 		}
 #endif
 	}
@@ -1164,6 +1202,7 @@ server_estab(struct Client *client_p)
 	add_to_hash(HASH_CLIENT, client_p->name, client_p);
 	/* doesnt duplicate client_p->serv if allocated this struct already */
 	make_server(client_p);
+	set_gecos(client_p, name);
 
 	client_p->serv->caps = client_p->localClient->caps;
 

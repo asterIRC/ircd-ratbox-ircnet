@@ -767,8 +767,8 @@ set_default_conf(void)
 	ConfigFileEntry.stats_c_oper_only = NO;
 	ConfigFileEntry.stats_y_oper_only = NO;
 	ConfigFileEntry.stats_h_oper_only = NO;
-	ConfigFileEntry.map_oper_only = YES;
-	ConfigFileEntry.operspy_admin_only = NO;
+	ConfigFileEntry.map_oper_only = NO;
+	ConfigFileEntry.operspy_admin_only = YES;
 	ConfigFileEntry.pace_wait = 1;
 	ConfigFileEntry.caller_id_wait = 60;
 	ConfigFileEntry.pace_wait_simple = 1;
@@ -825,10 +825,10 @@ set_default_conf(void)
 	ConfigChannel.topiclen = DEFAULT_TOPICLEN;
 	ConfigChannel.resv_forcepart = YES;
 
-	ConfigServerHide.flatten_links = 0;
-	ConfigServerHide.links_delay = 300;
-	ConfigServerHide.hidden = 0;
-	ConfigServerHide.disable_hidden = 0;
+	ConfigServerHide.flatten_links = NO; /* use cached links and map */
+	ConfigServerHide.links_delay = 300; /* how often to update map and links cache */
+	ConfigServerHide.hidden = NO; /* do not announce our realname to others */
+	ConfigServerHide.disable_hidden = NO; /* NO=show servers with hidden enabled in links and map s to useres */
 
 	ConfigFileEntry.min_nonwildcard = 4;
 	ConfigFileEntry.min_nonwildcard_simple = 3;
