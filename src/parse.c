@@ -150,6 +150,7 @@ char *array_to_string(const char *parv[], int parc, int uid2nick)
 /* parse()
  *
  * given a raw buffer, parses it and generates parv, parc and sender
+ * note that for broken ENCAP implementations this needs to be reentrant.
  */
 void
 parse(struct Client *client_p, char *pbuffer, char *bufend)
@@ -161,6 +162,10 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 	int i = 1;
 	char *numeric = 0;
 	struct Message *mptr;
+	static int entry_count;
+
+	/* no looping via realencap. kthx. */
+	if (entry_count > 3) return;
 
 	s_assert(MyConnect(client_p));
 	if(IsAnyDead(client_p))
@@ -301,6 +306,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 		return;
 	}
 
+	entry_count++;
 	if(handle_command(mptr, client_p, from, i,	/* XXX discards const!!! */
 			  (const char **)para) < -1)
 	{
@@ -325,7 +331,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 				     p[6], p[7], p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7]);
 		}
 	}
-
+	entry_count--;
 }
 
 /*

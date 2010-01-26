@@ -40,15 +40,40 @@
 #include "match.h"
 
 static int ms_encap(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
+#ifdef COMPAT_211
+static int ms_realencap(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
+struct Message realencap_msgtab = {
+	"REALENCAP", 0, 0, 0, MFLG_SLOW,
+	{mg_ignore, mg_ignore, mg_ignore, mg_ignore, {ms_realencap, 2}, mg_ignore}
+};
+#endif
+
 
 struct Message encap_msgtab = {
 	"ENCAP", 0, 0, 0, MFLG_SLOW,
 	{mg_ignore, mg_ignore, {ms_encap, 3}, {ms_encap, 3}, mg_ignore, mg_ignore}
 };
 
-mapi_clist_av2 encap_clist[] = { &encap_msgtab, NULL };
+mapi_clist_av2 encap_clist[] = { &encap_msgtab,
+#ifdef COMPAT_211
+&realencap_msgtab,
+#endif
+NULL };
 
 DECLARE_MODULE_AV2(encap, NULL, NULL, encap_clist, NULL, NULL, "$Revision$");
+
+#ifdef COMPAT_211
+/* no magic here, just reenter the parser */
+static int
+ms_realencap(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+{
+	char buf[BUFSIZE];
+	buf[0] = ':';
+	rb_strlcpy(buf + 1, parv[1], sizeof(buf)-1);
+	parse(client_p, buf, buf + strlen(buf));
+	return 0;
+}
+#endif
 
 /* ms_encap()
  *

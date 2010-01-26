@@ -46,7 +46,7 @@ struct Message wallops_msgtab = {
 
 struct Message operwall_msgtab = {
 	"OPERWALL", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_not_oper, {ms_operwall, 2}, mg_ignore, mg_ignore, {mo_operwall, 2}}
+	{mg_unreg, mg_not_oper, {ms_operwall, 2}, mg_ignore, {ms_operwall, 2}, {mo_operwall, 2}}
 };
 
 mapi_clist_av2 wallops_clist[] = { &wallops_msgtab, &operwall_msgtab, NULL };
@@ -67,8 +67,10 @@ mo_operwall(struct Client *client_p, struct Client *source_p, int parc, const ch
 	}
 
 	sendto_wallops_flags(UMODE_OPERWALL, source_p, "OPERWALL - %s", parv[1]);
-	sendto_server(client_p, NULL, CAP_TS6, NOCAPS, ":%s WALLOPS :%s",
+	sendto_server(client_p, NULL, CAP_TS6, CAP_211, ":%s OPERWALL :%s",
 		      source_p->id, parv[1]);
+	sendto_match_servs(source_p, "*", CAP_TS6|CAP_ENCAP|CAP_211, NOCAPS, "ENCAP * OPERWALL :%s",
+		      parv[1]);
 	return 0;
 }
 
@@ -84,7 +86,8 @@ ms_operwall(struct Client *client_p, struct Client *source_p, int parc, const ch
 	sendto_server(client_p, NULL, CAP_TS6, CAP_211, ":%s OPERWALL :%s",
 		      source_p->id, parv[1]);
 	sendto_wallops_flags(UMODE_OPERWALL, source_p, "OPERWALL - %s", parv[1]);
-
+	sendto_match_servs(source_p, "*", CAP_TS6|CAP_ENCAP|CAP_211, NOCAPS, "ENCAP * OPERWALL :%s",
+		      parv[1]);
 	return 0;
 }
 

@@ -822,7 +822,21 @@ sendto_match_servs(struct Client *source_p, const char *mask, int cap,
 	rb_vsnprintf(buf, sizeof(buf), pattern, args);
 	va_end(args);
 
-	rb_linebuf_putmsg(&rb_linebuf_id, NULL, NULL, ":%s %s", source_p->id, buf);
+#ifdef COMPAT_211
+	buf_head_t rb_linebuf_id2;
+	rb_linebuf_newbuf(&rb_linebuf_id2);
+	int brokencap = 0;
+	char *p;
+	/* Ughh! The counterpart is in src/parse.c:parse() */
+	if ((!strncmp(buf, "ENCAP ", 6)) && (!IsServer(source_p)) && (p = strchr(buf+6, ' '))) {
+		brokencap = 1;
+		/* zero term the dest mask */
+		*p = 0;
+		rb_linebuf_putmsg(&rb_linebuf_id2, NULL, NULL, ":%s ENCAP %s REALENCAP :%s ENCAP %s %s",
+						source_p->servptr->id, buf + 6, source_p->id, buf + 6, p + 1);
+	} else
+#endif
+		rb_linebuf_putmsg(&rb_linebuf_id, NULL, NULL, ":%s %s", source_p->id, buf);
 
 	current_serial++;
 
@@ -849,7 +863,11 @@ sendto_match_servs(struct Client *source_p, const char *mask, int cap,
 
 			if(nocap && !NotCapable(target_p->from, nocap))
 				continue;
-
+#ifdef COMPAT_211
+		if (IsCapable(target_p->from, CAP_211) && brokencap)
+			send_linebuf(target_p->from, &rb_linebuf_id2);
+		else
+#endif
 			send_linebuf(target_p->from, &rb_linebuf_id);
 		}
 	}

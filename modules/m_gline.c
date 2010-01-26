@@ -52,7 +52,7 @@ static void moddeinit(void);
 
 struct Message gline_msgtab = {
 	"GLINE", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_not_oper, {mc_gline, 3}, {ms_gline, 7}, mg_ignore, {mo_gline, 3}}
+	{mg_unreg, mg_not_oper, {mc_gline, 3}, {ms_gline, 7}, {mc_gline, 3}, {mo_gline, 3}}
 };
 
 struct Message ungline_msgtab = {
@@ -74,6 +74,17 @@ static int invalid_gline(struct Client *, const char *, char *);
 static int remove_temp_gline(const char *, const char *);
 static void expire_pending_glines(void *unused);
 static struct ev_entry *pending_gline_ev;
+
+/* encap glines for 2.11 */
+static	void	send_gline(struct Client *source_p, const char *user, const char *host, const char *reason, int encap)
+{
+	sendto_server(source_p->from, NULL, CAP_GLN | CAP_TS6, CAP_211, ":%s GLINE %s %s :%s",
+		source_p->id, user, host, reason);
+	if (encap)
+		sendto_match_servs(source_p, "*", CAP_ENCAP | CAP_TS6, CAP_GLN,
+			"ENCAP * GLINE %s %s :%s");
+}
+
 
 static int
 modinit(void)
@@ -198,8 +209,7 @@ mo_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	majority_gline(source_p, user, host, reason);
 
 	/* 4 param version for hyb-7 servers */
-	sendto_server(NULL, NULL, CAP_GLN | CAP_TS6, NOCAPS,
-		      ":%s GLINE %s %s :%s", source_p->id, user, host, reason);
+	send_gline(source_p, user, host, reason, 1);
 
 #if 0
 	/* hybrid 6 doesn't support TS6 at all so... */
@@ -237,8 +247,7 @@ mc_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	if(invalid_gline(acptr, user, reason))
 		return 0;
 
-	sendto_server(client_p, NULL, CAP_GLN | CAP_TS6, NOCAPS,
-		      ":%s GLINE %s %s :%s", acptr->id, user, host, reason);
+	send_gline(acptr, user, host, reason, 0);
 
 	if(!ConfigFileEntry.glines)
 		return 0;
@@ -339,8 +348,7 @@ ms_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	if(invalid_gline(acptr, user, reason))
 		return 0;
 
-	sendto_server(client_p, NULL, CAP_GLN | CAP_TS6, NOCAPS,
-		      ":%s GLINE %s %s :%s", acptr->id, user, host, reason);
+	send_gline(acptr, user, host, reason, 0);
 
 	if(!ConfigFileEntry.glines)
 		return 0;

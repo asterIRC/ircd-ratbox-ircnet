@@ -166,8 +166,8 @@ mo_gungline(struct Client *client_p, struct Client *source_p, int parc, const ch
 	/* If at least 3 opers agree this user should be G lined then do it */
 	majority_ungline(source_p, user, host, reason);
 
-	sendto_server(client_p, NULL, CAP_ENCAP | CAP_TS6, NOCAPS,
-		      ":%s ENCAP * GUNGLINE %s %s :%s", source_p->id, user, host, reason);
+	sendto_match_servs(source_p, "*", CAP_ENCAP | CAP_TS6, NOCAPS,
+		      "ENCAP * GUNGLINE %s %s :%s", user, host, reason);
 	return 0;
 }
 
