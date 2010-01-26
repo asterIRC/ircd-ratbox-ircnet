@@ -212,7 +212,7 @@ void free_channel(struct Channel *chptr);
 struct Ban *allocate_ban(const char *, const char *);
 void free_ban(struct Ban *bptr);
 
-
+void kill_channel_modes(struct Channel *chptr);
 void destroy_channel(struct Channel *);
 
 int can_send(struct Channel *chptr, struct Client *who, struct membership *);

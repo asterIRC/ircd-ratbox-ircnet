@@ -297,6 +297,10 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		if(flags == 0)	/* if channel doesn't exist, don't penalize */
 			successful_join_count++;
 
+		/* In case the channel was just created, reset all modes. */
+		if (flags && *chptr->chname != '!')
+			kill_channel_modes(chptr);
+
 		/* IRCNet splitmode behaviour */
 		if(splitmode && (*name != '&') &&
 		   ConfigChannel.no_ops_on_split)
@@ -1025,33 +1029,6 @@ do_join_0(struct Client *client_p, struct Client *source_p)
 				     source_p->username, source_p->host, chptr->chname);
 		remove_user_from_channel(msptr);
 	}
-}
-
-static int
-check_channel_name_loc(struct Client *source_p, const char *name)
-{
-	s_assert(name != NULL);
-	if(EmptyString(name))
-		return 0;
-
-	if(ConfigFileEntry.disable_fake_channels && !IsOper(source_p))
-	{
-		for(; *name; ++name)
-		{
-			if(!IsChanChar(*name) || IsFakeChanChar(*name))
-				return 0;
-		}
-	}
-	else
-	{
-		for(; *name; ++name)
-		{
-			if(!IsChanChar(*name))
-				return 0;
-		}
-	}
-
-	return 1;
 }
 
 /* can_join()

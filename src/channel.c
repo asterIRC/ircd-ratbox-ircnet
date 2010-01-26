@@ -488,17 +488,12 @@ free_channel_list(rb_dlink_list *list)
 	list->length = 0;
 }
 
-/* destroy_channel()
- *
- * input	- channel to destroy
- * output	-
- * side effects - channel is obliterated
- */
 void
-destroy_channel(struct Channel *chptr)
+kill_channel_modes(struct Channel *chptr)
 {
 	rb_dlink_node *ptr, *next_ptr;
 
+	chptr->mode.mode = 0;
 	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->invites.head)
 	{
 		del_invite(chptr, ptr->data);
@@ -508,16 +503,26 @@ destroy_channel(struct Channel *chptr)
 	free_channel_list(&chptr->banlist);
 	free_channel_list(&chptr->exceptlist);
 	free_channel_list(&chptr->invexlist);
+}
 
-	if (IsSCH(chptr))
+/* destroy_channel()
+ *
+ * input	- channel to destroy
+ * output	-
+ * side effects - channel is obliterated
+ */
+void
+destroy_channel(struct Channel *chptr)
+{
+
+	/* CHANDELAY: will be destroyed by the timer eventually */
+	if (IsSCH(chptr) || HasHistory(chptr))
 		return;
+
+	kill_channel_modes(chptr);
 
 	/* Free the topic */
 	free_topic(chptr);
-
-	/* CHANDELAY: will be destroyed by the timer eventually */
-	if (HasHistory(chptr))
-		return;
 
 	rb_dlinkDelete(&chptr->node, &global_channel_list);
 	del_from_hash(HASH_CHANNEL, chptr->chname, chptr);
