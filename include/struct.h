@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$
+ *  $Id: struct.h 150 2010-01-26 06:53:13Z karel.tuma $
  */
 #ifndef INCLUDED_struct_h
 #define INCLUDED_struct_h

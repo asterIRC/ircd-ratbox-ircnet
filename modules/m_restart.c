@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$
+ *  $Id: m_restart.c 101 2010-01-20 00:12:07Z karel.tuma $
  */
 
 #include "stdinc.h"
@@ -46,7 +46,7 @@ struct Message restart_msgtab = {
 
 mapi_clist_av2 restart_clist[] = { &restart_msgtab, NULL };
 
-DECLARE_MODULE_AV2(restart, NULL, NULL, restart_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV2(restart, NULL, NULL, restart_clist, NULL, NULL, "$Revision: 101 $");
 
 /*
  * mo_restart

@@ -19,7 +19,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$
+ *  $Id: m_map.c 150 2010-01-26 06:53:13Z karel.tuma $
  */
 
 #include "stdinc.h"
@@ -45,7 +45,7 @@ struct Message map_msgtab = {
 
 mapi_clist_av2 map_clist[] = { &map_msgtab, NULL };
 
-DECLARE_MODULE_AV2(map, NULL, NULL, map_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV2(map, NULL, NULL, map_clist, NULL, NULL, "$Revision: 150 $");
 
 static void dump_map(struct Client *client_p, struct Client *root, char *pbuf, int show);
 static int count_hidden_users(struct Client *server_p, int show);

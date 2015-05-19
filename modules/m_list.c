@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$
+ *  $Id: m_list.c 103 2010-01-20 09:48:51Z karel.tuma $
  */
 
 #include "stdinc.h"
@@ -48,7 +48,7 @@ struct Message list_msgtab = {
 
 mapi_clist_av2 list_clist[] = { &list_msgtab, NULL };
 
-DECLARE_MODULE_AV2(list, NULL, NULL, list_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV2(list, NULL, NULL, list_clist, NULL, NULL, "$Revision: 103 $");
 
 static void list_all_channels(struct Client *source_p);
 static void list_limit_channels(struct Client *source_p, const char *param);

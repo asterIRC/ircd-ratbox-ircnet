@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
  *
- *  $Id$
+ *  $Id: m_adminwall.c 101 2010-01-20 00:12:07Z karel.tuma $
  */
 #include "stdinc.h"
 #include "struct.h"
@@ -46,7 +46,7 @@ struct Message adminwall_msgtab = {
 
 mapi_clist_av2 adminwall_clist[] = { &adminwall_msgtab, NULL };
 
-DECLARE_MODULE_AV2(adminwall, NULL, NULL, adminwall_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV2(adminwall, NULL, NULL, adminwall_clist, NULL, NULL, "$Revision: 101 $");
 
 
 /*

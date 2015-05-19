@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$
+ *  $Id: m_connect.c 101 2010-01-20 00:12:07Z karel.tuma $
  */
 
 #include "stdinc.h"
@@ -49,7 +49,7 @@ struct Message connect_msgtab = {
 
 mapi_clist_av2 connect_clist[] = { &connect_msgtab, NULL };
 
-DECLARE_MODULE_AV2(connect, NULL, NULL, connect_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV2(connect, NULL, NULL, connect_clist, NULL, NULL, "$Revision: 101 $");
 
 /*
  * mo_connect - CONNECT command handler

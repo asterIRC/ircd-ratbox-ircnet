@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$
+ *  $Id: m_service.c 122 2010-01-21 23:11:35Z karel.tuma $
  */
 #include "stdinc.h"
 
@@ -64,7 +64,7 @@ struct Message squery_msgtab = {
 
 mapi_clist_av2 service_clist[] = { &service_msgtab, &servlist_msgtab, &squery_msgtab, NULL };
 
-DECLARE_MODULE_AV2(service, NULL, NULL, service_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV2(service, NULL, NULL, service_clist, NULL, NULL, "$Revision: 122 $");
 
 
 /*

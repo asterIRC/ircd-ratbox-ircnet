@@ -28,7 +28,7 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *  $Id$
+ *  $Id: supported.c 102 2010-01-20 01:30:49Z karel.tuma $
  */
 
 /* From the old supported.h which is

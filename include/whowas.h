@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$
+ *  $Id: whowas.h 101 2010-01-20 00:12:07Z karel.tuma $
  */
 #ifndef INCLUDED_whowas_h
 #define INCLUDED_whowas_h

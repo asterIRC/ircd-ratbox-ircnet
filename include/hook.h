@@ -2,7 +2,7 @@
  * Copyright (C) 2004-2005 Lee Hardy <lee -at- leeh.co.uk>
  * Copyright (C) 2004-2005 ircd-ratbox development team
  *
- * $Id$
+ * $Id: hook.h 130 2010-01-23 07:52:02Z karel.tuma $
  */
 #ifndef INCLUDED_HOOK_H
 #define INCLUDED_HOOK_H

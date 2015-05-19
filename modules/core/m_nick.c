@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$
+ *  $Id: m_nick.c 134 2010-01-23 13:41:50Z jilles@stack.nl $
  */
 
 #include "stdinc.h"
@@ -92,7 +92,7 @@ mapi_clist_av2 nick_clist[] = { &nick_msgtab, &uid_msgtab, &save_msgtab,
 #endif
  NULL };
 
-DECLARE_MODULE_AV2(nick, NULL, NULL, nick_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV2(nick, NULL, NULL, nick_clist, NULL, NULL, "$Revision: 134 $");
 
 static int change_remote_nick(struct Client *, struct Client *, time_t, const char *, int);
 

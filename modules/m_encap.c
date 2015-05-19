@@ -26,7 +26,7 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id$
+ * $Id: m_encap.c 153 2010-01-26 09:32:07Z karel.tuma $
  */
 
 #include "stdinc.h"
@@ -60,7 +60,7 @@ mapi_clist_av2 encap_clist[] = { &encap_msgtab,
 #endif
 NULL };
 
-DECLARE_MODULE_AV2(encap, NULL, NULL, encap_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV2(encap, NULL, NULL, encap_clist, NULL, NULL, "$Revision: 153 $");
 
 #ifdef COMPAT_211
 /* no magic here, just reenter the parser */

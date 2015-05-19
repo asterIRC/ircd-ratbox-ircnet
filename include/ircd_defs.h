@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$
+ *  $Id: ircd_defs.h 149 2010-01-25 22:59:15Z karel.tuma $
  */
 
 /*
@@ -38,7 +38,7 @@
 
 /* a password string used by ircnet servers (fake version: 2.11.3p199) */
 #define IRCNET_VERSTRING "0211030199"
-#define IRCNET_FAKESTRING IRCNET_VERSTRING " IRC|aCDEFHJKMQRTu Pj"
+#define IRCNET_FAKESTRING IRCNET_VERSTRING " IRC|aCEFHJKMQRTu Pj"
 
 /* For those unfamiliar with GNU format attributes, a is the 1 based
  * argument number of the format string, and b is the 1 based argument

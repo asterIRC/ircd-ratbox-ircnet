@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$
+ *  $Id: m_squit.c 150 2010-01-26 06:53:13Z karel.tuma $
  */
 
 #include "stdinc.h"
@@ -48,7 +48,7 @@ struct Message squit_msgtab = {
 
 mapi_clist_av2 squit_clist[] = { &squit_msgtab, NULL };
 
-DECLARE_MODULE_AV2(squit, NULL, NULL, squit_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV2(squit, NULL, NULL, squit_clist, NULL, NULL, "$Revision: 150 $");
 
 struct squit_parms
 {

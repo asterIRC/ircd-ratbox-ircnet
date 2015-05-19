@@ -26,7 +26,7 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id$
+ * $Id: m_operspy.c 142 2010-01-23 19:22:37Z karel.tuma $
  */
 
 #include "stdinc.h"
@@ -49,7 +49,7 @@ struct Message operspy_msgtab = {
 
 mapi_clist_av2 operspy_clist[] = { &operspy_msgtab, NULL };
 
-DECLARE_MODULE_AV2(operspy, NULL, NULL, operspy_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV2(operspy, NULL, NULL, operspy_clist, NULL, NULL, "$Revision: 142 $");
 
 /* ms_operspy()
  *

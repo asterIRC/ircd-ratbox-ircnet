@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$
+ *  $Id: m_dline.c 101 2010-01-20 00:12:07Z karel.tuma $
  */
 
 #include "stdinc.h"
@@ -62,7 +62,7 @@ struct Message undline_msgtab = {
 
 mapi_clist_av2 dline_clist[] = { &dline_msgtab, &admindline_msgtab, &undline_msgtab, NULL };
 
-DECLARE_MODULE_AV2(dline, NULL, NULL, dline_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV2(dline, NULL, NULL, dline_clist, NULL, NULL, "$Revision: 101 $");
 
 static int valid_dline(struct Client *source_p, const char *dlhost);
 static int already_placed_dline(struct Client *source_p, const char *dlhost);

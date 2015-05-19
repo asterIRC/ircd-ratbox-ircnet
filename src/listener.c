@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$
+ *  $Id: listener.c 101 2010-01-20 00:12:07Z karel.tuma $
  */
 
 #include "stdinc.h"
@@ -215,7 +215,7 @@ inetport(struct Listener *listener)
 		return 0;
 	}
 
-	if((ret = rb_listen(F, RATBOX_SOMAXCONN)))
+	if((ret = rb_listen(F, RATBOX_SOMAXCONN, 0)))
 	{
 		report_error("listen failed for %s:%s",
 			     get_listener_name(listener), get_listener_name(listener), errno);

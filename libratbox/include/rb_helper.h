@@ -1,7 +1,7 @@
 /*
  *  ircd-ratbox: A slightly useful ircd
  *  helper.h: Starts and deals with ircd helpers
- *  
+ *
  *  Copyright (C) 2006 Aaron Sethman <androsyn@ratbox.org>
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -19,7 +19,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: rb_helper.h 26521 2009-05-13 15:22:46Z androsyn $
  */
 
 #ifndef RB_LIB_H
@@ -36,20 +35,20 @@ typedef void rb_helper_cb(rb_helper *);
 
 
 
-rb_helper __rb_must_check *rb_helper_start(const char *name, const char *fullpath, rb_helper_cb * read_cb,
-			   rb_helper_cb * error_cb);
+rb_helper *rb_helper_start(const char *name, const char *fullpath, rb_helper_cb * read_cb,
+                           rb_helper_cb * error_cb);
 
-rb_helper __rb_must_check *rb_helper_child(rb_helper_cb * read_cb, rb_helper_cb * error_cb,
-			   log_cb * ilog, restart_cb * irestart, die_cb * idie,
-			   int maxcon, size_t lb_heap_size, size_t dh_size, size_t fd_heap_size);
+rb_helper *rb_helper_child(rb_helper_cb * read_cb, rb_helper_cb * error_cb,
+                           log_cb * ilog, restart_cb * irestart, die_cb * idie,
+                           int maxcon, size_t lb_heap_size, size_t dh_size, size_t fd_heap_size);
 
 void rb_helper_restart(rb_helper *helper);
 #ifdef __GNUC__
 void
 rb_helper_write(rb_helper *helper, const char *format, ...)
 __attribute((format(printf, 2, 3)));
-     void rb_helper_write_queue(rb_helper *helper, const char *format, ...)
-	__attribute((format(printf, 2, 3)));
+void rb_helper_write_queue(rb_helper *helper, const char *format, ...)
+__attribute((format(printf, 2, 3)));
 #else
 void rb_helper_write(rb_helper *helper, const char *format, ...);
 void rb_helper_write_queue(rb_helper *helper, const char *format, ...);

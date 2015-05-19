@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$
+ *  $Id: m_kill.c 147 2010-01-25 09:05:02Z karel.tuma $
  */
 
 #include "stdinc.h"
@@ -53,7 +53,7 @@ struct Message kill_msgtab = {
 
 mapi_clist_av2 kill_clist[] = { &kill_msgtab, NULL };
 
-DECLARE_MODULE_AV2(kill, NULL, NULL, kill_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV2(kill, NULL, NULL, kill_clist, NULL, NULL, "$Revision: 147 $");
 
 /*
 ** mo_kill

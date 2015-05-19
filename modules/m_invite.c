@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$
+ *  $Id: m_invite.c 116 2010-01-21 02:33:21Z karel.tuma $
  */
 
 #include "stdinc.h"
@@ -46,7 +46,7 @@ struct Message invite_msgtab = {
 };
 mapi_clist_av2 invite_clist[] = { &invite_msgtab, NULL };
 
-DECLARE_MODULE_AV2(invite, NULL, NULL, invite_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV2(invite, NULL, NULL, invite_clist, NULL, NULL, "$Revision: 116 $");
 
 static void add_invite(struct Channel *, struct Client *);
 

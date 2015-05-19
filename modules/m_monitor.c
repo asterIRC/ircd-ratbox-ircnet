@@ -27,7 +27,7 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id$
+ * $Id: m_monitor.c 101 2010-01-20 00:12:07Z karel.tuma $
  */
 
 #include "stdinc.h"
@@ -57,7 +57,7 @@ struct Message monitor_msgtab = {
 
 mapi_clist_av2 monitor_clist[] = { &monitor_msgtab, NULL };
 
-DECLARE_MODULE_AV2(monitor, modinit, moddeinit, monitor_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV2(monitor, modinit, moddeinit, monitor_clist, NULL, NULL, "$Revision: 101 $");
 
 static struct ev_entry *cleanup_monitor_ev;
 static int

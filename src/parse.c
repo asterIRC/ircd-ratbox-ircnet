@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$
+ *  $Id: parse.c 153 2010-01-26 09:32:07Z karel.tuma $
  */
 
 #include "stdinc.h"

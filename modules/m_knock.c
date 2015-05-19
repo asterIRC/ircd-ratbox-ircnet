@@ -20,7 +20,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$
+ *  $Id: m_knock.c 101 2010-01-20 00:12:07Z karel.tuma $
  */
 
 #include "stdinc.h"
@@ -46,7 +46,7 @@ struct Message knock_msgtab = {
 
 mapi_clist_av2 knock_clist[] = { &knock_msgtab, NULL };
 
-DECLARE_MODULE_AV2(knock, NULL, NULL, knock_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV2(knock, NULL, NULL, knock_clist, NULL, NULL, "$Revision: 101 $");
 
 /* m_knock
  *    parv[0] = sender prefix

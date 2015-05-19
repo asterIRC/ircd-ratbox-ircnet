@@ -1,5 +1,4 @@
 /*
- * $Id: ratbox_lib.h 26521 2009-05-13 15:22:46Z androsyn $
  */
 
 #ifndef RB_LIB_H
@@ -14,12 +13,8 @@
 #include <signal.h>
 #include <ctype.h>
 
-#if __GNUC__ > 4 || (__GNUC__ >= 3 && __GNUC_MINOR__ >= 4)
-#undef __rb_must_check
-#define __rb_must_check            __attribute__((warn_unused_result))
-#else
-#undef __rb_must_check
-#define __rb_must_check
+#ifdef HAVE_LINUX_TCP_H
+# include <linux/tcp.h>
 #endif
 
 #ifdef __GNUC__
@@ -189,7 +184,7 @@ void rb_set_time(void);
 const char *rb_lib_version(void);
 
 void rb_lib_init(log_cb * xilog, restart_cb * irestart, die_cb * idie, int closeall, int maxfds,
-		 size_t dh_size, size_t fd_heap_size);
+                 size_t dh_size, size_t fd_heap_size);
 void rb_lib_loop(long delay);
 
 time_t rb_current_time(void);

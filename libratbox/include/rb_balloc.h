@@ -21,7 +21,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: rb_balloc.h 26092 2008-09-19 15:13:52Z androsyn $
  */
 
 #ifndef RB_LIB_H
@@ -35,7 +34,7 @@
 struct rb_bh;
 typedef struct rb_bh rb_bh;
 typedef void rb_bh_usage_cb (size_t bused, size_t bfree, size_t bmemusage, size_t heapalloc,
-			     const char *desc, void *data);
+                             const char *desc, void *data);
 
 
 int rb_bh_free(rb_bh *, void *);

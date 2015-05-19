@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$
+ *  $Id: m_quit.c 101 2010-01-20 00:12:07Z karel.tuma $
  */
 
 #include "stdinc.h"
@@ -44,7 +44,7 @@ struct Message quit_msgtab = {
 
 mapi_clist_av2 quit_clist[] = { &quit_msgtab, NULL };
 
-DECLARE_MODULE_AV2(quit, NULL, NULL, quit_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV2(quit, NULL, NULL, quit_clist, NULL, NULL, "$Revision: 101 $");
 
 
 static int

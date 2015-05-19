@@ -520,7 +520,7 @@ char *yytext;
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
  *
- * $Id$
+ * $Id: ircd_lexer.c 101 2010-01-20 00:12:07Z karel.tuma $
  */
 #line 25 "ircd_lexer.l"
 

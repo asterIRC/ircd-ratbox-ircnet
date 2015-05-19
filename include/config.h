@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$
+ *  $Id: config.h 101 2010-01-20 00:12:07Z karel.tuma $
  */
 
 #ifndef INCLUDED_config_h
@@ -104,5 +104,6 @@
 
 #define CONFIG_RATBOX_LEVEL_3
 
+#define COMPAT_211 1
 #include "defaults.h"
 #endif /* INCLUDED_config_h */

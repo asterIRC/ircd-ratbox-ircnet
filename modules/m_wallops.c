@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$
+ *  $Id: m_wallops.c 153 2010-01-26 09:32:07Z karel.tuma $
  */
 
 #include "stdinc.h"
@@ -51,7 +51,7 @@ struct Message operwall_msgtab = {
 
 mapi_clist_av2 wallops_clist[] = { &wallops_msgtab, &operwall_msgtab, NULL };
 
-DECLARE_MODULE_AV2(wallops, NULL, NULL, wallops_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV2(wallops, NULL, NULL, wallops_clist, NULL, NULL, "$Revision: 153 $");
 
 /*
  * mo_operwall (write to *all* opers currently online)

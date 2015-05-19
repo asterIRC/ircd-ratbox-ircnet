@@ -29,7 +29,7 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id$
+ * $Id: s_newconf.h 117 2010-01-21 15:53:04Z karel.tuma $
  */
 
 #ifndef INCLUDED_s_newconf_h

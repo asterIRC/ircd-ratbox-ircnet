@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$
+ *  $Id: m_who.c 138 2010-01-23 17:19:51Z karel.tuma $
  */
 #include "stdinc.h"
 #include "struct.h"
@@ -49,7 +49,7 @@ struct Message who_msgtab = {
 
 mapi_clist_av2 who_clist[] = { &who_msgtab, NULL };
 
-DECLARE_MODULE_AV2(who, NULL, NULL, who_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV2(who, NULL, NULL, who_clist, NULL, NULL, "$Revision: 138 $");
 
 static void do_who_on_channel(struct Client *source_p, struct Channel *chptr,
 			      int server_oper, int member);

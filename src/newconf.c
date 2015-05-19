@@ -20,7 +20,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$               
+ *  $Id: newconf.c 143 2010-01-24 07:57:47Z karel.tuma $               
  * 
  */
 

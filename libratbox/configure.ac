@@ -1,4 +1,4 @@
-dnl $Id: configure.ac 26622 2009-07-23 19:04:40Z androsyn $
+dnl $Id: configure.ac 26260 2008-12-10 04:08:39Z androsyn $
 dnl Process this file with autoconf to produce a configure script.
 
 dnl TODO: clean up all the OpenSSL and shared module checking stuff;
@@ -8,7 +8,7 @@ dnl said functions need to be just about as complex as they already are.
 AC_PREREQ(2.63)
 AUTOMAKE_OPTIONS = 1.10
 dnl Sneaky way to get an Id tag into the configure script
-AC_COPYRIGHT([$Id: configure.ac 26622 2009-07-23 19:04:40Z androsyn $])
+AC_COPYRIGHT([$Id: configure.ac 26260 2008-12-10 04:08:39Z androsyn $])
 AC_INIT([libratbox],[devel])
 AM_INIT_AUTOMAKE(AC_PACKAGE_TARNAME, AC_PACKAGE_VERSION, -)
 
@@ -40,45 +40,21 @@ AM_MAINTAINER_MODE
 AC_ISC_POSIX
 AC_C_INLINE
 AC_C_CONST
+AC_C_BIGENDIAN
+AC_PROG_MAKE_SET
+AC_PROG_INSTALL
+AC_PATH_PROG(AUTOMAKE, automake)
+AC_PATH_PROG(ACLOCAL, aclocal)
+AC_PATH_PROG(AUTOHEADER, autoheader)
+AC_PATH_PROG(AS, as)
+AC_PATH_PROG(RM, rm)
+AC_PATH_PROG(CP, cp)
+AC_PATH_PROG(MV, mv)
+AC_PATH_PROG(LN, ln)
+AC_PATH_PROG(TOUCH, touch)
 AC_LANG(C)
-AC_LIBTOOL_DLOPEN
+
 AC_PROG_LIBTOOL
-
-GCC_STACK_PROTECT_CC
-
-cc_accepts_flag() 
-{
-	local CFLAGS="$@"
-	AC_MSG_CHECKING([whether $CC accepts $@])
-	AC_COMPILE_IFELSE([int main(){return 0;}] ,
-	[RC=0; AC_MSG_RESULT([yes])],
-	[RC=1; AC_MSG_RESULT([no])]) 
-	return $RC
-}
-
-if cc_accepts_flag -fno-strict-aliasing; then
-	CFLAGS="$CFLAGS -fno-strict-aliasing"  
-fi
-
-WARNLIST="
-	all
-	error
-	cast-qual
-	missing-declarations
-	missing-prototypes  
-	nested-externs
-	shadow
-	write-strings
-	no-unused
-	unused-function
-	unused-variable"
-
-for x in $WARNLIST; do 
-	if cc_accepts_flag -W$x; then
-		EXTRA_WARNINGS="$EXTRA_WARNINGS -W$x";
-	fi
-done
-
 
 LIBTOOL="$LIBTOOL --silent"
 
@@ -111,7 +87,7 @@ AM_CONDITIONAL([MINGW], [test "$is_mingw" = "yes"])
 
 
 # backwards support for IRC_CFLAGS
-CFLAGS="$IRC_CFLAGS $CFLAGS"
+CFLAGS="$IRC_CFLAGS $CFLAGS -Wall"
 
 dnl use directory structure of cached as default (hack)
 if test "$libexecdir" = '${exec_prefix}/libexec' &&
@@ -129,7 +105,7 @@ AC_TYPE_UID_T
 dnl Checks for header files.
 AC_HEADER_STDC
 
-AC_CHECK_HEADERS([crypt.h unistd.h sys/socket.h sys/stat.h sys/time.h time.h netinet/in.h arpa/inet.h errno.h sys/uio.h spawn.h sys/poll.h sys/epoll.h sys/select.h sys/devpoll.h sys/event.h port.h signal.h sys/signalfd.h sys/timerfd.h])
+AC_CHECK_HEADERS([crypt.h unistd.h sys/socket.h sys/stat.h sys/time.h time.h netinet/in.h arpa/inet.h errno.h sys/uio.h spawn.h sys/poll.h sys/epoll.h sys/select.h sys/devpoll.h sys/event.h port.h signal.h sys/signalfd.h sys/timerfd.h linux/tcp.h])
 AC_HEADER_TIME
 
 dnl Networking Functions
@@ -225,25 +201,6 @@ AC_CHECK_TYPES([struct sockaddr_storage],[
 	])
                 
 
-save_LIBS=$LIBS
-AC_SEARCH_LIBS(crypt, [crypt descrypt],,)
-LIBS=$save_LIBS
-
-CRYPT_LIB=$ac_cv_search_crypt
-
-if test "$CRYPT_LIB" = "none required"; then
-	unset CRYPT_LIB
-elif test "$CRYPT_LIB" = no; then
-	need_crypt=yes;
-	AC_DEFINE(NEED_CRYPT, 1, [Define if your system needs crypt.])
-	unset CRYPT_LIB
-fi
-
-AM_CONDITIONAL([NEED_CRYPT], [test x"$need_crypt" = "xyes"])
-
-
-AC_SUBST(CRYPT_LIB)
-
 dnl Check for stdarg.h - if we cant find it, halt configure
 AC_CHECK_HEADER(stdarg.h, , [AC_MSG_ERROR([** stdarg.h could not be found - libratbox will not compile without it **])])
 
@@ -308,7 +265,7 @@ if test "$cf_enable_openssl" != "no" ; then
 	if test ! -z "$cf_openssl_basedir"; then
 		if test -f "${cf_openssl_basedir}/include/openssl/opensslv.h" ; then
 			SSL_CFLAGS="-I${cf_openssl_basedir}/include"
-			SSL_LIBS="-L${cf_openssl_basedir}/lib $lt_cv_dlopen_libs"
+			SSL_LIBS="-L${cf_openssl_basedir}/lib"
 		else
 		dnl OpenSSL wasn't found in the directory specified.  Naughty
 		dnl administrator...
@@ -377,7 +334,7 @@ fi
 if test "$cf_enable_openssl" != no; then
 	CPPFLAGS="$CPPFLAGS $SSL_LIBS"
 	AC_CHECK_LIB(ssl, SSL_read, 
-		[SSL_LIBS="$SSL_LIBS -lssl -lcrypto $lt_cv_dlopen_libs"],
+		[SSL_LIBS="$SSL_LIBS -lssl -lcrypto"],
 		[cf_enable_openssl=no], [-lcrypto])
 fi
 
@@ -465,12 +422,13 @@ if test "$balloc" = no; then
 	AC_DEFINE([NOBALLOC], 1, [Define to 1 if you wish to disable the block allocator.])
 fi
 
-
+AC_ARG_ENABLE(warnings,
+AC_HELP_STRING([--enable-warnings],[Enable all sorts of warnings for debugging.]),
+[CFLAGS="$CFLAGS -Wall -Werror -Wcast-qual -Wmissing-declarations -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -W -Wno-unused -Wunused-function -Wunused-variable"],[])
 
 AC_SUBST(LDFLAGS)
 AC_SUBST(PICFLAGS)
 AC_SUBST(CFLAGS)
-AC_SUBST(EXTRA_WARNINGS)
 AC_SUBST(SEDOBJ)
 AC_SUBST(SSL_CFLAGS)
 AC_SUBST(SSL_LIBS)
@@ -685,6 +643,7 @@ fi
 AC_CONFIG_FILES(		\
 	src/Makefile		\
 	Makefile		\
+	libratbox.pc
 )
 
 AC_OUTPUT

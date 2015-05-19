@@ -20,7 +20,7 @@
  *  USA
  *
  *  from charybdis eccfecde11fa
- *  $Id$
+ *  $Id: blacklist.h 101 2010-01-20 00:12:07Z karel.tuma $
  */
 
 #ifndef _BLACKLIST_H_

@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$
+ *  $Id: m_whois.c 150 2010-01-26 06:53:13Z karel.tuma $
  */
 
 #include "stdinc.h"
@@ -65,7 +65,7 @@ mapi_hlist_av2 whois_hlist[] = {
 	{NULL, NULL}
 };
 
-DECLARE_MODULE_AV2(whois, NULL, NULL, whois_clist, whois_hlist, NULL, "$Revision$");
+DECLARE_MODULE_AV2(whois, NULL, NULL, whois_clist, whois_hlist, NULL, "$Revision: 150 $");
 
 /*
  * m_whois

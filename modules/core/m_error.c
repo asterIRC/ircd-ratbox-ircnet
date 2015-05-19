@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$
+ *  $Id: m_error.c 149 2010-01-25 22:59:15Z karel.tuma $
  */
 
 #include "stdinc.h"
@@ -47,7 +47,7 @@ mapi_clist_av2 error_clist[] = {
 	&error_msgtab, NULL
 };
 
-DECLARE_MODULE_AV2(error, NULL, NULL, error_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV2(error, NULL, NULL, error_clist, NULL, NULL, "$Revision: 149 $");
 
 /* Determine whether an ERROR message is safe to show (no IP address in it) */
 static int

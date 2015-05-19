@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$
+ *  $Id: m_ison.c 101 2010-01-20 00:12:07Z karel.tuma $
  */
 
 #include "stdinc.h"
@@ -45,7 +45,7 @@ struct Message ison_msgtab = {
 
 mapi_clist_av2 ison_clist[] = { &ison_msgtab, NULL };
 
-DECLARE_MODULE_AV2(ison, NULL, NULL, ison_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV2(ison, NULL, NULL, ison_clist, NULL, NULL, "$Revision: 101 $");
 
 static char buf[BUFSIZE];
 static char buf2[BUFSIZE];

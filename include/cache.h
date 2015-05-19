@@ -1,4 +1,4 @@
-/* $Id$ */
+/* $Id: cache.h 101 2010-01-20 00:12:07Z karel.tuma $ */
 #ifndef INCLUDED_CACHE_H
 #define INCLUDED_CACHE_H
 

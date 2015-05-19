@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$
+ *  $Id: m_motd.c 101 2010-01-20 00:12:07Z karel.tuma $
  */
 
 #include "stdinc.h"
@@ -53,7 +53,7 @@ mapi_hlist_av2 motd_hlist[] = {
 	{NULL, NULL}
 };
 
-DECLARE_MODULE_AV2(motd, NULL, NULL, motd_clist, motd_hlist, NULL, "$Revision$");
+DECLARE_MODULE_AV2(motd, NULL, NULL, motd_clist, motd_hlist, NULL, "$Revision: 101 $");
 
 static void motd_spy(struct Client *);
 

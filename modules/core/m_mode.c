@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$
+ *  $Id: m_mode.c 146 2010-01-24 17:01:47Z jilles@stack.nl $
  */
 
 #include "stdinc.h"
@@ -63,7 +63,7 @@ struct Message bmask_msgtab = {
 
 mapi_clist_av2 mode_clist[] = { &mode_msgtab, &tmode_msgtab, &bmask_msgtab, NULL };
 
-DECLARE_MODULE_AV2(mode, NULL, NULL, mode_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV2(mode, NULL, NULL, mode_clist, NULL, NULL, "$Revision: 146 $");
 
 /* bitmasks for error returns, so we send once per call */
 #define SM_ERR_NOTS             0x00000001	/* No TS on channel */
@@ -148,9 +148,6 @@ m_mode(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		sendto_one(source_p, form_str(RPL_CHANNELMODEIS),
 			   me.name, source_p->name, parv[1],
 			   operspy ? channel_modes(chptr, &me) : channel_modes(chptr, source_p));
-
-		sendto_one(source_p, form_str(RPL_CREATIONTIME),
-			   me.name, source_p->name, parv[1], chptr->channelts);
 	}
 	else
 	{

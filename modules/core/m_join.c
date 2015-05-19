@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$
+ *  $Id: m_join.c 151 2010-01-26 07:20:12Z karel.tuma $
  */
 
 #include "stdinc.h"
@@ -68,7 +68,7 @@ mapi_clist_av2 join_clist[] = { &join_msgtab, &sjoin_msgtab,
 #endif
  NULL };
 
-DECLARE_MODULE_AV2(join, NULL, NULL, join_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV2(join, NULL, NULL, join_clist, NULL, NULL, "$Revision: 151 $");
 
 static void do_join_0(struct Client *client_p, struct Client *source_p);
 static int check_channel_name_loc(struct Client *source_p, const char *name);
@@ -297,18 +297,6 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		if(flags == 0)	/* if channel doesn't exist, don't penalize */
 			successful_join_count++;
 
-		/* In case the channel was just created, reset all modes. */
-		if (flags && *chptr->chname != '!')
-			kill_channel_modes(chptr);
-
-		/* IRCNet splitmode behaviour */
-		if(splitmode && (*name != '&') &&
-		   ConfigChannel.no_ops_on_split)
-			flags = 0;
-
-		if (*name == '+')
-			flags = 0;
-
 		if(chptr == NULL)	/* If I already have a chptr, no point doing this */
 		{
 			chptr = get_or_create_channel(source_p, name, NULL);
@@ -322,6 +310,18 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 				continue;
 			}
 		}
+
+		/* In case the channel was just created, reset all modes. */
+		if (flags != 0 && *name != '!')
+			kill_channel_modes(chptr);
+
+		/* IRCNet splitmode behaviour */
+		if(splitmode && (*name != '&') &&
+		   ConfigChannel.no_ops_on_split)
+			flags = 0;
+
+		if (*name == '+')
+			flags = 0;
 
 		if (IsSCH(chptr) && !IsRemoteChannel(name))
 			flags = 0;
@@ -654,7 +654,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 			mode.mode |= MODE_TOPICLIMIT;
 			break;
 		case 'r':
-			mode.mode |= MODE_REOP|MODE_REGONLY;
+			mode.mode |= MODE_REOP;
 			break;
 		case 'a':
 			mode.mode |= MODE_ANONYMOUS;

@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$
+ *  $Id: m_gungline.c 153 2010-01-26 09:32:07Z karel.tuma $
  */
 
 #include "stdinc.h"
@@ -63,7 +63,7 @@ mapi_hfn_list_av2 gungline_hfnlist[] = {
 	{NULL, NULL}
 };
 
-DECLARE_MODULE_AV2(gungline, modinit, moddeinit, gungline_clist, NULL, gungline_hfnlist, "$Revision$");
+DECLARE_MODULE_AV2(gungline, modinit, moddeinit, gungline_clist, NULL, gungline_hfnlist, "$Revision: 153 $");
 
 static int majority_ungline(struct Client *source_p, const char *user,
 			  const char *host, const char *reason);

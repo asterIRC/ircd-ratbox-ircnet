@@ -21,7 +21,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id: rb_memory.c 26092 2008-09-19 15:13:52Z androsyn $
  */
 #include <libratbox_config.h>
 #include <ratbox_lib.h>
@@ -29,13 +28,13 @@
 void
 rb_outofmemory(void)
 {
-	static int was_here = 0;
+    static int was_here = 0;
 
-	if(was_here)
-		abort();
+    if(was_here)
+        abort();
 
-	was_here = 1;
+    was_here = 1;
 
-	rb_lib_log("Out of memory: restarting server...");
-	rb_lib_restart("Out of Memory");
+    rb_lib_log("Out of memory: restarting server...");
+    rb_lib_restart("Out of Memory");
 }

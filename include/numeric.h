@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$
+ *  $Id: numeric.h 103 2010-01-20 09:48:51Z karel.tuma $
  */
 
 #ifndef INCLUDED_numeric_h

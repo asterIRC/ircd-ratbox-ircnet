@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$
+ *  $Id: m_rehash.c 101 2010-01-20 00:12:07Z karel.tuma $
  */
 
 #include "stdinc.h"
@@ -54,7 +54,7 @@ struct Message rehash_msgtab = {
 
 mapi_clist_av2 rehash_clist[] = { &rehash_msgtab, NULL };
 
-DECLARE_MODULE_AV2(rehash, NULL, NULL, rehash_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV2(rehash, NULL, NULL, rehash_clist, NULL, NULL, "$Revision: 101 $");
 
 struct hash_commands
 {

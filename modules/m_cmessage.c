@@ -30,7 +30,7 @@
  *  IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- *  $Id$
+ *  $Id: m_cmessage.c 101 2010-01-20 00:12:07Z karel.tuma $
  */
 #include "stdinc.h"
 #include "struct.h"
@@ -60,7 +60,7 @@ struct Message cnotice_msgtab = {
 
 mapi_clist_av2 cmessage_clist[] = { &cprivmsg_msgtab, &cnotice_msgtab, NULL };
 
-DECLARE_MODULE_AV2(cmessage, NULL, NULL, cmessage_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV2(cmessage, NULL, NULL, cmessage_clist, NULL, NULL, "$Revision: 101 $");
 
 #define PRIVMSG 0
 #define NOTICE 1

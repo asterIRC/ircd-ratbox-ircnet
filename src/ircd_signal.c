@@ -17,7 +17,7 @@
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id$
+ * $Id: ircd_signal.c 101 2010-01-20 00:12:07Z karel.tuma $
  */
 
 #include "stdinc.h"

@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$
+ *  $Id: client.c 150 2010-01-26 06:53:13Z karel.tuma $
  */
 #include "ratbox_lib.h"
 #include "stdinc.h"

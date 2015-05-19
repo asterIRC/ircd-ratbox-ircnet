@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$
+ *  $Id: s_serv.c 150 2010-01-26 06:53:13Z karel.tuma $
  */
 
 #include "stdinc.h"
@@ -196,11 +196,9 @@ hunt_server(struct Client *client_p, struct Client *source_p,
 			return HUNTED_ISME;
 
 		old = parv[server];
-#ifdef COMPAT_211
 		if (IsCapable(target_p->from, CAP_211) && IsClient(target_p))
 			parv[server] = target_p->name;
 		else
-#endif
 		if (!strchr(parv[server], '.'))
 			parv[server] = get_id(target_p, target_p);
 
@@ -637,6 +635,8 @@ serv_connect_callback(rb_fde_t *F, int status, void *data)
 		return;
 	}
 
+	client_p->localClient->caps |= CAP_211;
+
 	/* RB_OK, so continue the connection procedure */
 	/* Get the C/N lines */
 	if((server_p = client_p->localClient->att_sconf) == NULL)
@@ -653,7 +653,6 @@ serv_connect_callback(rb_fde_t *F, int status, void *data)
 
 	if(!EmptyString(server_p->spasswd))
 	{
-#ifdef COMPAT_211
 		sendto_one(client_p, "PASS %s " IRCNET_FAKESTRING "%s%s",
 		   server_p->spasswd, ServerConfCompressed(server_p) && zlib_ok ? "Z" : "",
 					ServerConfTb(server_p) ? "T" : "");
@@ -664,7 +663,7 @@ serv_connect_callback(rb_fde_t *F, int status, void *data)
 			sendto_one(client_p, "SERVER %s 1 %s :%s", ServerConfMask(server_p, me.name), me.id,
 				(me.info[0]) ? (me.info) : "IRCers United");
 		}
-#else
+#ifndef COMPAT_211
 		sendto_one(client_p, "PASS %s TS %d :%s", server_p->spasswd, TS_CURRENT, me.id);
 #endif
 	}

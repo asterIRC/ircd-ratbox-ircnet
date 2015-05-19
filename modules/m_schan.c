@@ -26,7 +26,7 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id$
+ * $Id: m_schan.c 143 2010-01-24 07:57:47Z karel.tuma $
  */
 
 #include "stdinc.h"
@@ -68,7 +68,7 @@ mapi_hfn_list_av2 schan_hfnlist[] = {
 };
 
 DECLARE_MODULE_AV2(schan, NULL, NULL, NULL, NULL, schan_hfnlist,
-		   "$Revision$");
+		   "$Revision: 143 $");
 
 static void
 hfn_schan_notice(hook_data_int * hdata)

@@ -27,7 +27,7 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id$
+ * $Id: m_testline.c 101 2010-01-20 00:12:07Z karel.tuma $
  */
 #include "stdinc.h"
 #include "struct.h"
@@ -60,7 +60,7 @@ struct Message testgecos_msgtab = {
 
 mapi_clist_av2 testline_clist[] = { &testline_msgtab, &testgecos_msgtab, NULL };
 
-DECLARE_MODULE_AV2(testline, NULL, NULL, testline_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV2(testline, NULL, NULL, testline_clist, NULL, NULL, "$Revision: 101 $");
 
 static int
 mo_testline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])

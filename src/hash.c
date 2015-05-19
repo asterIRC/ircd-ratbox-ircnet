@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$
+ *  $Id: hash.c 127 2010-01-22 01:32:03Z karel.tuma $
  */
 
 #include "stdinc.h"

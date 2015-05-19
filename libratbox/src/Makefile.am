@@ -1,10 +1,8 @@
-# $Id: Makefile.am 26624 2009-07-23 19:05:59Z androsyn $
+# $Id: Makefile.am 26046 2008-09-09 16:37:30Z androsyn $
 
 AUTOMAKE_OPTIONS = foreign
 
 INCLUDES = -I. -I../include @SSL_CFLAGS@ @GNUTLS_CFLAGS@
-
-CFLAGS=@EXTRA_WARNINGS@ @CFLAGS@
 
 BUILT_SOURCES = version.c
 
@@ -44,7 +42,7 @@ libratbox_la_SOURCES =			\
 	version.c
 	
 
-libratbox_la_LDFLAGS = @CRYPT_LIB@ @SSL_LIBS@ @GNUTLS_LIBS@  -avoid-version -no-undefined -export-symbols export-syms.txt
-libratbox_la_LIBADD = @CRYPT_LIB@ @SSL_LIBS@ @GNUTLS_LIBS@
+libratbox_la_LDFLAGS = @SSL_LIBS@ @GNUTLS_LIBS@  -avoid-version -no-undefined -export-symbols export-syms.txt
+libratbox_la_LIBADD = @SSL_LIBS@ @GNUTLS_LIBS@
 lib_LTLIBRARIES = libratbox.la
 

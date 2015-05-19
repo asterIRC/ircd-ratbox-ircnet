@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$
+ *  $Id: hash.h 122 2010-01-21 23:11:35Z karel.tuma $
  */
 
 #ifndef INCLUDED_hash_h

@@ -29,7 +29,7 @@
  *  IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- *  $Id$
+ *  $Id: supported.h 101 2010-01-20 00:12:07Z karel.tuma $
  */
 
 #ifndef INCLUDED_supported_h

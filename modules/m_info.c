@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$
+ *  $Id: m_info.c 101 2010-01-20 00:12:07Z karel.tuma $
  */
 
 #include "stdinc.h"
@@ -60,7 +60,7 @@ mapi_hlist_av2 info_hlist[] = {
 	{NULL, NULL}
 };
 
-DECLARE_MODULE_AV2(info, NULL, NULL, info_clist, info_hlist, NULL, "$Revision$");
+DECLARE_MODULE_AV2(info, NULL, NULL, info_clist, info_hlist, NULL, "$Revision: 101 $");
 
 /*
  * jdc -- Structure for our configuration value table

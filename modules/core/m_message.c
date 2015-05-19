@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$
+ *  $Id: m_message.c 117 2010-01-21 15:53:04Z karel.tuma $
  */
 
 #include "stdinc.h"
@@ -70,7 +70,7 @@ struct Message notice_msgtab = {
 
 mapi_clist_av2 message_clist[] = { &privmsg_msgtab, &notice_msgtab, NULL };
 
-DECLARE_MODULE_AV2(message, modinit, moddeinit, message_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV2(message, modinit, moddeinit, message_clist, NULL, NULL, "$Revision: 117 $");
 
 struct entity
 {

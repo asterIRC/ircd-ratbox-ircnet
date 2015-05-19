@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$
+ *  $Id: m_admin.c 101 2010-01-20 00:12:07Z karel.tuma $
  */
 
 #include "stdinc.h"
@@ -58,7 +58,7 @@ mapi_hlist_av2 admin_hlist[] = {
 	{NULL, NULL}
 };
 
-DECLARE_MODULE_AV2(admin, NULL, NULL, admin_clist, admin_hlist, NULL, "$Revision$");
+DECLARE_MODULE_AV2(admin, NULL, NULL, admin_clist, admin_hlist, NULL, "$Revision: 101 $");
 
 /*
  * mr_admin - ADMIN command handler

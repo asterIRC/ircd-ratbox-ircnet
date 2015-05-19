@@ -21,7 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  *
- *  $Id$
+ *  $Id: m_die.c 101 2010-01-20 00:12:07Z karel.tuma $
  */
 
 #include "stdinc.h"
@@ -46,7 +46,7 @@ static struct Message die_msgtab = {
 
 mapi_clist_av2 die_clist[] = { &die_msgtab, NULL };
 
-DECLARE_MODULE_AV2(die, NULL, NULL, die_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV2(die, NULL, NULL, die_clist, NULL, NULL, "$Revision: 101 $");
 
 /*
  * mo_die - DIE command handler
